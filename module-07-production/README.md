@@ -16,7 +16,11 @@
 
 ## TPs disponibles
 
-1. **TP14 - Production best practices** : Sécurité, logs, healthchecks
+### TP14 - Production best practices
+Sécurité, healthchecks, logging et optimisation pour la production
+
+- 📝 [Énoncé du TP14](./tp/TP14-Production-Best-Practices.md)
+- ✅ [Solution du TP14](./solutions/TP14-Solution.md)
 
 ## Durée estimée
 

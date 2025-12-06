@@ -14,7 +14,11 @@
 
 ## TPs disponibles
 
-1. **TP13 - Portainer et interfaces web** : Administration graphique de Docker
+### TP13 - Portainer et interfaces web
+Administration graphique de Docker avec Portainer, Prometheus et Grafana
+
+- 📝 [Énoncé du TP13](./tp/TP13-Portainer-Interfaces.md)
+- ✅ [Solution du TP13](./solutions/TP13-Solution.md)
 
 ## Durée estimée
 

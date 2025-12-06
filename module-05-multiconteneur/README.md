@@ -16,8 +16,17 @@
 
 ## TPs disponibles
 
-1. **TP11 - Docker Compose fondamentaux** : Premiers stacks avec Compose
-2. **TP12 - Applications complètes** : Stacks production-ready
+### TP11 - Docker Compose fondamentaux
+Premiers stacks avec Docker Compose
+
+- 📝 [Énoncé du TP11](./tp/TP11-Docker-Compose-Fondamentaux.md)
+- ✅ [Solutions TP11 et TP12](./solutions/TP11-12-Solutions.md)
+
+### TP12 - Applications complètes
+Stacks multi-conteneurs production-ready
+
+- 📝 [Énoncé du TP12](./tp/TP12-Applications-Completes.md)
+- ✅ [Solutions TP11 et TP12](./solutions/TP11-12-Solutions.md)
 
 ## Durée estimée
 
