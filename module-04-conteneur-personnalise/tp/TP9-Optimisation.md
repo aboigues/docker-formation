@@ -327,16 +327,19 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Installer les dépendances système
+# Installer les dépendances système (gcc pour build, curl pour healthcheck)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         gcc \
+        curl \
         && rm -rf /var/lib/apt/lists/*
 
 # Copier et installer les dépendances Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && \
     apt-get purge -y --auto-remove gcc
+
+# Note: curl reste installé pour le HEALTHCHECK
 
 # Copier le code
 COPY . .
@@ -383,7 +386,7 @@ CMD ["sh"]
 EOF
 
 # Voir les labels
-docker inspect myapp --format '{{json .Config.Labels}}' | python3 -m json.tool
+docker inspect myapp --format '{{json .Config.Labels}}'
 ```
 
 ### 5.2 - Build args pour metadata

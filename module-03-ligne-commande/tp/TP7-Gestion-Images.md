@@ -69,7 +69,7 @@ docker history nginx:alpine
 docker history nginx:alpine --no-trunc --format "table {{.CreatedBy}}\t{{.Size}}"
 
 # Inspecter les détails
-docker inspect nginx:alpine --format '{{json .}}' | python3 -m json.tool | less
+docker inspect nginx:alpine --format '{{json .}}' | less
 
 # Informations clés
 docker inspect nginx:alpine --format 'Created: {{.Created}}'

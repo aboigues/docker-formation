@@ -67,7 +67,7 @@ docker run -d --name web1 nginx:alpine
 docker run -d --name web2 nginx:alpine
 
 # Vérifier qu'ils sont sur le réseau bridge
-docker network inspect bridge --format '{{json .Containers}}' | python3 -m json.tool
+docker network inspect bridge --format '{{json .Containers}}'
 
 # Trouver l'IP de web1
 WEB1_IP=$(docker inspect web1 --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
