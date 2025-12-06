@@ -111,7 +111,7 @@ Les volumes anonymes ont des noms générés automatiquement (hash).
 
 ```bash
 # Inspecter le conteneur
-docker inspect postgres-anon --format '{{json .Mounts}}' | python3 -m json.tool
+docker inspect postgres-anon --format '{{json .Mounts}}'
 
 # Ou voir tous les mappings
 docker ps -a --format '{{.Names}}' | while read c; do

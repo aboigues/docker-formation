@@ -17,7 +17,7 @@ HEALTHCHECK CMD pg_isready -U postgres -d myapp || exit 1
 HEALTHCHECK CMD mysqladmin ping -h localhost || exit 1
 
 # MongoDB
-HEALTHCHECK CMD echo 'db.runCommand("ping").ok' | mongosh --quiet || exit 1
+HEALTHCHECK CMD mongosh --eval "db.adminCommand('ping')" --quiet || exit 1
 ```
 
 ## Logging - Bonnes pratiques

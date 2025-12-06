@@ -20,6 +20,7 @@ version: '3.8'
 services:
   api:
     build: ./api
+    # Note: curl doit être installé dans le Dockerfile de l'API
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
       interval: 30s

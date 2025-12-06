@@ -320,7 +320,7 @@ docker run -d --name postgres-anon \
 docker volume ls
 
 # Inspecter le conteneur pour trouver le volume
-docker inspect postgres-anon --format '{{json .Mounts}}' | python3 -m json.tool
+docker inspect postgres-anon --format '{{json .Mounts}}'
 ```
 
 **Questions** :

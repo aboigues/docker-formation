@@ -736,6 +736,9 @@ docker run --rm -e APP_ENV=development arg-env-demo
 cat > Dockerfile << 'EOF'
 FROM nginx:alpine
 
+# Installer wget pour le healthcheck
+RUN apk add --no-cache wget
+
 # Copier une page custom
 RUN echo "<h1>Healthy App</h1>" > /usr/share/nginx/html/index.html
 
@@ -754,7 +757,7 @@ docker ps
 # STATUS affichera : starting, healthy, ou unhealthy
 
 # Inspecter les health checks
-docker inspect healthy --format='{{json .State.Health}}' | python3 -m json.tool
+docker inspect healthy --format='{{json .State.Health}}'
 
 # Simuler un échec
 docker exec healthy rm /usr/share/nginx/html/index.html
@@ -835,6 +838,9 @@ RUN npm install --production
 COPY server.js ./
 
 EXPOSE 3000
+
+# Installer wget pour le healthcheck
+RUN apk add --no-cache wget
 
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD wget --quiet --tries=1 --spider http://localhost:3000/api/health || exit 1

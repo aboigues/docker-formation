@@ -921,12 +921,11 @@ echo "=== Tests fonctionnels ==="
 echo "Test login:"
 curl -X POST http://localhost/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"admin","password":"password123"}' \
-  | python3 -m json.tool
+  -d '{"username":"admin","password":"password123"}'
 
 echo ""
 echo "Test API:"
-curl http://localhost/api/data | python3 -m json.tool
+curl http://localhost/api/data
 
 echo ""
 echo "=== Architecture déployée ==="
