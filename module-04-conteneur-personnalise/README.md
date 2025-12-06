@@ -16,9 +16,23 @@
 
 ## TPs disponibles
 
-1. **TP8 - Dockerfile fondamentaux** : Créer vos premières images
-2. **TP9 - Optimisation et bonnes pratiques** : Images production-ready
-3. **TP10 - Multi-stage builds** : Images optimisées et sécurisées
+### TP8 - Dockerfile fondamentaux
+Créer vos premières images personnalisées
+
+- 📝 [Énoncé du TP8](./tp/TP8-Dockerfile-Fondamentaux.md)
+- ✅ [Solutions TP8, TP9 et TP10](./solutions/TP8-9-10-Solutions.md)
+
+### TP9 - Optimisation et bonnes pratiques
+Images production-ready et optimisées
+
+- 📝 [Énoncé du TP9](./tp/TP9-Optimisation.md)
+- ✅ [Solutions TP8, TP9 et TP10](./solutions/TP8-9-10-Solutions.md)
+
+### TP10 - Multi-stage builds
+Images optimisées et sécurisées avec builds multi-étapes
+
+- 📝 [Énoncé du TP10](./tp/TP10-MultiStage.md)
+- ✅ [Solutions TP8, TP9 et TP10](./solutions/TP8-9-10-Solutions.md)
 
 ## Durée estimée
 

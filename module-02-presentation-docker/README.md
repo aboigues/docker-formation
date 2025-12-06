@@ -14,8 +14,15 @@
 
 ## TPs disponibles
 
-1. **TP3 - Commandes de base** : Maîtriser les commandes essentielles
-2. **TP4 - Inspection et diagnostic** : Explorer l'intérieur des conteneurs
+### TP3 - Commandes de base
+Maîtriser les commandes Docker essentielles
+
+- 📝 [Énoncé du TP3](./tp/TP3-Commandes-Base.md)
+
+### TP4 - Inspection et diagnostic
+Explorer l'intérieur des conteneurs
+
+- 📝 [Énoncé du TP4](./tp/TP4-Inspection-Diagnostic.md)
 
 ## Durée estimée
 
