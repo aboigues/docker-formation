@@ -101,6 +101,46 @@ En **juin 2014**, Docker 1.0 est officiellement lancé, marquant :
 - **Docker Registry** : Gestion privée des images
 - **Docker Machine** : Provisionnement automatisé de Docker
 
+### 2015 : La Standardisation - Naissance de l'OCI
+
+**22 juin 2015** : Création de l'**Open Container Initiative (OCI)**
+
+Docker, CoreOS et les principaux acteurs de l'industrie du conteneur fondent l'OCI sous l'égide de la **Linux Foundation**. Cette initiative marque un tournant historique dans la conteneurisation.
+
+**Objectifs de l'OCI** :
+- Créer des standards ouverts pour les formats de conteneurs
+- Standardiser les runtimes de conteneurs
+- Garantir l'interopérabilité entre les différentes solutions
+- Éviter la fragmentation de l'écosystème
+
+**Contribution de Docker** :
+- Don de **runc**, son runtime de conteneur
+- Contribution aux spécifications de base
+- Engagement vers l'ouverture et la standardisation
+
+**Les trois spécifications OCI** :
+
+1. **Runtime Specification (runtime-spec)**
+   - Définit comment exécuter un conteneur
+   - Spécifie le cycle de vie du conteneur
+   - Standardise la configuration
+
+2. **Image Specification (image-spec)**
+   - Format standardisé des images de conteneurs
+   - Métadonnées et manifestes
+   - Compatibilité entre registres
+
+3. **Distribution Specification (distribution-spec)**
+   - API standardisée pour la distribution d'images
+   - Publiée en v1.0 en mai 2020
+   - Applicable à tout type de contenu
+
+**Impact de l'OCI** :
+- Fin du risque de fragmentation de l'écosystème
+- Émergence de runtimes alternatifs (containerd, CRI-O, Podman)
+- Garantie de portabilité des conteneurs
+- Base pour l'innovation ouverte
+
 ### 2015-2016 : L'Orchestration
 
 - **Docker Swarm** : Solution d'orchestration native de Docker
@@ -148,6 +188,34 @@ En **juin 2014**, Docker 1.0 est officiellement lancé, marquant :
 - Détection des vulnérabilités
 - Analyse de la supply chain
 - Intégration dans le cycle de développement
+
+### OCI en 2024 : Évolution Continue des Standards
+
+**15 février 2024** : Releases majeures des spécifications OCI
+
+**OCI Image Specification v1.1.0** :
+- Support de la compression **zstd** pour les couches d'images
+  - Utilisation CPU réduite par rapport à gzip
+  - Taille de compression optimisée
+- Nouvelle API **referrers** et champ **subject** pour lier les artefacts
+- En-têtes d'avertissement pour les registres
+  - Notification des problèmes non critiques
+  - Annonces de dépréciation
+
+**OCI Distribution Specification v1.1.0** :
+- Amélioration de l'API de distribution
+- Support de nouveaux types de contenus
+- Mécanisme générique applicable à tout type de contenu
+
+**OCI Runtime Specification v1.3.0** :
+- 24 pull requests fusionnés depuis la version précédente
+- Améliorations du cycle de vie des conteneurs
+- Meilleures spécifications de configuration
+
+**Écosystème OCI en 2024** :
+- Podman, containerd, CRI-O pleinement conformes OCI
+- Kubernetes s'appuie entièrement sur les spécifications OCI
+- Standardisation complète de l'industrie
 
 ### Tendances Technologiques 2025
 
@@ -249,11 +317,11 @@ Les conteneurs ont permis l'essor des architectures microservices :
 
 ## 🎓 Conclusion
 
-De **chroot en 1979** à l'écosystème sophistiqué de 2025, la conteneurisation a parcouru un chemin remarquable. Docker, lancé en 2013, a démocratisé cette technologie et a déclenché une révolution dans le développement et le déploiement logiciel.
+De **chroot en 1979** à l'écosystème sophistiqué de 2025, la conteneurisation a parcouru un chemin remarquable. Docker, lancé en 2013, a démocratisé cette technologie et a déclenché une révolution dans le développement et le déploiement logiciel. La création de l'**OCI en 2015** a ensuite pérennisé cette révolution en établissant des standards ouverts, garantissant l'interopérabilité et évitant la fragmentation de l'écosystème.
 
-Aujourd'hui, avec plus de **90% d'adoption** dans l'IT, les conteneurs ne sont pas une mode passagère mais un **standard industriel** mature. L'avenir de la conteneurisation s'annonce encore plus prometteur avec l'intégration de l'IA, du edge computing et des nouvelles technologies émergentes.
+Aujourd'hui, avec plus de **90% d'adoption** dans l'IT, les conteneurs ne sont pas une mode passagère mais un **standard industriel** mature et standardisé. L'OCI continue d'évoluer avec des releases régulières (v1.1.0 en 2024), assurant que la conteneurisation reste moderne et adaptée aux besoins actuels. L'avenir s'annonce encore plus prometteur avec l'intégration de l'IA, du edge computing et des nouvelles technologies émergentes.
 
-**Les conteneurs ne sont pas morts - ils sont plus vivants que jamais** et continueront de façonner l'infrastructure informatique des décennies à venir.
+**Les conteneurs ne sont pas morts - ils sont plus vivants que jamais** et continueront de façonner l'infrastructure informatique des décennies à venir, soutenus par des standards ouverts et un écosystème vibrant.
 
 ---
 
@@ -277,6 +345,17 @@ Aujourd'hui, avec plus de **90% d'adoption** dans l'IT, les conteneurs ne sont p
 - [Docker (logiciel) — Wikipédia](https://fr.wikipedia.org/wiki/Docker_(logiciel))
 - [LXC - Wikipedia](https://en.wikipedia.org/wiki/LXC)
 - [cgroups - Wikipedia](https://en.wikipedia.org/wiki/Cgroups)
+
+### Open Container Initiative (OCI)
+
+- [Open Container Initiative - Site officiel](https://opencontainers.org/)
+- [About the Open Container Initiative - Overview](https://opencontainers.org/about/overview/)
+- [OCI Image and Distribution Specs v1.1 Releases](https://opencontainers.org/posts/blog/2024-03-13-image-and-distribution-1-1/)
+- [Open Container Initiative - Wikipedia](https://en.wikipedia.org/wiki/Open_Container_Initiative)
+- [Docker, les conteneurs et l'Open Container Initiative (OCI)](https://www.agaetis.fr/blogpost/docker-les-conteneurs-et-lopen-container-initiative-oci)
+- [What is Open Container Initiative? - TechTarget](https://www.techtarget.com/searchitoperations/definition/Open-Container-Initiative)
+- [What Next For The Open Container Initiative (OCI)? - Cloud Native Now](https://cloudnativenow.com/editorial-calendar/best-of-2024/what-next-for-the-open-container-initiative-oci-2/)
+- [OCI GitHub Organization](https://github.com/opencontainers)
 
 ### Documentation Complémentaire
 

@@ -29,8 +29,9 @@ Découvrez l'histoire fascinante de la conteneurisation, de **chroot en 1979** �
 - 🕰️ Les origines : chroot (1979), FreeBSD jails (2000)
 - 🔧 Les fondations : cgroups et namespaces (2006-2008), LXC (2008)
 - 🐳 L'ère Docker : lancement en 2013, Docker 1.0 en 2014
+- 📜 Standardisation : OCI (Open Container Initiative) créé en 2015
 - 🚀 L'évolution : de 465M$ en 2020 à 944M$ en 2024
-- 🌟 2025 : 92% d'adoption IT, innovations AI/ML, sécurité renforcée
+- 🌟 2025 : 92% d'adoption IT, innovations AI/ML, sécurité renforcée, OCI v1.1
 
 ## 📋 Prérequis
 
