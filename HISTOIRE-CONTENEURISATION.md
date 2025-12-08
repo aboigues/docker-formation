@@ -107,6 +107,41 @@ En **juin 2014**, Docker 1.0 est officiellement lancé, marquant :
 - **Kubernetes** : Google open-source Kubernetes (initialement lancé en 2014)
 - Émergence de l'architecture microservices
 
+### 2015 : Open Container Initiative (OCI) - La Standardisation
+
+En **juin 2015**, Docker et d'autres leaders de l'industrie (dont CoreOS, Google, IBM, Microsoft et Red Hat) créent l'**Open Container Initiative (OCI)** sous l'égide de la Linux Foundation.
+
+**Objectifs de l'OCI** :
+- Créer des standards ouverts pour les formats de conteneurs
+- Garantir l'interopérabilité entre les différentes solutions de conteneurisation
+- Éviter la fragmentation de l'écosystème et le vendor lock-in
+- Assurer la pérennité et la portabilité des conteneurs
+
+**Les Spécifications OCI** :
+
+1. **Runtime Specification (runtime-spec)** :
+   - Définit comment exécuter un conteneur
+   - Spécifie le cycle de vie d'un conteneur
+   - Référence d'implémentation : **runc** (donné par Docker à l'OCI)
+
+2. **Image Specification (image-spec)** :
+   - Définit le format des images de conteneurs
+   - Standardise la structure des layers
+   - Assure la compatibilité entre registries
+
+3. **Distribution Specification (distribution-spec)** :
+   - Définit comment distribuer les images de conteneurs
+   - Standardise les API des registries
+   - Facilite le partage et la distribution d'images
+
+**Impact de l'OCI** :
+- **containerd** : Docker donne containerd à la CNCF (Cloud Native Computing Foundation) en 2017
+- **Interopérabilité** : Émergence d'alternatives compatibles comme Podman, CRI-O
+- **Confiance** : Standards industriels approuvés par les principaux acteurs
+- **Innovation** : Base solide permettant l'innovation au-dessus des standards
+
+L'OCI représente un tournant majeur dans l'histoire de la conteneurisation, transformant une technologie propriétaire en un **standard ouvert et universel**.
+
 ### 2017-2020 : Standardisation et Maturation
 
 - **2017** : Docker adopte containerd comme runtime standard
