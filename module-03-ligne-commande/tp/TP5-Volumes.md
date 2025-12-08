@@ -111,7 +111,7 @@ docker run -d \
 sleep 15
 
 # Créer une base et des données
-docker exec -it mysql-persistent mysql -psecret << EOF
+docker exec -i mysql-persistent mysql -psecret << EOF
 CREATE DATABASE ma_base;
 USE ma_base;
 CREATE TABLE utilisateurs (id INT, nom VARCHAR(50));
