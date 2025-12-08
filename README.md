@@ -19,6 +19,19 @@ Formation progressive pour apprendre Docker de A à Z, avec des TPs pratiques et
 - Architectes techniques
 - Toute personne souhaitant apprendre Docker
 
+## 📜 Histoire de la Conteneurisation
+
+Découvrez l'histoire fascinante de la conteneurisation, de **chroot en 1979** à l'écosystème Docker de 2025 :
+
+👉 **[Lire l'histoire complète de la conteneurisation et de Docker](./HISTOIRE-CONTENEURISATION.md)**
+
+**Points clés** :
+- 🕰️ Les origines : chroot (1979), FreeBSD jails (2000)
+- 🔧 Les fondations : cgroups et namespaces (2006-2008), LXC (2008)
+- 🐳 L'ère Docker : lancement en 2013, Docker 1.0 en 2014
+- 🚀 L'évolution : de 465M$ en 2020 à 944M$ en 2024
+- 🌟 2025 : 92% d'adoption IT, innovations AI/ML, sécurité renforcée
+
 ## 📋 Prérequis
 
 - Connaissances de base en ligne de commande Linux/Windows
