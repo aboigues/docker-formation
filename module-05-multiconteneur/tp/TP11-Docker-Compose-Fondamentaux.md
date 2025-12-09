@@ -576,6 +576,6 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
 ---
 
-**[→ Voir les solutions](../solutions/TP11-Solution.md)**
+**[→ Voir les solutions](../solutions/TP11-12-Solutions.md)**
 
 **[→ TP suivant : Applications complètes](TP12-Applications-Completes.md)**
