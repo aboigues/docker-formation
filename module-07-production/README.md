@@ -34,9 +34,38 @@ Documentation automatique et visualisation d'architectures avec docker-compose-v
 - 📝 [Énoncé du TP14c](./tp/TP14c-Docker-Compose-Visualisation.md)
 - ✅ [Solution du TP14c](./solutions/TP14c-Solution.md)
 
+### 🆕 Série Registres Privés Docker
+
+#### TP16a - Registres privés : Fondamentaux (Niveau Débutant)
+Maîtriser les bases des registres Docker privés : installation, configuration, push/pull d'images et gestion de la persistance.
+
+- 📝 [Énoncé du TP16a](./tp/TP16a-Registres-Prives-Fondamentaux.md)
+- ✅ [Solution du TP16a](./solutions/TP16a-Solution.md)
+- ⏱️ Durée estimée : 60 minutes
+
+#### TP16b - Registres privés : Sécurité et authentification (Niveau Intermédiaire)
+Sécuriser un registre Docker privé avec authentification, HTTPS/TLS, et implémenter des contrôles d'accès.
+
+- 📝 [Énoncé du TP16b](./tp/TP16b-Registres-Prives-Securite.md)
+- ✅ [Solution du TP16b](./solutions/TP16b-Solution.md)
+- ⏱️ Durée estimée : 90 minutes
+
+#### TP16c - Registres privés : Production et haute disponibilité (Niveau Avancé)
+Déployer et gérer un registre Docker en production avec haute disponibilité, monitoring, backup, et optimisations avancées.
+
+- 📝 [Énoncé du TP16c](./tp/TP16c-Registres-Prives-Production.md)
+- ✅ [Solution du TP16c](./solutions/TP16c-Solution.md)
+- ⏱️ Durée estimée : 120 minutes
+
 ## Durée estimée
 
-5 heures (2h pour TP14 + 2h pour TP14b + 1h pour TP14c)
+9h30 au total :
+- TP14 : 2h
+- TP14b : 2h
+- TP14c : 1h
+- TP16a : 1h
+- TP16b : 1h30
+- TP16c : 2h
 
 ## Navigation
 
