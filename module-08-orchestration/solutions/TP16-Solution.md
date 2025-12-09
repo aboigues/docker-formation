@@ -378,4 +378,4 @@ kubectl run debug --image=busybox --rm -it -- sh
 
 ---
 
-**[← Retour au TP](../tp/TP15-Swarm-Kubernetes.md)**
+**[← Retour au TP](../tp/TP16-Swarm-Kubernetes.md)**

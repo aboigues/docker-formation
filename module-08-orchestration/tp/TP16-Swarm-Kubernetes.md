@@ -610,6 +610,6 @@ kubectl get configmap/secret
 
 ---
 
-**[→ Voir les solutions](../solutions/TP15-Solution.md)**
+**[→ Voir les solutions](../solutions/TP16-Solution.md)**
 
 **[← Retour au README du module](../README.md)**
