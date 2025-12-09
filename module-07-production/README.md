@@ -28,9 +28,15 @@ Mise en place d'un système de centralisation et d'observabilité avec OpenTelem
 - 📝 [Énoncé du TP14b](./tp/TP14b-OpenTelemetry-Centralisation.md)
 - ✅ [Solution du TP14b](./solutions/TP14b-Solution.md)
 
+### TP14c - Visualisation d'architectures Docker Compose
+Documentation automatique et visualisation d'architectures avec docker-compose-viz
+
+- 📝 [Énoncé du TP14c](./tp/TP14c-Docker-Compose-Visualisation.md)
+- ✅ [Solution du TP14c](./solutions/TP14c-Solution.md)
+
 ## Durée estimée
 
-4 heures (2h pour TP14 + 2h pour TP14b)
+5 heures (2h pour TP14 + 2h pour TP14b + 1h pour TP14c)
 
 ## Navigation
 
