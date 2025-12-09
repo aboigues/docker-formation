@@ -400,7 +400,7 @@ EOF
 docker compose up -d --scale app=3
 
 # Tester le load balancing
-for i in {1..10}; do curl http://localhost:8080 | grep -i hostname; done
+for i in {1..30}; do curl -s http://localhost:8080 | jq -r '.environment.HOSTNAME'; done
 ```
 
 ---
