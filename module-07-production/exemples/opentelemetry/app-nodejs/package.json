@@ -1,0 +1,15 @@
+{
+  "name": "otel-demo-app",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "express": "^4.18.2",
+    "@opentelemetry/api": "^1.7.0",
+    "@opentelemetry/sdk-node": "^0.45.1",
+    "@opentelemetry/auto-instrumentations-node": "^0.40.3",
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.45.1",
+    "@opentelemetry/exporter-metrics-otlp-grpc": "^0.45.1",
+    "@opentelemetry/resources": "^1.19.0",
+    "@opentelemetry/semantic-conventions": "^1.19.0"
+  }
+}
