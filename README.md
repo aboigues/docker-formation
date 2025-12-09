@@ -136,17 +136,20 @@ Utiliser des interfaces graphiques et outils de monitoring.
 ---
 
 ### [Module 7 : Administrer des conteneurs en production](./module-07-production/)
-**Durée : 2h**
+**Durée : 4h**
 
-Bonnes pratiques pour la production : sécurité, logging, healthchecks.
+Bonnes pratiques pour la production : sécurité, logging, healthchecks et observabilité avec OpenTelemetry.
 
 - **TP14** : Production best practices
+- **TP14b** : Centralisation avec OpenTelemetry
 
 **Compétences acquises** :
 - ✅ Healthchecks et restart policies
 - ✅ Sécurité Docker
 - ✅ Logging centralisé
 - ✅ Backup et recovery
+- ✅ OpenTelemetry (traces, métriques, logs)
+- ✅ Observabilité distribuée (Jaeger, Prometheus, Grafana)
 
 ---
 
@@ -167,7 +170,7 @@ Introduction à Docker Swarm et Kubernetes.
 
 ## ⏱️ Durée totale
 
-**16 heures** de formation pratique (environ 2 jours)
+**18 heures** de formation pratique (environ 2,5 jours)
 
 ## 🚀 Comment utiliser cette formation
 

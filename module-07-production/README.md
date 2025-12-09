@@ -22,9 +22,15 @@ Sécurité, healthchecks, logging et optimisation pour la production
 - 📝 [Énoncé du TP14](./tp/TP14-Production-Best-Practices.md)
 - ✅ [Solution du TP14](./solutions/TP14-Solution.md)
 
+### TP14b - Centralisation avec OpenTelemetry
+Mise en place d'un système de centralisation et d'observabilité avec OpenTelemetry pour collecter traces, métriques et logs
+
+- 📝 [Énoncé du TP14b](./tp/TP14b-OpenTelemetry-Centralisation.md)
+- ✅ [Solution du TP14b](./solutions/TP14b-Solution.md)
+
 ## Durée estimée
 
-2 heures
+4 heures (2h pour TP14 + 2h pour TP14b)
 
 ## Navigation
 
