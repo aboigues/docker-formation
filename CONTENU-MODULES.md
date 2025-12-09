@@ -131,10 +131,10 @@
 
 ---
 
-## Module 7 : Administration en production (2h)
+## Module 7 : Administration en production (9h30)
 
 ### TPs
-- **TP14-Production-Best-Practices.md** : Production
+- **TP14-Production-Best-Practices.md** : Production (2h)
   - Healthchecks (HEALTHCHECK instruction)
   - Restart policies
   - Limites de ressources (CPU, RAM)
@@ -144,7 +144,50 @@
   - Blue-green deployment
   - Checklist de production complète
 
-### Solution avec exemples production-ready
+- **TP14b-OpenTelemetry-Centralisation.md** : Observabilité (2h)
+  - Mise en place OpenTelemetry
+  - Collecte de traces, métriques et logs
+  - Centralisation et corrélation
+  - Dashboard et alerting
+
+- **TP14c-Docker-Compose-Visualisation.md** : Documentation (1h)
+  - Visualisation d'architectures Docker Compose
+  - Documentation automatique
+  - Génération de diagrammes
+
+- **🆕 TP16a-Registres-Prives-Fondamentaux.md** : Registres privés Niveau 1 (1h)
+  - Déploiement d'un registre Docker privé
+  - Push et pull d'images
+  - Gestion de la persistance (volumes, bind mounts)
+  - API du registre
+  - Configuration de base
+  - Monitoring et diagnostics
+  - Bonnes pratiques de versioning
+
+- **🆕 TP16b-Registres-Prives-Securite.md** : Registres privés Niveau 2 (1h30)
+  - Authentification avec htpasswd
+  - HTTPS avec certificats TLS
+  - Certificats auto-signés et CA
+  - Configuration avancée
+  - Authentification avec tokens (Bearer)
+  - Docker Compose avec registre sécurisé
+  - Contrôle d'accès par repository
+  - Isolation réseau
+  - Audit et monitoring de sécurité
+
+- **🆕 TP16c-Registres-Prives-Production.md** : Registres privés Niveau 3 (2h)
+  - Storage backend S3/MinIO
+  - Haute disponibilité (multi-instances)
+  - Load balancing avec nginx
+  - Monitoring avec Prometheus et Grafana
+  - Garbage collection automatique
+  - Backup et Disaster Recovery
+  - Réplication entre registres
+  - Optimisation des performances
+  - Vulnerability scanning (Trivy)
+  - Stack complète de production
+
+### Solutions avec exemples production-ready
 
 ---
 
@@ -211,12 +254,12 @@
 
 ## Statistiques globales
 
-- **Fichiers** : 37 fichiers markdown
-- **Lignes de code/doc** : ~14,662 lignes
+- **Fichiers** : 43 fichiers markdown (+6 nouveaux TPs registres privés)
+- **Lignes de code/doc** : ~20,000+ lignes
 - **Modules** : 8 modules progressifs
-- **TPs** : 15 travaux pratiques
-- **Exercices** : 80+ exercices pratiques
-- **Commandes testées** : 300+ commandes Docker
+- **TPs** : 18 travaux pratiques (dont 3 sur les registres privés)
+- **Exercices** : 100+ exercices pratiques
+- **Commandes testées** : 400+ commandes Docker
 - **Exemples complets** : 20+ applications
 - **Durée totale** : 16 heures
 
