@@ -353,13 +353,22 @@ docker compose --env-file prod.env up -d
 mkdir -p ~/docker-tp/compose-scale
 cd ~/docker-tp/compose-scale
 
+# Créer un script pour afficher le hostname
+cat > start.sh << 'EOF'
+#!/bin/sh
+http-echo -text="Instance $(hostname)"
+EOF
+chmod +x start.sh
+
 cat > docker-compose.yml << 'EOF'
 version: '3.8'
 
 services:
   app:
     image: hashicorp/http-echo:latest
-    command: ["sh", "-c", "http-echo -text=\"Instance $$HOSTNAME\""]
+    volumes:
+      - ./start.sh:/start.sh:ro
+    command: ["/start.sh"]
     networks:
       - app-net
 
