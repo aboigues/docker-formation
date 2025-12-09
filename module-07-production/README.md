@@ -36,25 +36,25 @@ Documentation automatique et visualisation d'architectures avec docker-compose-v
 
 ### 🆕 Série Registres Privés Docker
 
-#### TP16a - Registres privés : Fondamentaux (Niveau Débutant)
+#### TP15a - Registres privés : Fondamentaux (Niveau Débutant)
 Maîtriser les bases des registres Docker privés : installation, configuration, push/pull d'images et gestion de la persistance.
 
-- 📝 [Énoncé du TP16a](./tp/TP16a-Registres-Prives-Fondamentaux.md)
-- ✅ [Solution du TP16a](./solutions/TP16a-Solution.md)
+- 📝 [Énoncé du TP15a](./tp/TP15a-Registres-Prives-Fondamentaux.md)
+- ✅ [Solution du TP15a](./solutions/TP15a-Solution.md)
 - ⏱️ Durée estimée : 60 minutes
 
-#### TP16b - Registres privés : Sécurité et authentification (Niveau Intermédiaire)
+#### TP15b - Registres privés : Sécurité et authentification (Niveau Intermédiaire)
 Sécuriser un registre Docker privé avec authentification, HTTPS/TLS, et implémenter des contrôles d'accès.
 
-- 📝 [Énoncé du TP16b](./tp/TP16b-Registres-Prives-Securite.md)
-- ✅ [Solution du TP16b](./solutions/TP16b-Solution.md)
+- 📝 [Énoncé du TP15b](./tp/TP15b-Registres-Prives-Securite.md)
+- ✅ [Solution du TP15b](./solutions/TP15b-Solution.md)
 - ⏱️ Durée estimée : 90 minutes
 
-#### TP16c - Registres privés : Production et haute disponibilité (Niveau Avancé)
+#### TP15c - Registres privés : Production et haute disponibilité (Niveau Avancé)
 Déployer et gérer un registre Docker en production avec haute disponibilité, monitoring, backup, et optimisations avancées.
 
-- 📝 [Énoncé du TP16c](./tp/TP16c-Registres-Prives-Production.md)
-- ✅ [Solution du TP16c](./solutions/TP16c-Solution.md)
+- 📝 [Énoncé du TP15c](./tp/TP15c-Registres-Prives-Production.md)
+- ✅ [Solution du TP15c](./solutions/TP15c-Solution.md)
 - ⏱️ Durée estimée : 120 minutes
 
 ## Durée estimée
@@ -63,9 +63,9 @@ Déployer et gérer un registre Docker en production avec haute disponibilité, 
 - TP14 : 2h
 - TP14b : 2h
 - TP14c : 1h
-- TP16a : 1h
-- TP16b : 1h30
-- TP16c : 2h
+- TP15a : 1h
+- TP15b : 1h30
+- TP15c : 2h
 
 ## Navigation
 

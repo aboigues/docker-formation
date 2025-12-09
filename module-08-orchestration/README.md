@@ -16,11 +16,11 @@
 
 ## TPs disponibles
 
-### TP15 - Docker Swarm et introduction Kubernetes
+### TP16 - Docker Swarm et introduction Kubernetes
 Orchestration de conteneurs avec Swarm et premiers pas avec Kubernetes
 
-- 📝 [Énoncé du TP15](./tp/TP15-Swarm-Kubernetes.md)
-- ✅ [Solution du TP15](./solutions/TP15-Solution.md)
+- 📝 [Énoncé du TP16](./tp/TP16-Swarm-Kubernetes.md)
+- ✅ [Solution du TP16](./solutions/TP16-Solution.md)
 
 ## Durée estimée
 

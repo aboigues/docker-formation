@@ -1,4 +1,4 @@
-# TP16c : Registres privés Docker - Production et haute disponibilité - SOLUTIONS
+# TP15c : Registres privés Docker - Production et haute disponibilité - SOLUTIONS
 
 ## Exercice 1 : Storage backend - S3
 
@@ -688,4 +688,4 @@ docker exec registry bin/registry garbage-collect --delete-untagged /etc/docker/
 
 ---
 
-**[← Retour au TP](../tp/TP16c-Registres-Prives-Production.md)**
+**[← Retour au TP](../tp/TP15c-Registres-Prives-Production.md)**

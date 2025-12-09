@@ -155,7 +155,7 @@
   - Documentation automatique
   - Génération de diagrammes
 
-- **🆕 TP16a-Registres-Prives-Fondamentaux.md** : Registres privés Niveau 1 (1h)
+- **🆕 TP15a-Registres-Prives-Fondamentaux.md** : Registres privés Niveau 1 (1h)
   - Déploiement d'un registre Docker privé
   - Push et pull d'images
   - Gestion de la persistance (volumes, bind mounts)
@@ -164,7 +164,7 @@
   - Monitoring et diagnostics
   - Bonnes pratiques de versioning
 
-- **🆕 TP16b-Registres-Prives-Securite.md** : Registres privés Niveau 2 (1h30)
+- **🆕 TP15b-Registres-Prives-Securite.md** : Registres privés Niveau 2 (1h30)
   - Authentification avec htpasswd
   - HTTPS avec certificats TLS
   - Certificats auto-signés et CA
@@ -175,7 +175,7 @@
   - Isolation réseau
   - Audit et monitoring de sécurité
 
-- **🆕 TP16c-Registres-Prives-Production.md** : Registres privés Niveau 3 (2h)
+- **🆕 TP15c-Registres-Prives-Production.md** : Registres privés Niveau 3 (2h)
   - Storage backend S3/MinIO
   - Haute disponibilité (multi-instances)
   - Load balancing avec nginx
@@ -194,7 +194,7 @@
 ## Module 8 : Orchestration et clustérisation (3h)
 
 ### TPs
-- **TP15-Swarm-Kubernetes.md** : Orchestration
+- **TP16-Swarm-Kubernetes.md** : Orchestration
   
   **Partie 1 - Docker Swarm** :
   - Initialisation d'un cluster

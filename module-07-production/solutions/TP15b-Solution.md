@@ -1,4 +1,4 @@
-# TP16b : Registres privés Docker - Sécurité et authentification - SOLUTIONS
+# TP15b : Registres privés Docker - Sécurité et authentification - SOLUTIONS
 
 ## Exercice 1 : Authentification avec htpasswd
 
@@ -440,4 +440,4 @@ docker-compose logs -f
 
 ---
 
-**[← Retour au TP](../tp/TP16b-Registres-Prives-Securite.md)**
+**[← Retour au TP](../tp/TP15b-Registres-Prives-Securite.md)**

@@ -1,4 +1,4 @@
-# TP15 : Docker Swarm et introduction Kubernetes
+# TP16 : Docker Swarm et introduction Kubernetes
 
 ## Objectif
 
@@ -610,6 +610,6 @@ kubectl get configmap/secret
 
 ---
 
-**[→ Voir les solutions](../solutions/TP15-Solution.md)**
+**[→ Voir les solutions](../solutions/TP16-Solution.md)**
 
 **[← Retour au README du module](../README.md)**
