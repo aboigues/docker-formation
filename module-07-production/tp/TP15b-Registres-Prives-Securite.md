@@ -1,4 +1,4 @@
-# TP16b : Registres privés Docker - Sécurité et authentification
+# TP15b : Registres privés Docker - Sécurité et authentification
 
 ## Objectif
 
@@ -10,7 +10,7 @@ Sécuriser un registre Docker privé avec authentification, HTTPS/TLS, et implé
 
 ## Prérequis
 
-- TP16a complété (registres privés fondamentaux)
+- TP15a complété (registres privés fondamentaux)
 - Compréhension des certificats SSL/TLS
 - Accès à un terminal avec droits sudo
 - Docker et OpenSSL installés
@@ -996,10 +996,10 @@ rm -rf ~/docker-registry-secure ~/docker-registry-enterprise
 
 ---
 
-**[→ Suite : TP16c - Production et haute disponibilité](TP16c-Registres-Prives-Production.md)**
+**[→ Suite : TP15c - Production et haute disponibilité](TP15c-Registres-Prives-Production.md)**
 
-**[→ Voir les solutions](../solutions/TP16b-Solution.md)**
+**[→ Voir les solutions](../solutions/TP15b-Solution.md)**
 
-**[← Retour : TP16a - Fondamentaux](TP16a-Registres-Prives-Fondamentaux.md)**
+**[← Retour : TP15a - Fondamentaux](TP15a-Registres-Prives-Fondamentaux.md)**
 
 **[← Retour au README du module](../README.md)**

@@ -158,7 +158,7 @@ Bonnes pratiques pour la production : sécurité, logging, healthchecks et obser
 
 Introduction à Docker Swarm et Kubernetes.
 
-- **TP15** : Docker Swarm et Kubernetes
+- **TP16** : Docker Swarm et Kubernetes
 
 **Compétences acquises** :
 - ✅ Docker Swarm

@@ -1,4 +1,4 @@
-# TP15 : Docker Swarm et introduction Kubernetes
+# TP16 : Docker Swarm et introduction Kubernetes
 
 ## Objectif
 

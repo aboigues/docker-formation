@@ -1,4 +1,4 @@
-# Solutions - TP15 : Swarm et Kubernetes
+# Solutions - TP16 : Swarm et Kubernetes
 
 ## Docker Swarm - Points clés
 

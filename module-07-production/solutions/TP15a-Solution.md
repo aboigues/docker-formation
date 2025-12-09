@@ -1,4 +1,4 @@
-# TP16a : Registres privés Docker - Fondamentaux - SOLUTIONS
+# TP15a : Registres privés Docker - Fondamentaux - SOLUTIONS
 
 ## Exercice 1 : Déploiement d'un registre basique
 
@@ -232,4 +232,4 @@ docker exec registry bin/registry garbage-collect /etc/docker/registry/config.ym
 
 ---
 
-**[← Retour au TP](../tp/TP16a-Registres-Prives-Fondamentaux.md)**
+**[← Retour au TP](../tp/TP15a-Registres-Prives-Fondamentaux.md)**

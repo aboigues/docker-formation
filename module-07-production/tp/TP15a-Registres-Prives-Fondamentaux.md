@@ -1,4 +1,4 @@
-# TP16a : Registres privés Docker - Fondamentaux
+# TP15a : Registres privés Docker - Fondamentaux
 
 ## Objectif
 
@@ -827,8 +827,8 @@ rm -rf ~/docker-registry
 
 ---
 
-**[→ Suite : TP16b - Sécurité et authentification](TP16b-Registres-Prives-Securite.md)**
+**[→ Suite : TP15b - Sécurité et authentification](TP15b-Registres-Prives-Securite.md)**
 
-**[→ Voir les solutions](../solutions/TP16a-Solution.md)**
+**[→ Voir les solutions](../solutions/TP15a-Solution.md)**
 
 **[← Retour au README du module](../README.md)**

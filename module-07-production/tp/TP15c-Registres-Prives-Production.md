@@ -1,4 +1,4 @@
-# TP16c : Registres privés Docker - Production et haute disponibilité
+# TP15c : Registres privés Docker - Production et haute disponibilité
 
 ## Objectif
 
@@ -10,7 +10,7 @@ Déployer et gérer un registre Docker en production avec haute disponibilité, 
 
 ## Prérequis
 
-- TP16a et TP16b complétés
+- TP15a et TP15b complétés
 - Compréhension des concepts de haute disponibilité
 - Docker Compose installé
 - Connaissance de base en monitoring (Prometheus, Grafana)
@@ -1503,10 +1503,10 @@ rm -rf ~/docker-registry-production
 
 ---
 
-**[← Retour : TP16b - Sécurité et authentification](TP16b-Registres-Prives-Securite.md)**
+**[← Retour : TP15b - Sécurité et authentification](TP15b-Registres-Prives-Securite.md)**
 
-**[← Retour : TP16a - Fondamentaux](TP16a-Registres-Prives-Fondamentaux.md)**
+**[← Retour : TP15a - Fondamentaux](TP15a-Registres-Prives-Fondamentaux.md)**
 
-**[→ Voir les solutions](../solutions/TP16c-Solution.md)**
+**[→ Voir les solutions](../solutions/TP15c-Solution.md)**
 
 **[← Retour au README du module](../README.md)**
