@@ -353,22 +353,14 @@ docker compose --env-file prod.env up -d
 mkdir -p ~/docker-tp/compose-scale
 cd ~/docker-tp/compose-scale
 
-# Créer un script pour afficher le hostname
-cat > start.sh << 'EOF'
-#!/bin/sh
-http-echo -text="Instance $(hostname)"
-EOF
-chmod +x start.sh
-
 cat > docker-compose.yml << 'EOF'
 version: '3.8'
 
 services:
   app:
-    image: hashicorp/http-echo:latest
-    volumes:
-      - ./start.sh:/start.sh:ro
-    command: ["/start.sh"]
+    image: ealen/echo-server:latest
+    environment:
+      - PORT=8080
     networks:
       - app-net
 
@@ -392,7 +384,7 @@ events { worker_connections 1024; }
 
 http {
     upstream app {
-        server app:5678;
+        server app:8080;
     }
 
     server {
@@ -408,7 +400,7 @@ EOF
 docker compose up -d --scale app=3
 
 # Tester le load balancing
-for i in {1..10}; do curl http://localhost:8080; done
+for i in {1..10}; do curl http://localhost:8080 | grep -i hostname; done
 ```
 
 ---
