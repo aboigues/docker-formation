@@ -12,6 +12,8 @@ Déployer des applications production-ready complètes avec Docker Compose.
 
 ## Exercice 1 : Stack MERN (MongoDB, Express, React, Node)
 
+**⚠️ Note** : Plusieurs exercices utilisent le port 8080. Pensez à arrêter les stacks précédentes avec `docker compose down` avant de passer à l'exercice suivant.
+
 ```bash
 mkdir -p ~/docker-tp/mern-stack
 cd ~/docker-tp/mern-stack
@@ -173,6 +175,12 @@ EOF
 # Démarrer
 docker compose up -d --build
 
+# Vérifier les services
+docker compose ps
+
+# Tester l'application
+curl -I http://localhost:8080
+
 # Accéder à http://localhost:8080
 ```
 
@@ -292,10 +300,10 @@ services:
   gitlab:
     image: gitlab/gitlab-ce:latest
     restart: always
-    hostname: gitlab.local
+    hostname: localhost
     environment:
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'http://gitlab.local'
+        external_url 'http://localhost:8080'
         gitlab_rails['gitlab_shell_ssh_port'] = 2222
     ports:
       - '8080:80'
@@ -306,6 +314,7 @@ services:
       - gitlab_data:/var/opt/gitlab
     networks:
       - gitlab-net
+    shm_size: '256m'
 
   gitlab-runner:
     image: gitlab/gitlab-runner:latest
@@ -338,6 +347,14 @@ volumes:
 networks:
   gitlab-net:
 EOF
+
+# Attendre le démarrage de GitLab (peut prendre plusieurs minutes)
+echo "GitLab démarre... Cela peut prendre 5-10 minutes"
+docker compose up -d
+
+# Accéder à GitLab sur http://localhost:8080
+# Le mot de passe root initial se trouve dans :
+# docker compose exec gitlab cat /etc/gitlab/initial_root_password
 ```
 
 ---
@@ -407,15 +424,19 @@ services:
       - monitoring
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
+    image: gcr.io/cadvisor/cadvisor:v0.47.0
     restart: always
     ports:
-      - "8080:8080"
+      - "8081:8080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    privileged: true
+    devices:
+      - /dev/kmsg
     networks:
       - monitoring
 
@@ -438,9 +459,116 @@ docker compose up -d
 ## Exercice 5 : E-commerce Stack
 
 ```bash
-mkdir -p ~/docker-tp/ecommerce-stack
+mkdir -p ~/docker-tp/ecommerce-stack/{api,frontend,nginx}
 cd ~/docker-tp/ecommerce-stack
 
+# API Backend (Node.js + Express)
+cat > api/package.json << 'EOF'
+{
+  "name": "ecommerce-api",
+  "version": "1.0.0",
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.11.0",
+    "redis": "^4.6.0",
+    "amqplib": "^0.10.0"
+  }
+}
+EOF
+
+cat > api/server.js << 'EOF'
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy' });
+});
+
+app.get('/api/products', (req, res) => {
+  res.json([
+    { id: 1, name: 'Product 1', price: 29.99 },
+    { id: 2, name: 'Product 2', price: 49.99 }
+  ]);
+});
+
+app.listen(3000, () => console.log('API running on port 3000'));
+EOF
+
+cat > api/Dockerfile << 'EOF'
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY server.js ./
+EXPOSE 3000
+CMD ["node", "server.js"]
+EOF
+
+# Frontend (HTML simple)
+cat > frontend/index.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<head>
+    <title>E-commerce</title>
+    <style>
+        body { font-family: Arial; max-width: 1200px; margin: 50px auto; }
+        .product { border: 1px solid #ddd; padding: 20px; margin: 10px; }
+    </style>
+</head>
+<body>
+    <h1>E-commerce Store</h1>
+    <div id="products"></div>
+    <script>
+        fetch('/api/products')
+            .then(r => r.json())
+            .then(products => {
+                document.getElementById('products').innerHTML = products
+                    .map(p => `<div class="product"><h3>${p.name}</h3><p>$${p.price}</p></div>`)
+                    .join('');
+            });
+    </script>
+</body>
+</html>
+EOF
+
+cat > frontend/Dockerfile << 'EOF'
+FROM nginx:alpine
+COPY index.html /usr/share/nginx/html/
+EOF
+
+# Nginx Configuration
+cat > nginx/nginx.conf << 'EOF'
+events {
+    worker_connections 1024;
+}
+
+http {
+    upstream api {
+        server api:3000;
+    }
+
+    upstream frontend {
+        server frontend:80;
+    }
+
+    server {
+        listen 80;
+
+        location / {
+            proxy_pass http://frontend;
+            proxy_set_header Host $host;
+        }
+
+        location /api/ {
+            proxy_pass http://api/api/;
+            proxy_set_header Host $host;
+        }
+    }
+}
+EOF
+
+# Docker Compose
 cat > docker-compose.yml << 'EOF'
 version: '3.8'
 
@@ -503,21 +631,6 @@ services:
       - backend
       - frontend
 
-  # Worker for background jobs
-  worker:
-    build: ./api
-    restart: always
-    command: npm run worker
-    environment:
-      DATABASE_URL: postgres://ecommerce:password@postgres:5432/ecommerce
-      REDIS_URL: redis://redis:6379
-      RABBITMQ_URL: amqp://admin:admin@rabbitmq:5672
-    depends_on:
-      - rabbitmq
-      - redis
-    networks:
-      - backend
-
   # Frontend
   frontend:
     build: ./frontend
@@ -552,6 +665,17 @@ networks:
   frontend:
   backend:
 EOF
+
+# Démarrer la stack complète
+docker compose up -d --build
+
+# Vérifier les services
+docker compose ps
+
+# Tester l'application
+curl http://localhost:80
+
+# Accéder à RabbitMQ Management: http://localhost:15672 (admin/admin)
 ```
 
 ---
