@@ -359,7 +359,7 @@ version: '3.8'
 services:
   app:
     image: hashicorp/http-echo:latest
-    command: ["-text=Instance ${HOSTNAME}"]
+    command: ["-text=Instance $${HOSTNAME}"]
     networks:
       - app-net
 
