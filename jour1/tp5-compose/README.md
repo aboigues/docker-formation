@@ -1,12 +1,13 @@
-# TP4 — La même stack, mais avec Docker Compose
+# TP5 — La même stack, mais avec Docker Compose
 
 > **Jour 1** · Durée estimée : 45 min · Ports utilisés : `8083`
+> Prérequis : TP4 (la même stack montée à la main).
 
 ## 🎬 Le contexte
 
-Au TP3, monter WordPress + MySQL à la main vous a coûté ~6 commandes longues, non reproductibles et impossibles à versionner. Un·e collègue qui veut la même stack doit tout retaper sans se tromper. **Inacceptable** en équipe.
+Au TP4, monter WordPress + MySQL à la main vous a coûté ~6 commandes longues, non reproductibles et impossibles à versionner. Un·e collègue qui veut la même stack doit tout retaper sans se tromper. **Inacceptable** en équipe.
 
-Docker Compose décrit toute la stack dans **un seul fichier YAML**, versionnable dans Git, déployable en **une commande**. Vous allez convertir le TP3 et mesurer le gain.
+Docker Compose décrit toute la stack dans **un seul fichier YAML**, versionnable dans Git, déployable en **une commande**. Vous allez convertir le TP4 et mesurer le gain.
 
 ## 🎯 Objectif vérifiable
 
@@ -16,15 +17,15 @@ Un `docker-compose.yml` qui lève la même stack (WordPress sur 8083 + MySQL) av
 
 ## ⚠️ Avant de commencer
 
-Si la stack du TP3 tourne encore, démontez-la (même port 8083) :
+Si la stack du TP4 tourne encore, démontez-la (même port 8083) :
 
 ```bash
-cd ../tp3-stack-manuelle && ./solution/deploy.sh down && docker volume rm wp-db 2>/dev/null; cd -
+cd ../tp4-stack-manuelle && ./solution/deploy.sh down && docker volume rm wp-db 2>/dev/null; cd -
 ```
 
 ## Étape 1 — Lire la correspondance run → Compose
 
-Chaque option `docker run` du TP3 a son équivalent en YAML. Gardez cette table sous les yeux :
+Chaque option `docker run` du TP4 a son équivalent en YAML. Gardez cette table sous les yeux :
 
 | `docker run` | `docker-compose.yml` |
 |--------------|----------------------|
@@ -116,10 +117,22 @@ services:
 
 ---
 
+## 📖 Où chercher (documentation officielle)
+
+- **Présentation de Docker Compose** : https://docs.docker.com/compose/
+- **Référence du fichier `compose.yaml`** (toutes les clés) : https://docs.docker.com/reference/compose-file/
+- **Section `services`** (image, ports, volumes, environment, depends_on) : https://docs.docker.com/reference/compose-file/services/
+- **Volumes nommés dans Compose** : https://docs.docker.com/reference/compose-file/volumes/
+- **CLI `docker compose`** : https://docs.docker.com/reference/cli/docker/compose/
+
+> 💡 La clé `version:` que l'on voit dans de vieux tutoriels est **obsolète** : la doc officielle ne la mentionne plus. Fiez-vous à `docs.docker.com`, pas aux blogs de 2019.
+
+---
+
 ## 🚀 Pour aller plus loin
 
-1. **Comparez.** Comptez les lignes du `docker-compose.yml` vs le nombre de commandes du TP3. Lequel est le plus facile à relire pour un·e collègue dans 6 mois ?
+1. **Comparez.** Comptez les lignes du `docker-compose.yml` vs le nombre de commandes du TP4. Lequel est le plus facile à relire pour un·e collègue dans 6 mois ?
 2. **`docker compose config`.** Lancez-la : Compose affiche la configuration **finale** interprétée. À quoi ça sert avant un déploiement ?
-3. **Scaler ?** Essayez `docker compose up -d --scale wordpress=2`. Que se passe-t-il ? Pourquoi le mapping de port `8083:80` pose-t-il problème au-delà d'une instance ? (On résoudra ça au TP9 avec un reverse-proxy.)
-4. **Externaliser les secrets.** Déplacez les mots de passe dans un fichier `.env` et référencez-les avec `${...}` dans le YAML. Ajoutez `.env` au `.gitignore`. (C'est le cœur du TP5.)
+3. **Scaler ?** Essayez `docker compose up -d --scale wordpress=2`. Que se passe-t-il ? Pourquoi le mapping de port `8083:80` pose-t-il problème au-delà d'une instance ? (On résoudra ça au TP10 avec un reverse-proxy.)
+4. **Externaliser les secrets.** Déplacez les mots de passe dans un fichier `.env` et référencez-les avec `${...}` dans le YAML. Ajoutez `.env` au `.gitignore`. (C'est le cœur du TP6.)
 5. **Profiles.** Ajoutez un service `adminer` (interface DB web) derrière un `profiles: ["debug"]`, et ne le lancez qu'avec `docker compose --profile debug up -d`.

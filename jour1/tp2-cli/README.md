@@ -130,6 +130,18 @@ if docker top "$1" 2>/dev/null | grep -q nginx; then echo yes; else echo no; fi
 
 ---
 
+## 📖 Où chercher (documentation officielle)
+
+- **`docker logs`** : https://docs.docker.com/reference/cli/docker/container/logs/
+- **`docker exec`** (entrer dans un conteneur) : https://docs.docker.com/reference/cli/docker/container/exec/
+- **`docker inspect` & format Go template** : https://docs.docker.com/reference/cli/docker/inspect/ et https://docs.docker.com/engine/cli/formatting/
+- **`docker top` / `docker stats`** : https://docs.docker.com/reference/cli/docker/container/top/ · https://docs.docker.com/reference/cli/docker/container/stats/
+- **Syntaxe des templates Go** (pour `--format`) : https://pkg.go.dev/text/template
+
+> 💡 Pour `--format`, la doc « Formatting » de Docker donne des exemples prêts à l'emploi. Et `docker inspect <nom>` (sans format) montre **tout** le JSON : repérez-y le champ avant de l'extraire.
+
+---
+
 ## 🚀 Pour aller plus loin
 
 1. **`docker cp` à chaud.** Copiez une nouvelle `index.html` depuis l'hôte vers `checkout` sans le redémarrer (`docker cp index.html checkout:/usr/share/nginx/html/`). Rechargez la page. Pratique en hotfix… mais pourquoi est-ce une **mauvaise** pratique durable ?
