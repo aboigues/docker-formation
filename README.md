@@ -1,0 +1,90 @@
+# 🐳 Formation Docker — Travaux Pratiques
+
+> Code formation **DEVOPS-001** — © 2026 Telemach Learning
+> Support théorique : présentations Gamma. **Ce dépôt contient uniquement les TP.**
+
+Bienvenue dans les travaux pratiques de la formation Docker (3 jours). Ici, on **apprend en faisant** : chaque TP se construit pas à pas, à partir d'un squelette à compléter — pas de copier/coller passif.
+
+---
+
+## 🎯 Comment fonctionnent les TP
+
+Chaque TP est un dossier autonome organisé ainsi :
+
+```
+jourX/tpN-nom/
+├── README.md      ← le guide pas à pas (commencez TOUJOURS par là)
+├── starter/       ← les fichiers À COMPLÉTER (cherchez les « TODO »)
+├── solution/      ← la solution de référence (à consulter en dernier recours)
+└── verify.sh      ← le script de validation (le même que la CI)
+```
+
+### La règle d'or
+
+> **Si ce n'est pas testé par GitHub Actions, ça ne fonctionne pas.**
+
+Chaque TP a une **cible vérifiable** (un site qui répond, une base qui persiste, une image sans vulnérabilité critique...). Le script `verify.sh` automatise cette vérification, et la **CI GitHub Actions** l'exécute sur la `solution/` à chaque push : la pastille verte ✅ prouve que le TP est réalisable de bout en bout.
+
+### Votre méthode de travail
+
+1. **Lisez le `README.md`** du TP en entier avant de taper la moindre commande.
+2. **Travaillez dans `starter/`** : complétez les fichiers marqués `# TODO`.
+3. **Validez vous-même** : lancez `./verify.sh` depuis le dossier du TP.
+4. **Bloqué ?** Relisez la section « Indices », puis seulement en dernier recours, regardez `solution/`.
+5. **En avance ?** Faites la section **🚀 Pour aller plus loin** — elle est là pour ça.
+
+---
+
+## 📚 Parcours
+
+| Jour | TP | Sujet | Cas réel |
+|------|----|-------|----------|
+| **1** | TP1 | Prise en main & première image | Déployer une landing page |
+| **1** | TP2 | Maîtriser la CLI | Déboguer un conteneur en production |
+| **1** | TP3 | Stack multi-conteneurs à la main | Héberger un CMS (WordPress + MySQL) |
+| **1** | TP4 | La même stack avec Compose | Industrialiser le déploiement |
+| **2** | TP5 | Compose avancé | API + base + cache (env, healthchecks, override) |
+| **2** | TP6 | Registry privé & Portainer | Distribuer ses images en interne |
+| **2** | TP7 | Sécurité des images | Scanner, durcir, transférer en air-gapped |
+| **3** | TP8 | Monitoring & logs | Observer une appli (Prometheus, Grafana, Loki) |
+| **3** | TP9 | Swarm & Traefik | Mettre en production en cluster |
+
+---
+
+## ✅ Prérequis
+
+- **Docker Engine 27+** (idéalement la dernière version) et le plugin **Docker Compose v2** (`docker compose version`)
+- Un shell **bash** (Linux, WSL2, ou macOS)
+- `curl` et `git`
+- Pour le Jour 3 : une machine avec assez de RAM (4 Go libres recommandés)
+
+Vérifiez votre environnement :
+
+```bash
+docker version
+docker compose version
+```
+
+---
+
+## 🤖 Tester en local comme la CI
+
+Depuis n'importe quel dossier de TP :
+
+```bash
+cd jour1/tp1-prise-en-main
+./verify.sh        # construit, lance, vérifie, nettoie
+```
+
+La CI fait exactement la même chose sur chaque `solution/` — voir [`.github/workflows`](.github/workflows).
+
+---
+
+## 🧭 Conventions
+
+- Les commandes destructrices (`docker system prune`, `down -v`) sont **toujours signalées** dans les README.
+- Chaque TP **nettoie ses propres ressources** à la fin (`verify.sh` inclut un `cleanup`).
+- Les ports utilisés sont indiqués en début de TP pour éviter les collisions.
+- Les mots de passe des TP sont **fictifs** et ne doivent jamais être réutilisés ailleurs.
+
+Bon courage, et surtout : **tapez les commandes vous-même.** 💪
