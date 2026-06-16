@@ -39,15 +39,18 @@ Chaque TP a une **cible vérifiable** (un site qui répond, une base qui persist
 
 | Jour | TP | Sujet | Cas réel |
 |------|----|-------|----------|
-| **1** | TP1 | Prise en main & première image | Déployer une landing page |
+| **1** | TP1 | Premiers pas avec Docker | Lancer et manipuler des conteneurs |
 | **1** | TP2 | Maîtriser la CLI | Déboguer un conteneur en production |
-| **1** | TP3 | Stack multi-conteneurs à la main | Héberger un CMS (WordPress + MySQL) |
-| **1** | TP4 | La même stack avec Compose | Industrialiser le déploiement |
-| **2** | TP5 | Compose avancé | API + base + cache (env, healthchecks, override) |
-| **2** | TP6 | Registry privé & Portainer | Distribuer ses images en interne |
-| **2** | TP7 | Sécurité des images | Scanner, durcir, transférer en air-gapped |
-| **3** | TP8 | Monitoring & logs | Observer une appli (Prometheus, Grafana, Loki) |
-| **3** | TP9 | Swarm & Traefik | Mettre en production en cluster |
+| **1** | TP3 | Construire sa première image | Emballer une landing page (Dockerfile) |
+| **1** | TP4 | Stack multi-conteneurs à la main | Héberger un CMS (WordPress + MySQL) |
+| **1** | TP5 | La même stack avec Compose | Industrialiser le déploiement |
+| **2** | TP6 | Compose avancé | API + base + cache (env, healthchecks, override) |
+| **2** | TP7 | Registry privé & Portainer | Distribuer ses images en interne |
+| **2** | TP8 | Sécurité des images | Scanner, durcir, transférer en air-gapped |
+| **3** | TP9 | Monitoring & logs | Observer une appli (Prometheus, Grafana, Loki) |
+| **3** | TP10 | Swarm & Traefik | Mettre en production en cluster |
+
+> La progression est **volontairement graduelle** : on lance des conteneurs (TP1) avant d'en construire (TP3), et on monte une stack à la main (TP4) avant de l'automatiser (TP5).
 
 ---
 

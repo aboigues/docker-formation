@@ -24,8 +24,9 @@ jobs:
         tp:
           - jour1/tp1-prise-en-main
           - jour1/tp2-cli
-          - jour1/tp3-stack-manuelle
-          - jour1/tp4-compose
+          - jour1/tp3-premiere-image
+          - jour1/tp4-stack-manuelle
+          - jour1/tp5-compose
     name: ${{ matrix.tp }}
     steps:
       - uses: actions/checkout@v4

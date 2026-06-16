@@ -1,12 +1,13 @@
-# TP3 — Monter une stack multi-conteneurs à la main
+# TP4 — Monter une stack multi-conteneurs à la main
 
 > **Jour 1** · Durée estimée : 1 h · Ports utilisés : `8083`
+> Prérequis : TP1 à TP3 (lancer des conteneurs, CLI, première image).
 
 ## 🎬 Le contexte
 
 Le service communication veut un **blog WordPress** pour publier les actualités de l'entreprise. WordPress a besoin d'une **base de données MySQL**. Deux conteneurs doivent donc coopérer : se **trouver** (réseau), **persister** les données (volume) et se **configurer** (variables d'environnement).
 
-Vous allez tout monter **à la main**, commande par commande. L'objectif n'est pas l'efficacité — c'est de **ressentir la douleur** de la gestion manuelle, pour comprendre au TP4 pourquoi Docker Compose existe.
+Vous allez tout monter **à la main**, commande par commande. L'objectif n'est pas l'efficacité — c'est de **ressentir la douleur** de la gestion manuelle, pour comprendre au TP5 pourquoi Docker Compose existe.
 
 ## 🎯 Objectif vérifiable
 
@@ -62,7 +63,7 @@ docker rm -f wp-app
 
 Rechargez la page : si vous aviez commencé l'installation, l'état est **conservé**, car les données vivent dans le volume `wp-db`, pas dans le conteneur.
 
-> 🧠 **Le bilan « douloureux »** : comptez le nombre de commandes (et de variables) qu'il a fallu pour 2 services. Imaginez 10 services. Non reproductible, non versionnable, fragile. → **TP4 : Docker Compose.**
+> 🧠 **Le bilan « douloureux »** : comptez le nombre de commandes (et de variables) qu'il a fallu pour 2 services. Imaginez 10 services. Non reproductible, non versionnable, fragile. → **TP5 : Docker Compose.**
 
 ## Étape 4 — Validez
 
@@ -100,6 +101,19 @@ docker run -d --name wp-mysql --network wp-net \
 
 Vérifiez que les **deux** conteneurs sont sur le **même réseau** (`--network wp-net`) et que `WORDPRESS_DB_HOST` vaut exactement le **nom** du conteneur MySQL.
 </details>
+
+---
+
+## 📖 Où chercher (documentation officielle)
+
+- **Réseaux Docker & DNS entre conteneurs** : https://docs.docker.com/engine/network/ et https://docs.docker.com/engine/network/drivers/bridge/#use-user-defined-bridge-networks
+- **Volumes (persistance des données)** : https://docs.docker.com/engine/storage/volumes/
+- **Variables d'environnement (`-e`, `--env-file`)** : https://docs.docker.com/reference/cli/docker/container/run/#env
+- **Image WordPress (variables `WORDPRESS_DB_*`)** : https://hub.docker.com/_/wordpress
+- **Image MySQL (variables `MYSQL_*`)** : https://hub.docker.com/_/mysql
+- **`docker network create` / `docker volume create`** : https://docs.docker.com/reference/cli/docker/network/create/ · https://docs.docker.com/reference/cli/docker/volume/create/
+
+> 💡 Sur Docker Hub, la page d'une image (onglet description) liste **toujours** les variables d'environnement supportées. C'est là qu'on trouve `WORDPRESS_DB_HOST`, `MYSQL_DATABASE`, etc.
 
 ---
 

@@ -1,117 +1,118 @@
-# TP1 — Votre première application conteneurisée
+# TP1 — Premiers pas avec Docker
 
-> **Jour 1** · Durée estimée : 45 min · Ports utilisés : `8081`
+> **Jour 1** · Durée estimée : 30 min · Ports utilisés : `8081`
 
 ## 🎬 Le contexte
 
-Votre équipe doit mettre en ligne la **landing page** d'un nouveau produit, « Telemach Cloud ». Aujourd'hui, la page est livrée « à la main » sur un serveur — fragile et non reproductible. Votre mission : **emballer cette page dans une image Docker** pour pouvoir la déployer n'importe où, à l'identique, en une commande.
+C'est votre **tout premier contact** avec Docker. Pas de panique : on ne construit rien aujourd'hui. On apprend simplement à **faire tourner des conteneurs déjà prêts**, à les observer et à les manipuler — comme on apprendrait à conduire avant de réparer un moteur.
 
-À la fin de ce TP, vous saurez : lancer un conteneur, servir des fichiers depuis l'hôte, puis **construire votre propre image** avec un `Dockerfile`.
+À la fin de ce TP, vous saurez : lancer un conteneur, le voir vivre, l'arrêter, le supprimer, et utiliser une image téléchargée depuis Docker Hub. **Aucun fichier à écrire.**
 
 ## 🎯 Objectif vérifiable
 
-Une image `telemach-landing` qui, une fois lancée, sert la landing page sur le port 8081, et répond `200` avec le titre du produit. C'est ce que `./verify.sh` (et la CI) contrôle.
+Savoir lancer un serveur web `nginx` (image officielle) et le rendre accessible dans votre navigateur, puis maîtriser le cycle de vie d'un conteneur. `./verify.sh` rejoue ce scénario de base et confirme que votre environnement Docker fonctionne.
 
 ---
 
-## Étape 1 — Docker répond-il ?
+## Étape 1 — Dire bonjour 👋
 
-Avant tout, le rituel de vérification. Tapez (ne copiez pas mécaniquement : **lisez chaque sortie**) :
-
-```bash
-docker version
-docker run --rm hello-world
-```
-
-> ❓ **Question** : dans la sortie de `docker version`, repérez les **deux** blocs `Client` et `Server`. Pourquoi y en a-t-il deux ? (Indice : architecture client/daemon.)
-
-`hello-world` s'est lancé puis arrêté : c'est normal, son seul rôle est d'afficher un message. L'option `--rm` a supprimé le conteneur après son exécution.
-
-## Étape 2 — Servir la page SANS rien construire (bind mount)
-
-La page existe déjà dans `starter/site/index.html`. On va d'abord la servir avec une image `nginx` **standard**, en lui **montant** notre dossier. Depuis le dossier `starter/` :
+La toute première commande de tout débutant Docker :
 
 ```bash
-cd starter
-docker run -d --name landing-test \
-  -p 8081:80 \
-  -v "$(pwd)/site:/usr/share/nginx/html:ro" \
-  nginx:1.30-alpine
+docker run hello-world
 ```
 
-Ouvrez http://localhost:8081 (ou `curl -s http://localhost:8081 | head`).
+Lisez le message affiché : il explique **ce que Docker vient de faire** (le client a contacté le daemon, qui a téléchargé une image puis lancé un conteneur).
 
-> ❓ **Question** : modifiez une ligne dans `site/index.html`, rechargez la page. Le changement apparaît-il **sans** reconstruire ni relancer le conteneur ? Pourquoi ? (Indice : `:ro` = read-only, et le bind mount pointe vers vos fichiers.)
+> ❓ **Question** : d'où vient l'image `hello-world` ? (Indice : le message le dit — un « registry ».)
 
-Nettoyez avant l'étape suivante :
+## Étape 2 — Lancer un vrai serveur web
+
+On lance maintenant **nginx**, un serveur web très répandu, à partir de son image officielle. On le met en arrière-plan (`-d`) et on **publie** son port :
 
 ```bash
-docker rm -f landing-test
+docker run -d --name mon-serveur -p 8081:80 nginx:1.30-alpine
 ```
 
-> 🧠 **Ce qu'on vient de voir** : le bind mount est parfait en **développement** (édition en direct). Mais il **lie** le conteneur à l'arborescence de votre machine : impossible de déployer ailleurs tel quel. D'où l'étape suivante.
+Ouvrez http://localhost:8081 dans votre navigateur (ou `curl http://localhost:8081`). Vous voyez la page d'accueil de nginx : **bravo, vous hébergez un serveur web** !
 
-## Étape 3 — Construire une vraie image (à vous de jouer)
+Décortiquons la commande :
 
-Ouvrez `starter/Dockerfile`. Il est **incomplet** : complétez les `# TODO`. Vous devez :
+| Morceau | Signification |
+|---------|---------------|
+| `-d` | *detached* : tourne en arrière-plan |
+| `--name mon-serveur` | un nom lisible (sinon Docker en invente un) |
+| `-p 8081:80` | publie le port 80 du conteneur sur le 8081 de votre machine |
+| `nginx:1.30-alpine` | l'image à utiliser (et sa version) |
 
-1. partir de l'image de base `nginx:1.30-alpine` ;
-2. copier le contenu de `site/` dans le dossier servi par nginx (`/usr/share/nginx/html/`) ;
-3. documenter le port exposé (80) ;
-4. ajouter un `LABEL` d'auteur (pas de `MAINTAINER`, qui est déprécié).
+> ❓ **Question** : si vous lancez `docker run -d -p 9090:80 nginx:1.30-alpine`, sur quelle adresse verrez-vous nginx ? Pourquoi le port de gauche (hôte) peut-il être différent du port de droite (conteneur) ?
 
-Puis construisez et lancez **votre** image :
+## Étape 3 — Observer le conteneur
 
 ```bash
-docker build -t telemach-landing:1.0 .
-docker run -d --name landing -p 8081:80 telemach-landing:1.0
-curl -s http://localhost:8081 | grep "Telemach"
+docker ps                 # les conteneurs EN COURS d'exécution
+docker logs mon-serveur   # ce que le serveur a écrit
+docker stats --no-stream  # consommation CPU / RAM
 ```
 
-> ❓ **Question** : relancez `docker build` une 2ᵉ fois sans rien changer. Pourquoi est-ce **instantané** ? (Indice : cache de couches.)
+## Étape 4 — Le cycle de vie
 
-Nettoyez :
+Manipulez l'état du conteneur et **observez `docker ps` après chaque commande** :
 
 ```bash
-docker rm -f landing
+docker stop mon-serveur      # arrêt → disparaît de `docker ps`
+docker ps -a                 # -a montre AUSSI les conteneurs arrêtés
+docker start mon-serveur     # redémarrage
+docker restart mon-serveur   # arrêt + démarrage
 ```
 
-## Étape 4 — Validez votre travail
+> ❓ **Question** : après `docker stop`, le conteneur a-t-il disparu, ou est-il seulement arrêté ? Quelle commande le prouve ?
 
-Depuis le dossier du TP :
+## Étape 5 — Faire le ménage
+
+```bash
+docker rm -f mon-serveur     # -f force la suppression même s'il tourne
+docker ps -a                 # il n'apparaît plus
+```
+
+> 🧠 **Conteneur ≠ image.** Vous venez de supprimer le **conteneur** (l'instance). L'**image** `nginx:1.30-alpine`, elle, est toujours téléchargée sur votre machine : `docker images`. On la réutilisera sans la retélécharger.
+
+## Étape 6 — Explorer les images
+
+```bash
+docker images                       # images présentes localement
+docker pull httpd:2.4               # télécharger une autre image (Apache)
+docker search postgres              # chercher des images sur Docker Hub
+```
+
+## Étape 7 — Validez
 
 ```bash
 ./verify.sh
 ```
 
-Le script construit l'image de la **solution**, la lance, vérifie la réponse HTTP et le contenu, puis nettoie tout. Tant que vous n'avez pas le ✅, votre TP n'est pas terminé.
+Le script rejoue le scénario (hello-world, lancement de nginx, vérification HTTP, cycle de vie) et nettoie tout. Le ✅ confirme que votre Docker est opérationnel — vous êtes prêt·e pour la suite.
 
 ---
 
-## 💡 Indices (si vous êtes bloqué·e)
+## 📖 Où chercher (documentation officielle)
 
-<details>
-<summary>L'instruction pour copier des fichiers locaux dans l'image ?</summary>
+- **Premiers pas / `docker run`** : https://docs.docker.com/get-started/ et https://docs.docker.com/reference/cli/docker/container/run/
+- **Publier des ports (`-p`)** : https://docs.docker.com/engine/network/#published-ports
+- **Cycle de vie des conteneurs** : https://docs.docker.com/reference/cli/docker/container/
+- **Trouver des images** : https://hub.docker.com (et `docker search`)
+- **S'entraîner sans rien installer** : https://labs.play-with-docker.com
 
-C'est `COPY <source_locale> <destination_dans_l_image>`. La source est relative au **contexte de build** (le dossier du `docker build .`).
-</details>
-
-<details>
-<summary>« COPY failed: no source files » ?</summary>
-
-Vérifiez que vous lancez `docker build` **depuis le dossier qui contient `site/`**, et que le chemin source dans `COPY` correspond bien (`site/` et non `./starter/site/`).
-</details>
+> 💡 Réflexe à prendre : la **doc officielle `docs.docker.com`** est la source de vérité. Chaque commande a sa page de référence (`docker <commande> --help` aussi).
 
 ---
 
 ## 🚀 Pour aller plus loin
 
-> Réservé à celles et ceux qui ont terminé en avance. Chaque défi est **indépendant**.
+> Réservé à celles et ceux qui ont terminé en avance.
 
-1. **Pesez votre image.** `docker images telemach-landing:1.0`. Comparez avec `nginx:1.30` (sans `-alpine`). Combien de Mo économisés grâce à Alpine ?
-2. **Healthcheck.** Ajoutez une instruction `HEALTHCHECK` au Dockerfile qui fait un `wget`/`curl` sur `http://localhost/`. Lancez le conteneur et observez la colonne `STATUS` de `docker ps` passer à `(healthy)`.
-3. **Page d'erreur personnalisée.** Ajoutez une page `404.html` et configurez nginx (`error_page 404 /404.html;`) via un fichier de conf monté ou copié. Testez avec `curl -i http://localhost:8081/inexistant`.
-4. **Versionnez par tag.** Construisez `telemach-landing:1.1` après une modif, gardez `:1.0`. Listez les deux. Comment revenir à la `1.0` en cas de problème ?
-5. **Build arg.** Injectez la date de build via `ARG BUILD_DATE` + `LABEL`, et passez-la avec `--build-arg BUILD_DATE=$(date -I)`. Vérifiez avec `docker inspect`.
-
-> Les solutions de l'approfondissement ne sont pas fournies : c'est l'occasion de fouiller la doc officielle `docs.docker.com`.
+1. **Mode interactif.** Lancez un Ubuntu et entrez dedans : `docker run -it ubuntu:24.04 bash`. Tapez `cat /etc/os-release`, puis `exit`. Vous étiez « dans » un conteneur Linux complet.
+2. **Auto-nettoyage.** Relancez hello-world avec `docker run --rm hello-world`. Quelle différence voyez-vous dans `docker ps -a` ? À quoi sert `--rm` ?
+3. **Port aléatoire.** Lancez nginx avec `-P` (majuscule) au lieu de `-p 8081:80`. Puis `docker port <nom>` : quel port l'hôte a-t-il choisi ?
+4. **Deux serveurs en même temps.** Lancez deux nginx sur deux ports différents (8081 et 8082). Pourquoi ne peut-on PAS les mettre tous les deux sur 8081 ?
+5. **Variables d'environnement.** Lancez `docker run -d -e POSTGRES_PASSWORD=demo postgres:18` et lisez `docker logs` : la base démarre. Cherchez sur Docker Hub la liste des variables supportées par l'image `postgres`.
