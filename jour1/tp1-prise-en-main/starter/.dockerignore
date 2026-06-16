@@ -1,0 +1,5 @@
+# Exclut les fichiers inutiles du contexte de build
+.git
+*.md
+Dockerfile
+.dockerignore

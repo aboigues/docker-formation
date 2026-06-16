@@ -1,0 +1,43 @@
+name: Jour 1 — TP
+
+# « Si ce n'est pas testé par GitHub Actions, ça ne fonctionne pas. »
+# Chaque TP est validé en exécutant son verify.sh sur la solution de référence.
+
+on:
+  push:
+    paths:
+      - "jour1/**"
+      - "scripts/**"
+      - ".github/workflows/jour1.yml"
+  pull_request:
+    paths:
+      - "jour1/**"
+      - "scripts/**"
+  workflow_dispatch:
+
+jobs:
+  tp:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tp:
+          - jour1/tp1-prise-en-main
+          - jour1/tp2-cli
+          - jour1/tp3-stack-manuelle
+          - jour1/tp4-compose
+    name: ${{ matrix.tp }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Environnement Docker
+        run: |
+          docker version
+          docker compose version
+
+      - name: Rendre les scripts exécutables
+        run: chmod +x scripts/lib.sh "${{ matrix.tp }}/verify.sh"
+
+      - name: Vérifier le TP (solution de référence)
+        working-directory: ${{ matrix.tp }}
+        run: ./verify.sh solution

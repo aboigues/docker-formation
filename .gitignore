@@ -1,0 +1,15 @@
+# Données et artefacts générés par les TP
+**/backups/
+**/data/
+*.tar
+*.tar.gz
+*.tar.xz
+**/certs/*.crt
+**/certs/*.key
+**/auth/htpasswd
+.env
+!.env.example
+
+# Système
+.DS_Store
+*.log
