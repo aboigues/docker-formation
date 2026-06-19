@@ -52,6 +52,8 @@ Chaque TP a une **cible vérifiable** (un site qui répond, une base qui persist
 
 > Les TP sont **numérotés dans l'ordre conseillé** et la progression est **volontairement graduelle** : on lance des conteneurs (TP1) avant d'en construire (TP3), et on monte une stack à la main (TP4) avant de l'automatiser (TP5). Suivez-les dans l'ordre, quel que soit votre rythme.
 
+📌 **Pour aller plus loin et rester autonome** : [**BONNES-PRATIQUES.md**](BONNES-PRATIQUES.md) — mémo de fin de formation (principes, aide-mémoire commandes, check-list « avant la prod » et anti-patterns à bannir).
+
 ---
 
 ## ✅ Prérequis

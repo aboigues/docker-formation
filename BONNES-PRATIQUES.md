@@ -1,0 +1,198 @@
+# 🧭 Docker — Conseils & bonnes pratiques
+
+> Mémo de fin de formation (**DEVOPS-001**) pour travailler **en autonomie**.
+> À garder sous la main : principes, aide-mémoire commandes, check-lists et anti-patterns.
+> Les renvois `→ TPxx` pointent vers le TP où le sujet a été pratiqué.
+
+---
+
+## 0. Les 5 principes qui évitent 90 % des ennuis
+
+1. **Un conteneur = un seul processus / responsabilité.** Pas de « VM-conteneur » qui fait tourner ssh + cron + l'appli.
+2. **Image immuable, configuration injectée.** Le code est dans l'image ; la config (URL, secrets) vient de l'extérieur (env, secrets). → TP6, TP8
+3. **Moindre privilège partout.** Image minimale, utilisateur non-root, capacités retirées, rien d'exposé inutilement. → TP8
+4. **Tout est reproductible et versionné.** Tags figés, `Dockerfile`/`compose.yaml` dans Git, builds déterministes.
+5. **Si ce n'est pas observable et testé, ça n'existe pas.** Healthcheck, logs sur stdout, métriques, scan en CI. → TP9
+
+---
+
+## 1. Construire de bonnes images
+
+### Choisir la base
+- **Pinnez** une version précise, jamais `latest` : `node:24-alpine`, pas `node`. → TP3, TP6
+- Préférez **minimal** : `-alpine`, **distroless** (`gcr.io/distroless/...`) ou **scratch** pour un binaire statique. Moins de paquets = moins de CVE et image plus légère. → TP8
+- En entreprise, regardez les **Docker Hardened Images** (`dhi.io/...`) : bases durcies, non-root, signées, SBOM fournie.
+
+### Dockerfile efficace
+- **Multi-stage** : compiler dans une image lourde, ne livrer que l'artefact. → TP8
+- **Ordonnez du moins au plus volatil** pour exploiter le cache de couches : copier `package.json` + installer **avant** de copier le code.
+- Un **`.dockerignore`** systématique (`.git`, `node_modules`, `*.md`, `.env`, `*.key`) : build plus rapide **et** pas de fuite de fichiers sensibles dans l'image. → TP3, TP8
+- **`USER` non-root** + `EXPOSE` (documentaire) + `HEALTHCHECK`. → TP3, TP8
+- Labels **OCI** utiles : `org.opencontainers.image.source`, `...version`, `...revision`.
+
+### Directives à jour (pièges fréquents)
+| Obsolète / à éviter | À utiliser |
+|---------------------|-----------|
+| `MAINTAINER` | `LABEL org.opencontainers.image.authors=...` |
+| `ENV clé valeur` | `ENV clé=valeur` |
+| `npm install --only=production` | `npm install --omit=dev` |
+| `FROM openjdk` | `eclipse-temurin` |
+| clé `version:` dans Compose | (supprimée, ne plus la mettre) → TP5 |
+| `docker-compose` (v1) | `docker compose` (v2) |
+
+---
+
+## 2. Construire (build)
+
+- **BuildKit** est le moteur par défaut : profitez du cache et du parallélisme.
+- **Secrets de build** : jamais en `ARG`/`ENV` (ils restent dans l'historique de l'image). Utilisez `RUN --mount=type=secret`.
+  ```dockerfile
+  RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm ci
+  ```
+- **Reproductibilité** : `npm ci` (lockfile) plutôt que `npm install` ; figez les versions d'OS-packages quand c'est critique.
+- **Multi-arch** si besoin : `docker buildx build --platform linux/amd64,linux/arm64`.
+
+---
+
+## 3. Sécurité (le réflexe SRE)
+
+- **Scanner en CI** et faire **échouer** le build sur HIGH/CRITICAL : `trivy image --severity HIGH,CRITICAL --exit-code 1 img`. → TP8
+- **Scanner les secrets** : `trivy image --scanners secret --exit-code 1 img` (clé/token oubliés dans une couche). → TP8
+- **Pas de secret dans l'image ni dans `ENV`.** Utilisez les **secrets** Compose/Swarm (montés dans `/run/secrets`) ou un coffre (Vault). → TP6
+- **Durcir le runtime** :
+  ```bash
+  docker run --user 1000:1000 \
+    --read-only --tmpfs /tmp \
+    --cap-drop ALL \
+    --security-opt no-new-privileges \
+    mon-image
+  ```
+- **Mettre à jour les bases régulièrement** (les CVE arrivent *après* le build) → rebuild planifié.
+- **Provenance** : signer les images (`cosign`) et conserver la **SBOM** (`docker sbom` / `trivy sbom`).
+- **Registre privé** pour les images internes, en **HTTPS** + auth. → TP7
+
+---
+
+## 4. Exécuter (runtime)
+
+- **Limiter les ressources** : `--memory=512m --cpus=1.5` (en Compose : `deploy.resources.limits`). Évite qu'un conteneur affame l'hôte.
+- **Politique de redémarrage** : `--restart=unless-stopped` (ou `on-failure`), `restart: always` en prod. → TP6, TP10
+- **Logs** : écrire sur **stdout/stderr** (jamais dans un fichier interne), et **borner** la rotation côté daemon :
+  ```json
+  // /etc/docker/daemon.json
+  { "log-driver": "json-file", "log-opts": { "max-size": "10m", "max-file": "3" } }
+  ```
+- **Healthcheck** : que le service soit déclaré *healthy*, pas seulement *running* — base des dépendances `service_healthy`. → TP6
+- **Données** : **volumes nommés** pour ce qui doit survivre ; ⚠️ `docker compose down -v` **supprime** les volumes. → TP4, TP5
+
+---
+
+## 5. Réseau
+
+- **Un réseau dédié par stack** : isolation + DNS interne (résolution par nom de service). → TP4, TP6
+- **N'exposez (`-p` / `ports:`) que le strict nécessaire.** Une base de données n'a pas à être joignable depuis l'hôte. → TP4, TP6
+- En cluster, un **reverse-proxy** (Traefik) gère l'entrée unique + TLS + répartition. → TP10
+
+---
+
+## 6. Compose & multi-environnements
+
+- `compose.yaml` de base **+ surcouches** : `compose.override.yaml` (dev, auto-chargé) vs `-f compose.yaml -f compose.prod.yaml` (prod). → TP6
+- Configuration via **`.env`** (et `.env` dans `.gitignore`, seul `.env.example` est versionné). → TP6
+- `depends_on` avec **`condition: service_healthy`** pour un démarrage fiable. → TP6
+- **`profiles`** pour les services optionnels (debug, outils). → TP6
+- Avant tout déploiement : **`docker compose config`** affiche la configuration réellement interprétée (variables résolues, fichiers fusionnés). → TP5, TP6
+
+---
+
+## 7. Mise en production / orchestration
+
+- **Réplicas + état désiré** : l'orchestrateur maintient « je veux N instances » malgré les pannes. → TP10
+- **Rolling updates** sans coupure : `update_config` (Swarm) / stratégie de déploiement (k8s).
+- **Swarm** = simple, intégré, idéal petits clusters ; **Kubernetes** = standard de l'industrie, plus riche et plus complexe. Choisissez selon l'équipe et l'échelle.
+- **TLS automatique** au bord (Let's Encrypt via Traefik/ingress). → TP10
+
+---
+
+## 8. Aide-mémoire (cheat sheet)
+
+```bash
+# --- Diagnostic ---
+docker ps -a                      # conteneurs (y compris arrêtés)
+docker logs -f --tail=100 NAME    # suivre les logs
+docker exec -it NAME sh           # shell dans un conteneur
+docker inspect -f '{{.State.Status}}' NAME
+docker stats --no-stream          # CPU/RAM par conteneur
+docker top NAME                    # processus du conteneur
+
+# --- Images ---
+docker image ls
+docker history --no-trunc IMG     # taille par couche (repérer le gras)
+docker build -t app:1.0 .
+docker tag app:1.0 registre/app:1.0 && docker push registre/app:1.0
+
+# --- Réseaux & volumes ---
+docker network ls ; docker volume ls
+docker network create mon-net
+docker run --network mon-net ...
+
+# --- Compose ---
+docker compose up -d --build
+docker compose ps
+docker compose logs -f SERVICE
+docker compose config             # config finale interprétée
+docker compose down               # garde les volumes
+docker compose down -v            # ⚠️ supprime aussi les volumes
+
+# --- Nettoyage (récupérer de l'espace) ---
+docker system df                  # ce qui occupe l'espace
+docker image prune                # images "dangling"
+docker container prune
+docker system prune -a --volumes  # ⚠️ AGRESSIF : tout l'inutilisé, volumes compris
+```
+
+---
+
+## 9. Anti-patterns à bannir
+
+- ❌ `FROM ...:latest` → reproductibilité nulle, surprises au prochain pull.
+- ❌ Tourner **en root** par défaut.
+- ❌ **Secrets en `ENV`** ou en `ARG` (visibles dans `docker inspect` / l'historique d'image).
+- ❌ **Plusieurs processus** dans un conteneur (sshd + appli + cron).
+- ❌ Logs écrits **dans un fichier** au lieu de stdout.
+- ❌ **Données dans la couche conteneur** (perdues à la recréation) au lieu d'un volume.
+- ❌ Exposer une **base de données** sur l'hôte « au cas où ».
+- ❌ `COPY . .` sans `.dockerignore` → on embarque `.git`, `.env`, clés…
+- ❌ Image **mutable** rebuildée « en prod » au lieu d'un artefact figé et signé.
+- ❌ Ignorer les **healthchecks** et les **limites de ressources**.
+
+---
+
+## 10. Check-list « avant la prod »
+
+- [ ] Base **pinnée**, **minimale**, **non-root** ; `.dockerignore` présent. → TP3, TP8
+- [ ] **Multi-stage** : pas d'outillage de build dans l'image finale. → TP8
+- [ ] **Scan CVE + secrets** en CI, build qui **échoue** sur HIGH/CRITICAL. → TP8
+- [ ] **Aucun secret** dans l'image / `ENV` ; secrets injectés au runtime. → TP6
+- [ ] **Healthcheck** défini ; dépendances en `service_healthy`. → TP6
+- [ ] **Limites** CPU/mémoire et **politique de redémarrage**.
+- [ ] **Logs** sur stdout + **rotation** configurée.
+- [ ] **Volumes nommés** pour l'état ; stratégie de **sauvegarde**.
+- [ ] Réseau **dédié**, surface d'exposition **minimale**.
+- [ ] Métriques **/metrics** + tableau de bord ; alertes de base. → TP9
+- [ ] Images **versionnées** (tags immuables) et **poussées** dans un registre privé. → TP7
+- [ ] En cluster : **réplicas**, **rolling update**, **TLS** au bord. → TP10
+
+---
+
+## 11. Pour creuser
+
+- **Dockerfile best practices** : https://docs.docker.com/build/building/best-practices/
+- **Compose** : https://docs.docker.com/compose/
+- **Sécurité Docker** : https://docs.docker.com/engine/security/
+- **Trivy** : https://trivy.dev/ · **Docker Scout** : https://docs.docker.com/scout/
+- **Cosign / Sigstore** : https://docs.sigstore.dev/
+- **Docker Hardened Images** : https://docs.docker.com/dhi/
+- **The Twelve-Factor App** (config, logs, services externes) : https://12factor.net/fr/
+
+> 🎓 Bonne continuation ! Le meilleur moyen de rester autonome : **relire ce mémo** au début de chaque nouveau projet conteneurisé, et garder le réflexe *« minimal, immuable, observable, moindre privilège »*.
