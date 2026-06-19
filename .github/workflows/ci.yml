@@ -42,9 +42,9 @@ jobs:
       # Outillage supplémentaire requis par certains TP (installé uniquement si besoin).
       - name: Installer Trivy (TP8)
         if: matrix.tp == 'tp8-securite'
-        uses: aquasecurity/setup-trivy@v0.2.3
+        uses: aquasecurity/setup-trivy@v0.3.1
         with:
-          version: v0.68.0
+          version: v0.71.1
 
       - name: Rendre les scripts exécutables
         run: chmod +x scripts/lib.sh "${{ matrix.tp }}/verify.sh"

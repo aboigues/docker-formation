@@ -1,0 +1,18 @@
+# Surcouche DÉVELOPPEMENT.
+# Compose la charge AUTOMATIQUEMENT quand on tape `docker compose up` sans -f.
+# Objectif : itérer vite (code monté + rechargement à chaud), pas une image immuable.
+services:
+  api:
+    environment:
+      NODE_ENV: development
+    volumes:
+      # On monte le code de l'hôte DANS le conteneur : éditer = recharger.
+      - ../app:/usr/src/app
+      # ...mais on garde les node_modules de l'image (volume anonyme).
+      - /usr/src/app/node_modules
+    command: ["node", "--watch", "server.js"]
+
+  cache:
+    # En dev seulement, on expose Redis pour l'inspecter avec redis-cli depuis l'hôte.
+    ports:
+      - "6379:6379"

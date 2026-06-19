@@ -1,0 +1,2 @@
+# Le htpasswd est généré localement (make-auth.sh), jamais versionné.
+auth/

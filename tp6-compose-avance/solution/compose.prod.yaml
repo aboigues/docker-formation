@@ -1,0 +1,15 @@
+# Surcouche PRODUCTION.
+# À utiliser EXPLICITEMENT (l'override dev n'est alors PAS chargé) :
+#   docker compose -f compose.yaml -f compose.prod.yaml up -d
+# Ici : image immuable (pas de code monté, pas de --watch) + redémarrage auto.
+services:
+  api:
+    environment:
+      NODE_ENV: production
+    restart: always
+
+  db:
+    restart: always
+
+  cache:
+    restart: always
