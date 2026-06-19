@@ -75,7 +75,7 @@ docker compose version
 Depuis n'importe quel dossier de TP :
 
 ```bash
-cd tp1-prise-en-main
+cd tp01-prise-en-main
 ./verify.sh        # construit, lance, vérifie, nettoie
 ```
 

@@ -20,7 +20,7 @@ Un `docker-compose.yml` qui lève la même stack (WordPress sur 8083 + MySQL) av
 Si la stack du TP4 tourne encore, démontez-la (même port 8083) :
 
 ```bash
-cd ../tp4-stack-manuelle && ./solution/deploy.sh down && docker volume rm wp-db 2>/dev/null; cd -
+cd ../tp04-stack-manuelle && ./solution/deploy.sh down && docker volume rm wp-db 2>/dev/null; cd -
 ```
 
 ## Étape 1 — Lire la correspondance run → Compose
