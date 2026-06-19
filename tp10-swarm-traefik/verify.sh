@@ -34,29 +34,38 @@ until [ "$(docker service ls --filter "name=${STACK}_whoami" --format '{{.Replic
 done
 info "whoami = 3/3"
 
+# curl borné : --max-time empêche tout blocage (le maillage Swarm peut accepter
+# la connexion sans répondre tant qu'aucune tâche n'est prête -> sinon hang infini).
+cget() { curl -fsS --max-time 5 "$@"; }
+
 step "4) Traefik route par Host(\`whoami.localhost\`) vers le service"
 i=0
-until curl -fsS -H "Host: whoami.localhost" "http://localhost:8090/" >/dev/null 2>&1; do
+until cget -H "Host: whoami.localhost" "http://localhost:8090/" >/dev/null 2>&1; do
   i=$((i + 3)); sleep 3
-  [ "$i" -ge 90 ] && { docker service logs "${STACK}_traefik" --no-trunc 2>&1 | tail -20; exit 1; }
+  if [ "$i" -ge 60 ]; then
+    echo "--- diagnostic Traefik ---"
+    docker service ps "${STACK}_whoami" --no-trunc 2>&1 | tail -10
+    docker service logs "${STACK}_traefik" --no-trunc 2>&1 | tail -25
+    exit 1
+  fi
 done
 assert_contains "whoami répond à travers Traefik" "Hostname:" \
-  "$(curl -fsS -H 'Host: whoami.localhost' "http://localhost:8090/")"
+  "$(cget -H 'Host: whoami.localhost' "http://localhost:8090/")"
 
 step "5) Répartition de charge sur plusieurs réplicas"
-DISTINCT="$(for _ in $(seq 1 15); do
-  curl -fsS -H 'Host: whoami.localhost' "http://localhost:8090/" 2>/dev/null | sed -n 's/^Hostname: //p'
+DISTINCT="$(for _ in $(seq 1 12); do
+  cget -H 'Host: whoami.localhost' "http://localhost:8090/" 2>/dev/null | sed -n 's/^Hostname: //p'
 done | sort -u | wc -l)"
 info "réplicas distincts observés = $DISTINCT"
 check "Au moins 2 réplicas distincts répondent" bash -c "[ '$DISTINCT' -ge 2 ]"
 
 step "6) L'API Traefik connaît bien le routeur whoami"
 i=0
-until curl -fsS "http://localhost:8091/api/rawdata" >/dev/null 2>&1; do
+until cget "http://localhost:8091/api/rawdata" >/dev/null 2>&1; do
   i=$((i + 2)); sleep 2
-  [ "$i" -ge 30 ] && break
+  [ "$i" -ge 20 ] && break
 done
 assert_contains "Le routeur whoami est enregistré dans Traefik" "whoami" \
-  "$(curl -fsS "http://localhost:8091/api/rawdata" 2>/dev/null || echo '{}')"
+  "$(cget "http://localhost:8091/api/rawdata" 2>/dev/null || echo '{}')"
 
 summary

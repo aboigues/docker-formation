@@ -18,6 +18,7 @@ on:
 jobs:
   tp:
     runs-on: ubuntu-latest
+    timeout-minutes: 12   # garde-fou : aucun TP ne doit tourner aussi longtemps
     strategy:
       fail-fast: false
       matrix:
