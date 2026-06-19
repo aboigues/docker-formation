@@ -2,9 +2,10 @@
 # TP10 — vérifie un déploiement Swarm : service whoami répliqué 3x, exposé par
 # Traefik (routage par Host), avec répartition de charge sur les réplicas.
 source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
+set +e  # les boucles d'attente gèrent elles-mêmes leurs erreurs ; le verdict vient de summary
 
 TARGET="${1:-solution}"
-cd "$TARGET"
+cd "$TARGET" || exit 1
 STACK="tp10"
 WE_INIT_SWARM=0
 
@@ -15,25 +16,17 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# curl borné : --max-time empêche tout blocage (le maillage Swarm peut accepter
-# la connexion sans répondre tant qu'aucune tâche n'est prête -> sinon hang infini).
-cget()  { curl -fsS  --max-time 5 "$@"; }                 # échoue sur code != 2xx/3xx
+# curl bornés : --max-time empêche tout blocage (le maillage Swarm peut accepter
+# la connexion sans répondre tant qu'aucune tâche n'est prête).
+cget()  { curl -fsS  --max-time 5 "$@"; }                       # échoue si code != 2xx/3xx
 ccode() { curl -sS -o /dev/null --max-time 5 -w '%{http_code}' "$@" 2>/dev/null; }
+reps()  { docker service ls --filter "name=$1" --format '{{.Replicas}}' 2>/dev/null; }
 
 dump_traefik() {
   echo "--- service ps traefik ---"; docker service ps "${STACK}_traefik" --no-trunc 2>&1 | tail -8
   echo "--- service ps whoami ---";  docker service ps "${STACK}_whoami"  --no-trunc 2>&1 | tail -8
   echo "--- logs traefik ---";       docker service logs "${STACK}_traefik" 2>&1 | tail -30
   echo "--- routers (API) ---";      cget "http://localhost:8091/api/http/routers" 2>/dev/null || echo "(API injoignable)"
-}
-
-# Attend qu'un service atteigne l'état de réplicas voulu (ex. "3/3").
-wait_replicas() {
-  local svc="$1" want="$2" t="${3:-180}" i=0
-  until [ "$(docker service ls --filter "name=$svc" --format '{{.Replicas}}')" = "$want" ]; do
-    i=$((i + 3)); sleep 3
-    [ "$i" -ge "$t" ] && { docker service ps "$svc" --no-trunc 2>&1 | tail -10; return 1; }
-  done
 }
 
 step "1) S'assurer qu'un Swarm est actif (init si nécessaire)"
@@ -52,28 +45,40 @@ step "2) Déployer la stack"
 docker stack deploy -c stack.yml "$STACK"
 
 step "3) Attendre que les services soient en place (traefik 1/1, whoami 3/3)"
-wait_replicas "${STACK}_traefik" "1/1" 180 || { echo "traefik pas prêt"; dump_traefik; exit 1; }
-wait_replicas "${STACK}_whoami"  "3/3" 180 || { echo "whoami pas prêt"; exit 1; }
-info "traefik = 1/1, whoami = 3/3"
+i=0; TR=""
+while [ "$i" -lt 180 ]; do
+  TR="$(reps "${STACK}_traefik")"; [ "$TR" = "1/1" ] && break
+  i=$((i + 3)); sleep 3
+done
+i=0; WH=""
+while [ "$i" -lt 180 ]; do
+  WH="$(reps "${STACK}_whoami")"; [ "$WH" = "3/3" ] && break
+  i=$((i + 3)); sleep 3
+done
+info "réplicas : traefik=$TR · whoami=$WH"
+if [ "$TR" != "1/1" ] || [ "$WH" != "3/3" ]; then
+  echo "services pas prêts"; dump_traefik; exit 1
+fi
 
 step "4) L'API Traefik est joignable (ingress -> Traefik)"
-i=0
-until cget "http://localhost:8091/api/rawdata" >/dev/null 2>&1; do
+i=0; API_OK=0
+while [ "$i" -lt 60 ]; do
+  cget "http://localhost:8091/api/rawdata" >/dev/null 2>&1 && { API_OK=1; break; }
   i=$((i + 3)); sleep 3
-  [ "$i" -ge 60 ] && { echo "API Traefik injoignable"; dump_traefik; exit 1; }
 done
+if [ "$API_OK" != 1 ]; then echo "API Traefik injoignable"; dump_traefik; exit 1; fi
 info "API Traefik OK"
 
 step "5) Traefik route par Host(\`whoami.localhost\`) vers whoami"
-i=0
-until [ "$(ccode -H 'Host: whoami.localhost' http://localhost:8090/)" = "200" ]; do
+i=0; ROUTE_OK=0; LAST=""
+while [ "$i" -lt 60 ]; do
+  LAST="$(ccode -H 'Host: whoami.localhost' http://localhost:8090/)"
+  [ "$LAST" = "200" ] && { ROUTE_OK=1; break; }
   i=$((i + 3)); sleep 3
-  if [ "$i" -ge 60 ]; then
-    echo "--- routage KO (dernier code HTTP : $(ccode -H 'Host: whoami.localhost' http://localhost:8090/)) ---"
-    dump_traefik
-    exit 1
-  fi
 done
+if [ "$ROUTE_OK" != 1 ]; then
+  echo "--- routage KO (dernier code HTTP : $LAST) ---"; dump_traefik; exit 1
+fi
 assert_contains "whoami répond à travers Traefik" "Hostname:" \
   "$(cget -H 'Host: whoami.localhost' "http://localhost:8090/")"
 
