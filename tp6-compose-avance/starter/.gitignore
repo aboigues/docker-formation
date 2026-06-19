@@ -1,0 +1,2 @@
+# Le vrai fichier de secrets ne se commit pas. On versionne seulement .env.example.
+.env

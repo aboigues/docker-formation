@@ -1,6 +1,6 @@
 # TP5 — La même stack, mais avec Docker Compose
 
-> **Jour 1** · Durée estimée : 45 min · Ports utilisés : `8083`
+> Durée estimée : 45 min · Ports utilisés : `8083`
 > Prérequis : TP4 (la même stack montée à la main).
 
 ## 🎬 Le contexte

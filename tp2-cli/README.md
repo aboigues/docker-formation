@@ -1,6 +1,6 @@
 # TP2 — Maîtriser la CLI : déboguer un conteneur
 
-> **Jour 1** · Durée estimée : 50 min · Ports utilisés : `8082`
+> Durée estimée : 50 min · Ports utilisés : `8082`
 
 ## 🎬 Le contexte
 

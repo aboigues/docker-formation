@@ -12,7 +12,7 @@ Bienvenue dans les travaux pratiques de la formation Docker (3 jours). Ici, on *
 Chaque TP est un dossier autonome organisé ainsi :
 
 ```
-jourX/tpN-nom/
+tpN-nom/
 ├── README.md      ← le guide pas à pas (commencez TOUJOURS par là)
 ├── starter/       ← les fichiers À COMPLÉTER (cherchez les « TODO »)
 ├── solution/      ← la solution de référence (à consulter en dernier recours)
@@ -37,20 +37,20 @@ Chaque TP a une **cible vérifiable** (un site qui répond, une base qui persist
 
 ## 📚 Parcours
 
-| Jour | TP | Sujet | Cas réel |
-|------|----|-------|----------|
-| **1** | TP1 | Premiers pas avec Docker | Lancer et manipuler des conteneurs |
-| **1** | TP2 | Maîtriser la CLI | Déboguer un conteneur en production |
-| **1** | TP3 | Construire sa première image | Emballer une landing page (Dockerfile) |
-| **1** | TP4 | Stack multi-conteneurs à la main | Héberger un CMS (WordPress + MySQL) |
-| **1** | TP5 | La même stack avec Compose | Industrialiser le déploiement |
-| **2** | TP6 | Compose avancé | API + base + cache (env, healthchecks, override) |
-| **2** | TP7 | Registry privé & Portainer | Distribuer ses images en interne |
-| **2** | TP8 | Sécurité des images | Scanner, durcir, transférer en air-gapped |
-| **3** | TP9 | Monitoring & logs | Observer une appli (Prometheus, Grafana, Loki) |
-| **3** | TP10 | Swarm & Traefik | Mettre en production en cluster |
+| TP | Sujet | Cas réel |
+|----|-------|----------|
+| TP1 | Premiers pas avec Docker | Lancer et manipuler des conteneurs |
+| TP2 | Maîtriser la CLI | Déboguer un conteneur en production |
+| TP3 | Construire sa première image | Emballer une landing page (Dockerfile) |
+| TP4 | Stack multi-conteneurs à la main | Héberger un CMS (WordPress + MySQL) |
+| TP5 | La même stack avec Compose | Industrialiser le déploiement |
+| TP6 | Compose avancé | API + base + cache (env, healthchecks, override) |
+| TP7 | Registry privé | Distribuer ses images en interne |
+| TP8 | Sécurité des images | Scanner, durcir, transférer en air-gapped |
+| TP9 | Monitoring & logs | Observer une appli (Prometheus, Grafana, Loki) |
+| TP10 | Swarm & Traefik | Mettre en production en cluster |
 
-> La progression est **volontairement graduelle** : on lance des conteneurs (TP1) avant d'en construire (TP3), et on monte une stack à la main (TP4) avant de l'automatiser (TP5).
+> Les TP sont **numérotés dans l'ordre conseillé** et la progression est **volontairement graduelle** : on lance des conteneurs (TP1) avant d'en construire (TP3), et on monte une stack à la main (TP4) avant de l'automatiser (TP5). Suivez-les dans l'ordre, quel que soit votre rythme.
 
 ---
 
@@ -59,7 +59,7 @@ Chaque TP a une **cible vérifiable** (un site qui répond, une base qui persist
 - **Docker Engine 27+** (idéalement la dernière version) et le plugin **Docker Compose v2** (`docker compose version`)
 - Un shell **bash** (Linux, WSL2, ou macOS)
 - `curl` et `git`
-- Pour le Jour 3 : une machine avec assez de RAM (4 Go libres recommandés)
+- Pour les TP de fin de parcours (TP9 monitoring, TP10 cluster) : une machine avec assez de RAM (4 Go libres recommandés)
 
 Vérifiez votre environnement :
 
@@ -75,7 +75,7 @@ docker compose version
 Depuis n'importe quel dossier de TP :
 
 ```bash
-cd jour1/tp1-prise-en-main
+cd tp1-prise-en-main
 ./verify.sh        # construit, lance, vérifie, nettoie
 ```
 

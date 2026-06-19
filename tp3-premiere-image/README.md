@@ -1,6 +1,6 @@
 # TP3 — Construire sa première image
 
-> **Jour 1** · Durée estimée : 45 min · Ports utilisés : `8081`
+> Durée estimée : 45 min · Ports utilisés : `8081`
 > Prérequis : avoir fait le TP1 (lancer des conteneurs) et le TP2 (CLI).
 
 ## 🎬 Le contexte

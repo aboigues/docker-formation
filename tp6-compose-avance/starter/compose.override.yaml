@@ -1,0 +1,17 @@
+# Surcouche DÉVELOPPEMENT (chargée automatiquement par `docker compose up`).
+# But : éditer le code de l'hôte et voir l'effet sans reconstruire l'image.
+services:
+  api:
+    environment:
+      NODE_ENV: development
+    # TODO : montez le code de l'hôte (../app) dans /usr/src/app,
+    #        tout en PRÉSERVANT les node_modules de l'image (volume anonyme).
+    volumes:
+      - ______
+      - ______
+    # TODO : lancez l'API en mode rechargement à chaud (node --watch server.js).
+    command: ______
+
+  cache:
+    ports:
+      - "6379:6379"

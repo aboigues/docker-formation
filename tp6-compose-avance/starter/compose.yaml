@@ -1,0 +1,53 @@
+# Stack de base à COMPLÉTER. Cherchez les « TODO ».
+# Règle d'or : aucune valeur sensible en dur — tout passe par .env (${VARIABLE}).
+name: tp6-telescope
+
+services:
+  api:
+    build:
+      context: ../app
+    image: telescope-api:tp6
+    environment:
+      PORT: 3000
+      # TODO : composez DATABASE_URL avec ${POSTGRES_USER}, ${POSTGRES_PASSWORD},
+      #        l'hôte « db », le port 5432 et ${POSTGRES_DB}.
+      DATABASE_URL: ______
+      REDIS_URL: redis://cache:6379
+      NODE_ENV: ${NODE_ENV:-production}
+    ports:
+      - "${API_PORT:-8085}:3000"
+    # TODO : ne démarrer l'API que lorsque db ET cache sont *healthy*
+    #        (depends_on avec condition: service_healthy).
+    depends_on:
+      ______
+    # TODO : healthcheck qui interroge http://localhost:3000/health
+    #        (indice plus bas dans le README).
+    healthcheck:
+      ______
+
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      # TODO : volume nommé db-data monté sur le répertoire de données de Postgres.
+      #        ⚠️ Postgres 18+ : c'est /var/lib/postgresql (et non plus .../data).
+      - ______
+    # TODO : healthcheck avec pg_isready (la base est-elle prête à accepter des connexions ?).
+    healthcheck:
+      ______
+    # (volontairement PAS de `ports:` — Postgres reste interne)
+
+  cache:
+    image: redis:8-alpine
+    # TODO : healthcheck Redis (redis-cli ping).
+    healthcheck:
+      ______
+
+  # TODO : ajoutez un service `adminer` (image adminer:5, port 8086:8080) placé
+  #        derrière `profiles: ["debug"]` pour qu'il ne démarre QUE sur demande.
+
+volumes:
+  db-data:
