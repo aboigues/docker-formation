@@ -1,6 +1,6 @@
 # TP1 — Premiers pas avec Docker
 
-> **Jour 1** · Durée estimée : 30 min · Ports utilisés : `8081`
+> Durée estimée : 30 min · Ports utilisés : `8081`
 
 ## 🎬 Le contexte
 

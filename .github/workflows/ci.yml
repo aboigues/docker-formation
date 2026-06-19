@@ -1,4 +1,4 @@
-name: Jour 1 — TP
+name: TP — vérification
 
 # « Si ce n'est pas testé par GitHub Actions, ça ne fonctionne pas. »
 # Chaque TP est validé en exécutant son verify.sh sur la solution de référence.
@@ -6,12 +6,12 @@ name: Jour 1 — TP
 on:
   push:
     paths:
-      - "jour1/**"
+      - "tp*/**"
       - "scripts/**"
-      - ".github/workflows/jour1.yml"
+      - ".github/workflows/ci.yml"
   pull_request:
     paths:
-      - "jour1/**"
+      - "tp*/**"
       - "scripts/**"
   workflow_dispatch:
 
@@ -22,11 +22,14 @@ jobs:
       fail-fast: false
       matrix:
         tp:
-          - jour1/tp1-prise-en-main
-          - jour1/tp2-cli
-          - jour1/tp3-premiere-image
-          - jour1/tp4-stack-manuelle
-          - jour1/tp5-compose
+          - tp1-prise-en-main
+          - tp2-cli
+          - tp3-premiere-image
+          - tp4-stack-manuelle
+          - tp5-compose
+          - tp6-compose-avance
+          - tp7-registry
+          - tp8-securite
     name: ${{ matrix.tp }}
     steps:
       - uses: actions/checkout@v4
@@ -35,6 +38,13 @@ jobs:
         run: |
           docker version
           docker compose version
+
+      # Outillage supplémentaire requis par certains TP (installé uniquement si besoin).
+      - name: Installer Trivy (TP8)
+        if: matrix.tp == 'tp8-securite'
+        uses: aquasecurity/setup-trivy@v0.2.3
+        with:
+          version: v0.68.0
 
       - name: Rendre les scripts exécutables
         run: chmod +x scripts/lib.sh "${{ matrix.tp }}/verify.sh"

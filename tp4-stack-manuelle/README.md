@@ -1,6 +1,6 @@
 # TP4 — Monter une stack multi-conteneurs à la main
 
-> **Jour 1** · Durée estimée : 1 h · Ports utilisés : `8083`
+> Durée estimée : 1 h · Ports utilisés : `8083`
 > Prérequis : TP1 à TP3 (lancer des conteneurs, CLI, première image).
 
 ## 🎬 Le contexte
