@@ -1,0 +1,20 @@
+# Prometheus va « scraper » (interroger) périodiquement chaque cible listée ici.
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  # Prometheus se surveille lui-même.
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Métriques de TOUS les conteneurs, fournies par cAdvisor.
+  - job_name: cadvisor
+    static_configs:
+      - targets: ["cadvisor:8080"]
+
+  # Métriques applicatives exposées par notre appli sur /metrics.
+  - job_name: telescope-app
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["app:3000"]

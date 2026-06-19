@@ -1,0 +1,33 @@
+# Stack Swarm à COMPLÉTER. Cherchez les « TODO ».
+# Déploiement : docker stack deploy -c stack.yml tp10
+services:
+  traefik:
+    image: traefik:v3.7.5
+    command:
+      - --providers.swarm.endpoint=unix:///var/run/docker.sock
+      - --providers.swarm.exposedByDefault=false
+      - --entrypoints.web.address=:80
+      - --api.dashboard=true
+      - --api.insecure=true
+    ports:
+      - "8090:80"
+      - "8091:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  whoami:
+    image: traefik/whoami:latest
+    deploy:
+      # TODO 1 : lancez ce service en 3 réplicas.
+      replicas: ______
+      labels:
+        # TODO 2 : exposez whoami via Traefik. Il faut 4 labels :
+        #   - activer Traefik (traefik.enable=true)
+        #   - une règle de routage par hôte : Host(`whoami.localhost`)
+        #   - l'entrypoint « web »
+        #   - le port interne du conteneur whoami (80)
+        - ______

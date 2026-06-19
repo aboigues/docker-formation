@@ -1,0 +1,21 @@
+// Grafana Alloy : le « collecteur » qui remplace Promtail.
+// Ici il découvre les conteneurs Docker, lit leurs logs, et les pousse vers Loki.
+
+// 1) Découvre les conteneurs via le socket Docker.
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+// 2) Lit les logs de ces conteneurs.
+loki.source.docker "default" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.docker.containers.targets
+  forward_to = [loki.write.default.receiver]
+}
+
+// 3) Écrit vers Loki.
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

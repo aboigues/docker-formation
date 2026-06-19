@@ -1,0 +1,69 @@
+# Stack d'observabilité complète :
+#   métriques  : app -> Prometheus <- cAdvisor   ->  Grafana
+#   logs       : conteneurs -> Alloy -> Loki      ->  Grafana
+name: tp9-observabilite
+
+services:
+  # --- L'application à observer (expose /metrics et journalise sur stdout) ---
+  app:
+    build:
+      context: ../app
+    image: telescope-demo:tp9
+    ports:
+      - "8088:3000"
+    restart: unless-stopped
+
+  # --- MÉTRIQUES ---
+  prometheus:
+    image: prom/prometheus:v3.12.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-lifecycle
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.55.1
+    privileged: true
+    devices:
+      - /dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - "8080:8080"
+
+  # --- LOGS ---
+  loki:
+    image: grafana/loki:3.7.2
+    command: -config.file=/etc/loki/local-config.yaml  # config par défaut de l'image
+    ports:
+      - "3100:3100"
+
+  alloy:
+    image: grafana/alloy:v1.17.0
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - loki
+
+  # --- VISUALISATION ---
+  grafana:
+    image: grafana/grafana:13.0.2
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - loki

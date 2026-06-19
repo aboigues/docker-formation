@@ -1,0 +1,33 @@
+# Stack Swarm : un reverse-proxy Traefik route le trafic vers un service whoami
+# répliqué 3 fois. Déploiement : docker stack deploy -c stack.yml tp10
+services:
+  traefik:
+    image: traefik:v3.7.5
+    command:
+      # Provider Swarm (Traefik v3) : il lit les services Swarm via le socket Docker.
+      - --providers.swarm.endpoint=unix:///var/run/docker.sock
+      - --providers.swarm.exposedByDefault=false
+      - --entrypoints.web.address=:80
+      - --api.dashboard=true
+      - --api.insecure=true        # dashboard sans auth — OK en formation, JAMAIS en prod
+    ports:
+      - "8090:80"      # point d'entrée web (routage applicatif)
+      - "8091:8080"    # dashboard / API Traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    deploy:
+      # Traefik doit tourner sur un MANAGER pour interroger l'API Swarm.
+      placement:
+        constraints:
+          - node.role == manager
+
+  whoami:
+    image: traefik/whoami:latest
+    deploy:
+      replicas: 3
+      labels:
+        # En Swarm, les labels Traefik se mettent sous deploy.labels (niveau service).
+        - traefik.enable=true
+        - traefik.http.routers.whoami.rule=Host(`whoami.localhost`)
+        - traefik.http.routers.whoami.entrypoints=web
+        - traefik.http.services.whoami.loadbalancer.server.port=80

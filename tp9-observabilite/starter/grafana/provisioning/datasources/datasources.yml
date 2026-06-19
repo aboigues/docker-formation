@@ -1,0 +1,13 @@
+# Sources de données provisionnées automatiquement au démarrage de Grafana.
+# Plus besoin de les ajouter à la main dans l'UI : tout est versionné ici.
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+
+  # TODO : ajoutez la source de données Loki (type: loki) pointant vers
+  #        http://loki:3100, pour explorer les LOGS dans Grafana.

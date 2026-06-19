@@ -30,6 +30,8 @@ jobs:
           - tp6-compose-avance
           - tp7-registry
           - tp8-securite
+          - tp9-observabilite
+          - tp10-swarm-traefik
     name: ${{ matrix.tp }}
     steps:
       - uses: actions/checkout@v4

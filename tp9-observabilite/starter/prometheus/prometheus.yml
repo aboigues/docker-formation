@@ -1,0 +1,15 @@
+# Prometheus va « scraper » (interroger) périodiquement chaque cible listée ici.
+# Cherchez les TODO : pour l'instant, Prometheus ne se surveille QUE lui-même.
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # TODO 1 : ajoutez un job « cadvisor » qui scrape la cible cadvisor:8080
+  #          (cAdvisor expose les métriques de tous les conteneurs).
+
+  # TODO 2 : ajoutez un job « telescope-app » qui scrape app:3000 sur le
+  #          chemin /metrics (champ metrics_path).
