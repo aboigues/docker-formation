@@ -25,8 +25,14 @@ reps()  { docker service ls --filter "name=$1" --format '{{.Replicas}}' 2>/dev/n
 dump_traefik() {
   echo "--- service ps traefik ---"; docker service ps "${STACK}_traefik" --no-trunc 2>&1 | tail -8
   echo "--- service ps whoami ---";  docker service ps "${STACK}_whoami"  --no-trunc 2>&1 | tail -8
-  echo "--- logs traefik ---";       docker service logs "${STACK}_traefik" 2>&1 | tail -30
-  echo "--- routers (API) ---";      cget "http://localhost:8091/api/http/routers" 2>/dev/null || echo "(API injoignable)"
+  echo "--- service logs traefik ---"; docker service logs "${STACK}_traefik" 2>&1 | tail -30
+  local cid
+  cid="$(docker ps --filter "label=com.docker.swarm.service.name=${STACK}_traefik" -q 2>/dev/null | head -1)"
+  if [ -n "$cid" ]; then
+    echo "--- docker logs (conteneur $cid) ---"; docker logs "$cid" 2>&1 | tail -30
+    echo "--- ports publiés ---"; docker port "$cid" 2>&1
+  fi
+  echo "--- routers (API) ---"; cget "http://localhost:8091/api/http/routers" 2>/dev/null || echo "(API injoignable)"
 }
 
 step "1) S'assurer qu'un Swarm est actif (init si nécessaire)"

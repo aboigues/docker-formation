@@ -9,9 +9,14 @@ services:
       - --entrypoints.web.address=:80
       - --api.dashboard=true
       - --api.insecure=true
+    # Ports en mode HOST (bind direct sur le nœud) : fiable sur un Swarm mono-nœud.
     ports:
-      - "8090:80"
-      - "8091:8080"
+      - target: 80
+        published: 8090
+        mode: host
+      - target: 8080
+        published: 8091
+        mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     deploy:

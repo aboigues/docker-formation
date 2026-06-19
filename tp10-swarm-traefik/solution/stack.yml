@@ -10,9 +10,15 @@ services:
       - --entrypoints.web.address=:80
       - --api.dashboard=true
       - --api.insecure=true        # dashboard sans auth — OK en formation, JAMAIS en prod
+    # Ports publiés en mode HOST (bind direct sur le nœud) plutôt que via le
+    # maillage d'ingress : plus simple et fiable sur un Swarm à un seul nœud.
     ports:
-      - "8090:80"      # point d'entrée web (routage applicatif)
-      - "8091:8080"    # dashboard / API Traefik
+      - target: 80
+        published: 8090
+        mode: host       # point d'entrée web (routage applicatif)
+      - target: 8080
+        published: 8091
+        mode: host       # dashboard / API Traefik
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     deploy:
