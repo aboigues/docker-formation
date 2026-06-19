@@ -1,4 +1,4 @@
-# TP1 — Dockerfile à compléter
+# TP3 — Dockerfile à compléter
 # Objectif : emballer la landing page (dossier site/) dans une image autonome.
 # Complétez les TODO ci-dessous, puis : docker build -t telemach-landing:1.0 .
 

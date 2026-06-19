@@ -1,4 +1,4 @@
-# TP1 — Solution de référence
+# TP3 — Solution de référence
 FROM nginx:1.30-alpine
 
 LABEL maintainer="formation@telemach-learning.fr"

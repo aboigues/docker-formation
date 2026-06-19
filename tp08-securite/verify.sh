@@ -37,6 +37,10 @@ step "4) Scan Trivy : aucune vulnérabilité HIGH ou CRITICAL"
 check "Trivy ne trouve aucune faille HIGH/CRITICAL" \
   trivy image --quiet --severity HIGH,CRITICAL --exit-code 1 --no-progress "$IMG"
 
+step "4b) Scan Trivy : aucun secret embarqué dans l'image"
+check "Trivy ne détecte aucun secret (mot de passe, clé, token)" \
+  trivy image --quiet --scanners secret --exit-code 1 --no-progress "$IMG"
+
 step "5) L'image durcie reste fonctionnelle (le service répond)"
 docker run -d --name "$NAME" -p "$PORT:8080" "$IMG" >/dev/null
 wait_for_http "http://localhost:$PORT/health" 20 || { docker logs "$NAME"; exit 1; }

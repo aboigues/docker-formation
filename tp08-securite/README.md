@@ -79,7 +79,13 @@ docker images "telescope:*"                                    # ~10 Mo vs ~300 
 trivy image --severity HIGH,CRITICAL --exit-code 1 telescope:hardened && echo "✅ propre"
 ```
 
-> ❓ **Question** : pourquoi l'image durcie a-t-elle **mécaniquement** moins de vulnérabilités ? (Indice : on ne peut pas avoir de faille dans un paquet… qu'on n'a pas installé.)
+Trivy ne cherche pas que des CVE : il sait aussi repérer un **secret** oublié dans une couche (mot de passe, clé privée, token). C'est une cause classique de fuite. Vérifiez-le :
+
+```bash
+trivy image --scanners secret --exit-code 1 telescope:hardened && echo "✅ aucun secret"
+```
+
+> ❓ **Question** : pourquoi l'image durcie a-t-elle **mécaniquement** moins de vulnérabilités ? (Indice : on ne peut pas avoir de faille dans un paquet… qu'on n'a pas installé.) Et pourquoi un `COPY .` trop large peut-il embarquer un `.env` ou une clé SSH dans l'image ?
 
 ## Étape 5 — Transférer hors-ligne (air-gapped)
 

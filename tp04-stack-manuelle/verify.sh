@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# TP3 — vérifie que la stack WordPress + MySQL fonctionne et persiste.
+# TP4 — vérifie que la stack WordPress + MySQL fonctionne et persiste.
 source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 
 TARGET="${1:-solution}"
