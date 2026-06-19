@@ -36,24 +36,33 @@ info "prometheus prêt"
 step "4) Générer un peu de trafic applicatif (métriques + logs)"
 for _ in $(seq 1 8); do curl -fsS "http://localhost:8088/" >/dev/null 2>&1 || true; done
 
-step "5) Les cibles Prometheus sont UP"
-wait_metric 'up{job="telescope-app"}' 90
+step "5) L'appli expose bien ses métriques (vérification directe)"
+assert_contains "telescope_requests_total exposé sur /metrics" "telescope_requests_total" \
+  "$(curl -fsS "http://localhost:8088/metrics")"
+
+step "6) Les cibles Prometheus sont UP (app + cAdvisor)"
+if ! wait_metric 'up{job="telescope-app"}' 120; then
+  echo "--- diagnostic : cibles Prometheus ---"
+  curl -fsS "http://localhost:9090/api/v1/targets" 2>/dev/null | sed 's/},{/},\n{/g' \
+    | grep -Ei '"job"|"health"|"lastError"|"scrapeUrl"' | head -40
+  echo "--- logs app ---"; docker compose logs app 2>&1 | tail -15
+fi
 assert_contains "telescope-app : up == 1" ',"1"]' \
   "$(curl -fsS -G "http://localhost:9090/api/v1/query" --data-urlencode 'query=up{job="telescope-app"}')"
-wait_metric 'up{job="cadvisor"}' 90
+wait_metric 'up{job="cadvisor"}' 120 || true
 assert_contains "cadvisor : up == 1" ',"1"]' \
   "$(curl -fsS -G "http://localhost:9090/api/v1/query" --data-urlencode 'query=up{job="cadvisor"}')"
 
-step "6) Une métrique APPLICATIVE est bien collectée"
+step "7) Une métrique APPLICATIVE est bien collectée"
 check "telescope_requests_total est présent dans Prometheus" \
   bash -c "curl -fsS -G 'http://localhost:9090/api/v1/query' --data-urlencode 'query=telescope_requests_total' | grep -q '\"result\":\[{'"
 
-step "7) Grafana : sources de données provisionnées (Prometheus + Loki)"
+step "8) Grafana : sources de données provisionnées (Prometheus + Loki)"
 DS="$(curl -fsS -u admin:admin "http://localhost:3000/api/datasources")"
 assert_contains "Source Prometheus provisionnée" '"type":"prometheus"' "$DS"
 assert_contains "Source Loki provisionnée" '"type":"loki"' "$DS"
 
-step "8) Loki est prêt"
+step "9) Loki est prêt"
 i=0
 until curl -fsS "http://localhost:3100/ready" 2>/dev/null | grep -q "ready"; do
   i=$((i + 3)); sleep 3
@@ -62,7 +71,7 @@ done
 assert_contains "Loki répond 'ready'" "ready" \
   "$(curl -fsS "http://localhost:3100/ready" 2>/dev/null || echo indisponible)"
 
-step "9) Les logs des conteneurs arrivent dans Loki (via Alloy)"
+step "10) Les logs des conteneurs arrivent dans Loki (via Alloy)"
 # Un flux Loki non vide renvoie un tableau "data" peuplé : ["container",...].
 # grep -F (chaîne littérale) car le motif contient un « [ ».
 i=0; LOGS_OK=0

@@ -34,4 +34,5 @@ const server = http.createServer((req, res) => {
   res.end('telescope demo — métriques sur /metrics\n');
 });
 
-server.listen(3000, () => console.log('demo app à l\'écoute sur :3000'));
+// On écoute explicitement sur 0.0.0.0 (IPv4) pour que Prometheus joigne « app:3000 ».
+server.listen(3000, '0.0.0.0', () => console.log('demo app à l\'écoute sur :3000'));
