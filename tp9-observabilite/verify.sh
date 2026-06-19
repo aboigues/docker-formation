@@ -63,13 +63,17 @@ assert_contains "Loki répond 'ready'" "ready" \
   "$(curl -fsS "http://localhost:3100/ready" 2>/dev/null || echo indisponible)"
 
 step "9) Les logs des conteneurs arrivent dans Loki (via Alloy)"
-i=0
-until curl -fsS "http://localhost:3100/loki/api/v1/labels" 2>/dev/null | grep -q '"data":\["'; do
+# Un flux Loki non vide renvoie un tableau "data" peuplé : ["container",...].
+# grep -F (chaîne littérale) car le motif contient un « [ ».
+i=0; LOGS_OK=0
+while [ "$i" -lt 150 ]; do
   curl -fsS "http://localhost:8088/" >/dev/null 2>&1 || true   # produire des logs
+  if curl -fsS "http://localhost:3100/loki/api/v1/labels" 2>/dev/null | grep -qF '"data":["'; then
+    LOGS_OK=1; break
+  fi
   i=$((i + 5)); sleep 5
-  [ "$i" -ge 150 ] && break
 done
-assert_contains "Loki a indexé des logs (labels présents)" '"data":["' \
-  "$(curl -fsS "http://localhost:3100/loki/api/v1/labels" 2>/dev/null || echo '{}')"
+check "Loki a indexé des logs (au moins un label présent)" bash -c "[ '$LOGS_OK' = '1' ]"
+[ "$LOGS_OK" = "1" ] || { echo "--- logs alloy ---"; docker compose logs alloy 2>&1 | tail -30; }
 
 summary

@@ -6,14 +6,25 @@ discovery.docker "containers" {
   host = "unix:///var/run/docker.sock"
 }
 
-// 2) Lit les logs de ces conteneurs.
+// 2) Transforme les métadonnées en VRAIS labels (chaque flux DOIT avoir au moins
+//    un label, sinon Loki refuse le push). Ici : le nom du conteneur -> label « container ».
+discovery.relabel "containers" {
+  targets = discovery.docker.containers.targets
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+}
+
+// 3) Lit les logs de ces conteneurs.
 loki.source.docker "default" {
   host       = "unix:///var/run/docker.sock"
-  targets    = discovery.docker.containers.targets
+  targets    = discovery.relabel.containers.output
   forward_to = [loki.write.default.receiver]
 }
 
-// 3) Écrit vers Loki.
+// 4) Écrit vers Loki.
 loki.write "default" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"
