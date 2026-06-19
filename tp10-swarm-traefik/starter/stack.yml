@@ -25,7 +25,7 @@ services:
           - node.role == manager
 
   whoami:
-    image: traefik/whoami:latest
+    image: traefik/whoami:v1.11.0
     deploy:
       # TODO 1 : lancez ce service en 3 réplicas.
       replicas: ______

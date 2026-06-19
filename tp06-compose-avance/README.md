@@ -25,7 +25,7 @@ Une stack qui démarre **dans le bon ordre** (API gardée par la santé de db + 
 ## L'arborescence du TP
 
 ```
-tp6-compose-avance/
+tp06-compose-avance/
 ├── app/                     # l'API Telescope (FOURNIE — ne pas modifier pour réussir le TP)
 │   ├── server.js
 │   ├── package.json

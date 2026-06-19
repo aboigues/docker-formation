@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# TP3 — Solution de référence : stack WordPress + MySQL à la main.
+# TP4 — Solution de référence : stack WordPress + MySQL à la main.
 # Usage : ./deploy.sh up | down
 set -euo pipefail
 

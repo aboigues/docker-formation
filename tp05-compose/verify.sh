@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# TP4 — vérifie que la stack Compose lève WordPress + MySQL.
+# TP5 — vérifie que la stack Compose lève WordPress + MySQL.
 source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 
 TARGET="${1:-solution}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 DIR="$HERE/$TARGET"
-PROJECT="tp4verify"
+PROJECT="tp5verify"
 
 compose() { docker compose -p "$PROJECT" -f "$DIR/docker-compose.yml" "$@"; }
 
