@@ -7,8 +7,8 @@ TARGET="${1:-solution}"
 cd "$TARGET"
 
 REG="localhost:5000"
-USER="telescope"
-PASS="registry_secret"
+REG_USER="telescope"
+REG_PASS="registry_secret"
 SRC="alpine:3.23"
 DEST="$REG/demo/alpine:1.0"
 
@@ -23,7 +23,7 @@ cleanup  # repartir propre
 
 step "1) Générer le htpasswd (bcrypt) via un conteneur httpd jetable"
 mkdir -p auth
-docker run --rm --entrypoint htpasswd httpd:2 -Bbn "$USER" "$PASS" > auth/htpasswd
+docker run --rm --entrypoint htpasswd httpd:2 -Bbn "$REG_USER" "$REG_PASS" > auth/htpasswd
 check "Le fichier auth/htpasswd est non vide" test -s auth/htpasswd
 
 step "2) Démarrer le registre privé"
@@ -41,16 +41,16 @@ assert_contains "Le catalogue renvoie 401 sans login" "401" \
   "$(curl -s -o /dev/null -w '%{http_code}' "http://$REG/v2/_catalog")"
 
 step "4) Se connecter, étiqueter et pousser une image"
-echo "$PASS" | docker login "$REG" -u "$USER" --password-stdin
+echo "$REG_PASS" | docker login "$REG" -u "$REG_USER" --password-stdin
 docker pull "$SRC" >/dev/null
 docker tag "$SRC" "$DEST"
 check "Push de l'image vers le registre privé" docker push "$DEST"
 
 step "5) Le catalogue (authentifié) liste bien l'image"
 assert_contains "demo/alpine présent dans /v2/_catalog" "demo/alpine" \
-  "$(curl -fsS -u "$USER:$PASS" "http://$REG/v2/_catalog")"
+  "$(curl -fsS -u "$REG_USER:$REG_PASS" "http://$REG/v2/_catalog")"
 assert_contains "Le tag 1.0 est listé" '"1.0"' \
-  "$(curl -fsS -u "$USER:$PASS" "http://$REG/v2/demo/alpine/tags/list")"
+  "$(curl -fsS -u "$REG_USER:$REG_PASS" "http://$REG/v2/demo/alpine/tags/list")"
 
 step "6) Supprimer l'image locale puis la re-télécharger depuis le registre privé"
 docker rmi "$DEST" >/dev/null 2>&1 || true

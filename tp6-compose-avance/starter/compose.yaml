@@ -33,6 +33,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       # TODO : volume nommé db-data monté sur le répertoire de données de Postgres.
+      #        ⚠️ Postgres 18+ : c'est /var/lib/postgresql (et non plus .../data).
       - ______
     # TODO : healthcheck avec pg_isready (la base est-elle prête à accepter des connexions ?).
     healthcheck:

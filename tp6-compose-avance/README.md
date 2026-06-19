@@ -61,7 +61,9 @@ postgres://<user>:<password>@db:5432/<database>
 
 > 🧠 On écrit `db`, pas une IP : Compose fournit un **DNS interne** où chaque service est joignable par son nom (vu au TP5).
 
-**1.b — Le volume de Postgres.** Montez le volume nommé `db-data` sur le répertoire de données de Postgres (`/var/lib/postgresql/data`) pour que la base **survive** à un `down`.
+**1.b — Le volume de Postgres.** Montez le volume nommé `db-data` sur le répertoire de données de Postgres pour que la base **survive** à un `down`.
+
+> ⚠️ **Piège Postgres 18+** : le répertoire à monter est `/var/lib/postgresql` (et **non plus** `/var/lib/postgresql/data` comme dans les versions ≤ 17 et les vieux tutoriels). Monter l'ancien chemin « marche » au démarrage… mais ne persiste rien.
 
 ## Étape 2 — Rendre le démarrage fiable (healthchecks + `depends_on`)
 

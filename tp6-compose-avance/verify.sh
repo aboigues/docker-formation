@@ -37,6 +37,12 @@ step "5) La clé est bien présente dans Redis"
 check "Redis contient link:$CODE" \
   bash -c "docker compose exec -T cache redis-cli exists 'link:$CODE' | tr -d '\r' | grep -qx 1"
 
+step "5b) Persistance : le volume nommé est monté au bon endroit (Postgres 18)"
+DBID="$(docker compose ps -q db)"
+MNT="$(docker inspect "$DBID" --format '{{range .Mounts}}{{.Destination}}={{.Name}};{{end}}')"
+info "montages db = $MNT"
+assert_contains "db-data monté sur /var/lib/postgresql" "/var/lib/postgresql=" "$MNT"
+
 step "6) Isolation : Postgres n'est PAS exposé sur l'hôte"
 check "Le port 5432 est fermé côté hôte" \
   bash -c "! timeout 2 bash -c 'exec 3<>/dev/tcp/127.0.0.1/5432' 2>/dev/null"
