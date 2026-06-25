@@ -42,6 +42,7 @@ Chaque TP a une **cible vérifiable** (un site qui répond, une base qui persist
 | TP1 | Premiers pas avec Docker | Lancer et manipuler des conteneurs |
 | TP2 | Maîtriser la CLI | Déboguer un conteneur en production |
 | TP3 | Construire sa première image | Emballer une landing page (Dockerfile) |
+| TP3b | Dockerfile avancé : multi-stage | Compiler une appli et livrer une image minimale (`scratch`) |
 | TP4 | Stack multi-conteneurs à la main | Héberger un CMS (WordPress + MySQL) |
 | TP5 | La même stack avec Compose | Industrialiser le déploiement |
 | TP6 | Compose avancé | API + base + cache (env, healthchecks, override) |

@@ -1,0 +1,8 @@
+# N'envoie au daemon que le strict nécessaire au build.
+.git/
+*.md
+Dockerfile*
+.dockerignore
+# Artefacts de compilation locaux éventuels
+server
+/out/
