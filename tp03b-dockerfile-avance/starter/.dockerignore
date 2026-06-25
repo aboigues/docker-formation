@@ -1,0 +1,2 @@
+# À COMPLÉTER : excluez du contexte de build tout ce qui est inutile.
+# TODO : ajoutez au moins .git/, les *.md, les Dockerfile* et le binaire « server ».

@@ -26,6 +26,7 @@ jobs:
           - tp01-prise-en-main
           - tp02-cli
           - tp03-premiere-image
+          - tp03b-dockerfile-avance
           - tp04-stack-manuelle
           - tp05-compose
           - tp06-compose-avance
