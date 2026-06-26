@@ -9,7 +9,9 @@ services:
       - --entrypoints.web.address=:80
       - --api.dashboard=true
       - --api.insecure=true
-    # Ports en mode HOST (bind direct sur le nœud) : fiable sur un Swarm mono-nœud.
+    # Ports en mode HOST (bind direct sur le nœud) plutôt que via l'ingress mesh :
+    # Traefik est lui-même le load-balancer, on évite un double LB et on préserve
+    # l'IP source du client. Le proxy est épinglé sur le manager (placement ci-dessous).
     ports:
       - target: 80
         published: 8090

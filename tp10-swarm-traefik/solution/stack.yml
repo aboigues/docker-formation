@@ -10,8 +10,13 @@ services:
       - --entrypoints.web.address=:80
       - --api.dashboard=true
       - --api.insecure=true        # dashboard sans auth — OK en formation, JAMAIS en prod
-    # Ports publiés en mode HOST (bind direct sur le nœud) plutôt que via le
-    # maillage d'ingress : plus simple et fiable sur un Swarm à un seul nœud.
+    # Ports en mode HOST (bind direct sur le nœud) plutôt que via le maillage
+    # d'ingress de Swarm. Raison : Traefik EST déjà le load-balancer ; le mettre
+    # derrière l'ingress mesh empilerait deux répartitions (IPVS Swarm -> Traefik
+    # -> réplique) et masquerait l'IP source du client (SNAT du mesh). En host,
+    # Traefik reçoit la connexion directe et garde la vraie IP. Le proxy est
+    # épinglé sur un nœud connu (placement manager ci-dessous), donc le bind est
+    # déterministe. Vrai multi-nœuds de bordure : on combinerait host + deploy.mode: global.
     ports:
       - target: 80
         published: 8090
