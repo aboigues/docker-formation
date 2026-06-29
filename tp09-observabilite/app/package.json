@@ -1,8 +1,0 @@
-{
-  "name": "telescope-demo",
-  "version": "1.0.0",
-  "description": "Appli instrumentée (métriques + logs) — TP9 observabilité",
-  "type": "module",
-  "main": "server.js",
-  "scripts": { "start": "node server.js" }
-}

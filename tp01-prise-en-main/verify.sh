@@ -4,7 +4,7 @@
 source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 
 # Le 1er argument (solution/starter) est ignoré : ce TP n'a pas de fichier à compléter.
-NAME="tp1-verify-nginx"
+NAME="tp01-verify-nginx"
 PORT=8081
 
 cleanup() { docker rm -f "$NAME" >/dev/null 2>&1 || true; }

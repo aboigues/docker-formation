@@ -12,7 +12,7 @@
 # Exception : le .env de la solution de référence (mots de passe FICTIFS) est
 # committé car la CI en a besoin pour lancer la stack. Les participants, eux,
 # créent leur propre .env dans starter/ (toujours ignoré).
-!tp6-compose-avance/solution/.env
+!tp08-compose-avance/solution/.env
 
 # Système
 .DS_Store

@@ -1,0 +1,5 @@
+# Dépendances et cache du script Playwright (capture-screens.mjs)
+node_modules/
+package-lock.json
+# Les captures PNG dans docs/img/ NE sont PAS ignorées : elles sont committées
+# une fois générées (elles servent de support visuel dans le README).

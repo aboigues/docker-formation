@@ -1,0 +1,22 @@
+# Registre privé à COMPLÉTER. Cherchez les « TODO ».
+name: tp09-registry
+
+services:
+  registry:
+    image: registry:3
+    ports:
+      - "5000:5000"
+    environment:
+      # TODO : activez l'authentification htpasswd via 3 variables :
+      #   REGISTRY_AUTH=htpasswd
+      #   REGISTRY_AUTH_HTPASSWD_REALM="..."
+      #   REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd
+      ______
+    volumes:
+      # TODO : montez ./auth (lecture seule) sur /auth, et un volume nommé
+      #        registry-data sur /var/lib/registry pour PERSISTER les images.
+      - ______
+      - ______
+
+volumes:
+  registry-data:
