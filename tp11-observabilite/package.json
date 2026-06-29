@@ -1,0 +1,13 @@
+{
+  "name": "tp11-capture-screens",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Génère les captures d'écran du TP11 (Prometheus, cAdvisor, Grafana) avec Playwright.",
+  "scripts": {
+    "capture": "node capture-screens.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1"
+  }
+}

@@ -9,25 +9,25 @@
 ## 0. Les 5 principes qui évitent 90 % des ennuis
 
 1. **Un conteneur = un seul processus / responsabilité.** Pas de « VM-conteneur » qui fait tourner ssh + cron + l'appli.
-2. **Image immuable, configuration injectée.** Le code est dans l'image ; la config (URL, secrets) vient de l'extérieur (env, secrets). → TP6, TP8
-3. **Moindre privilège partout.** Image minimale, utilisateur non-root, capacités retirées, rien d'exposé inutilement. → TP8
+2. **Image immuable, configuration injectée.** Le code est dans l'image ; la config (URL, secrets) vient de l'extérieur (env, secrets). → TP8, TP10
+3. **Moindre privilège partout.** Image minimale, utilisateur non-root, capacités retirées, rien d'exposé inutilement. → TP10
 4. **Tout est reproductible et versionné.** Tags figés, `Dockerfile`/`compose.yaml` dans Git, builds déterministes.
-5. **Si ce n'est pas observable et testé, ça n'existe pas.** Healthcheck, logs sur stdout, métriques, scan en CI. → TP9
+5. **Si ce n'est pas observable et testé, ça n'existe pas.** Healthcheck, logs sur stdout, métriques, scan en CI. → TP11
 
 ---
 
 ## 1. Construire de bonnes images
 
 ### Choisir la base
-- **Pinnez** une version précise, jamais `latest` : `node:24-alpine`, pas `node`. → TP3, TP6
-- Préférez **minimal** : `-alpine`, **distroless** (`gcr.io/distroless/...`) ou **scratch** pour un binaire statique. Moins de paquets = moins de CVE et image plus légère. → TP8
+- **Pinnez** une version précise, jamais `latest` : `node:24-alpine`, pas `node`. → TP5, TP8
+- Préférez **minimal** : `-alpine`, **distroless** (`gcr.io/distroless/...`) ou **scratch** pour un binaire statique. Moins de paquets = moins de CVE et image plus légère. → TP10
 - En entreprise, regardez les **Docker Hardened Images** (`dhi.io/...`) : bases durcies, non-root, signées, SBOM fournie.
 
 ### Dockerfile efficace
-- **Multi-stage** : compiler dans une image lourde, ne livrer que l'artefact. → TP8
+- **Multi-stage** : compiler dans une image lourde, ne livrer que l'artefact. → TP10
 - **Ordonnez du moins au plus volatil** pour exploiter le cache de couches : copier `package.json` + installer **avant** de copier le code.
-- Un **`.dockerignore`** systématique (`.git`, `node_modules`, `*.md`, `.env`, `*.key`) : build plus rapide **et** pas de fuite de fichiers sensibles dans l'image. → TP3, TP8
-- **`USER` non-root** + `EXPOSE` (documentaire) + `HEALTHCHECK`. → TP3, TP8
+- Un **`.dockerignore`** systématique (`.git`, `node_modules`, `*.md`, `.env`, `*.key`) : build plus rapide **et** pas de fuite de fichiers sensibles dans l'image. → TP5, TP10
+- **`USER` non-root** + `EXPOSE` (documentaire) + `HEALTHCHECK`. → TP5, TP10
 - Labels **OCI** utiles : `org.opencontainers.image.source`, `...version`, `...revision`.
 
 ### Directives à jour (pièges fréquents)
@@ -37,7 +37,7 @@
 | `ENV clé valeur` | `ENV clé=valeur` |
 | `npm install --only=production` | `npm install --omit=dev` |
 | `FROM openjdk` | `eclipse-temurin` |
-| clé `version:` dans Compose | (supprimée, ne plus la mettre) → TP5 |
+| clé `version:` dans Compose | (supprimée, ne plus la mettre) → TP4 |
 | `docker-compose` (v1) | `docker compose` (v2) |
 
 ---
@@ -56,9 +56,9 @@
 
 ## 3. Sécurité (le réflexe SRE)
 
-- **Scanner en CI** et faire **échouer** le build sur HIGH/CRITICAL : `trivy image --severity HIGH,CRITICAL --exit-code 1 img`. → TP8
-- **Scanner les secrets** : `trivy image --scanners secret --exit-code 1 img` (clé/token oubliés dans une couche). → TP8
-- **Pas de secret dans l'image ni dans `ENV`.** Utilisez les **secrets** Compose/Swarm (montés dans `/run/secrets`) ou un coffre (Vault). → TP6
+- **Scanner en CI** et faire **échouer** le build sur HIGH/CRITICAL : `trivy image --severity HIGH,CRITICAL --exit-code 1 img`. → TP10
+- **Scanner les secrets** : `trivy image --scanners secret --exit-code 1 img` (clé/token oubliés dans une couche). → TP10
+- **Pas de secret dans l'image ni dans `ENV`.** Utilisez les **secrets** Compose/Swarm (montés dans `/run/secrets`) ou un coffre (Vault). → TP8
 - **Durcir le runtime** :
   ```bash
   docker run --user 1000:1000 \
@@ -69,48 +69,48 @@
   ```
 - **Mettre à jour les bases régulièrement** (les CVE arrivent *après* le build) → rebuild planifié.
 - **Provenance** : signer les images (`cosign`) et conserver la **SBOM** (`docker sbom` / `trivy sbom`).
-- **Registre privé** pour les images internes, en **HTTPS** + auth. → TP7
+- **Registre privé** pour les images internes, en **HTTPS** + auth. → TP9
 
 ---
 
 ## 4. Exécuter (runtime)
 
 - **Limiter les ressources** : `--memory=512m --cpus=1.5` (en Compose : `deploy.resources.limits`). Évite qu'un conteneur affame l'hôte.
-- **Politique de redémarrage** : `--restart=unless-stopped` (ou `on-failure`), `restart: always` en prod. → TP6, TP10
+- **Politique de redémarrage** : `--restart=unless-stopped` (ou `on-failure`), `restart: always` en prod. → TP8, TP12
 - **Logs** : écrire sur **stdout/stderr** (jamais dans un fichier interne), et **borner** la rotation côté daemon :
   ```json
   // /etc/docker/daemon.json
   { "log-driver": "json-file", "log-opts": { "max-size": "10m", "max-file": "3" } }
   ```
-- **Healthcheck** : que le service soit déclaré *healthy*, pas seulement *running* — base des dépendances `service_healthy`. → TP6
-- **Données** : **volumes nommés** pour ce qui doit survivre ; ⚠️ `docker compose down -v` **supprime** les volumes. → TP4, TP5
+- **Healthcheck** : que le service soit déclaré *healthy*, pas seulement *running* — base des dépendances `service_healthy`. → TP8
+- **Données** : **volumes nommés** pour ce qui doit survivre ; ⚠️ `docker compose down -v` **supprime** les volumes. → TP3, TP4
 
 ---
 
 ## 5. Réseau
 
-- **Un réseau dédié par stack** : isolation + DNS interne (résolution par nom de service). → TP4, TP6
-- **N'exposez (`-p` / `ports:`) que le strict nécessaire.** Une base de données n'a pas à être joignable depuis l'hôte. → TP4, TP6
-- En cluster, un **reverse-proxy** (Traefik) gère l'entrée unique + TLS + répartition. → TP10
+- **Un réseau dédié par stack** : isolation + DNS interne (résolution par nom de service). → TP3, TP8
+- **N'exposez (`-p` / `ports:`) que le strict nécessaire.** Une base de données n'a pas à être joignable depuis l'hôte. → TP3, TP8
+- En cluster, un **reverse-proxy** (Traefik) gère l'entrée unique + TLS + répartition. → TP12
 
 ---
 
 ## 6. Compose & multi-environnements
 
-- `compose.yaml` de base **+ surcouches** : `compose.override.yaml` (dev, auto-chargé) vs `-f compose.yaml -f compose.prod.yaml` (prod). → TP6
-- Configuration via **`.env`** (et `.env` dans `.gitignore`, seul `.env.example` est versionné). → TP6
-- `depends_on` avec **`condition: service_healthy`** pour un démarrage fiable. → TP6
-- **`profiles`** pour les services optionnels (debug, outils). → TP6
-- Avant tout déploiement : **`docker compose config`** affiche la configuration réellement interprétée (variables résolues, fichiers fusionnés). → TP5, TP6
+- `compose.yaml` de base **+ surcouches** : `compose.override.yaml` (dev, auto-chargé) vs `-f compose.yaml -f compose.prod.yaml` (prod). → TP8
+- Configuration via **`.env`** (et `.env` dans `.gitignore`, seul `.env.example` est versionné). → TP8
+- `depends_on` avec **`condition: service_healthy`** pour un démarrage fiable. → TP8
+- **`profiles`** pour les services optionnels (debug, outils). → TP8
+- Avant tout déploiement : **`docker compose config`** affiche la configuration réellement interprétée (variables résolues, fichiers fusionnés). → TP4, TP8
 
 ---
 
 ## 7. Mise en production / orchestration
 
-- **Réplicas + état désiré** : l'orchestrateur maintient « je veux N instances » malgré les pannes. → TP10
+- **Réplicas + état désiré** : l'orchestrateur maintient « je veux N instances » malgré les pannes. → TP12
 - **Rolling updates** sans coupure : `update_config` (Swarm) / stratégie de déploiement (k8s).
 - **Swarm** = simple, intégré, idéal petits clusters ; **Kubernetes** = standard de l'industrie, plus riche et plus complexe. Choisissez selon l'équipe et l'échelle.
-- **TLS automatique** au bord (Let's Encrypt via Traefik/ingress). → TP10
+- **TLS automatique** au bord (Let's Encrypt via Traefik/ingress). → TP12
 
 ---
 
@@ -170,18 +170,18 @@ docker system prune -a --volumes  # ⚠️ AGRESSIF : tout l'inutilisé, volumes
 
 ## 10. Check-list « avant la prod »
 
-- [ ] Base **pinnée**, **minimale**, **non-root** ; `.dockerignore` présent. → TP3, TP8
-- [ ] **Multi-stage** : pas d'outillage de build dans l'image finale. → TP8
-- [ ] **Scan CVE + secrets** en CI, build qui **échoue** sur HIGH/CRITICAL. → TP8
-- [ ] **Aucun secret** dans l'image / `ENV` ; secrets injectés au runtime. → TP6
-- [ ] **Healthcheck** défini ; dépendances en `service_healthy`. → TP6
+- [ ] Base **pinnée**, **minimale**, **non-root** ; `.dockerignore` présent. → TP5, TP10
+- [ ] **Multi-stage** : pas d'outillage de build dans l'image finale. → TP10
+- [ ] **Scan CVE + secrets** en CI, build qui **échoue** sur HIGH/CRITICAL. → TP10
+- [ ] **Aucun secret** dans l'image / `ENV` ; secrets injectés au runtime. → TP8
+- [ ] **Healthcheck** défini ; dépendances en `service_healthy`. → TP8
 - [ ] **Limites** CPU/mémoire et **politique de redémarrage**.
 - [ ] **Logs** sur stdout + **rotation** configurée.
 - [ ] **Volumes nommés** pour l'état ; stratégie de **sauvegarde**.
 - [ ] Réseau **dédié**, surface d'exposition **minimale**.
-- [ ] Métriques **/metrics** + tableau de bord ; alertes de base. → TP9
-- [ ] Images **versionnées** (tags immuables) et **poussées** dans un registre privé. → TP7
-- [ ] En cluster : **réplicas**, **rolling update**, **TLS** au bord. → TP10
+- [ ] Métriques **/metrics** + tableau de bord ; alertes de base. → TP11
+- [ ] Images **versionnées** (tags immuables) et **poussées** dans un registre privé. → TP9
+- [ ] En cluster : **réplicas**, **rolling update**, **TLS** au bord. → TP12
 
 ---
 

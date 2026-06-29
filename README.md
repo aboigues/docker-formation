@@ -41,17 +41,18 @@ Chaque TP a une **cible vérifiable** (un site qui répond, une base qui persist
 |----|-------|----------|
 | TP1 | Premiers pas avec Docker | Lancer et manipuler des conteneurs |
 | TP2 | Maîtriser la CLI | Déboguer un conteneur en production |
-| TP3 | Construire sa première image | Emballer une landing page (Dockerfile) |
-| TP3b | Dockerfile avancé : multi-stage | Compiler une appli et livrer une image minimale (`scratch`) |
-| TP4 | Stack multi-conteneurs à la main | Héberger un CMS (WordPress + MySQL) |
-| TP5 | La même stack avec Compose | Industrialiser le déploiement |
-| TP6 | Compose avancé | API + base + cache (env, healthchecks, override) |
-| TP7 | Registry privé | Distribuer ses images en interne |
-| TP8 | Sécurité des images | Scanner, durcir, transférer en air-gapped |
-| TP9 | Monitoring & logs | Observer une appli (Prometheus, Grafana, Loki) |
-| TP10 | Swarm & Traefik | Mettre en production en cluster |
+| TP3 | Stack multi-conteneurs à la main | Héberger un CMS (WordPress + MySQL) |
+| TP4 | La même stack avec Compose | Industrialiser le déploiement |
+| TP5 | Construire sa première image | Emballer une landing page (Dockerfile statique) |
+| TP6 | Dockerfile : toutes les instructions | Conteneuriser une appli (WORKDIR, ENV, ARG, HEALTHCHECK, USER, ENTRYPOINT…) |
+| TP7 | Dockerfile avancé : multi-stage | Compiler une appli et livrer une image minimale (`scratch`) |
+| TP8 | Compose avancé | API + base + cache (env, healthchecks, override) |
+| TP9 | Registry privé | Distribuer ses images en interne |
+| TP10 | Sécurité des images | Scanner, durcir, transférer en air-gapped |
+| TP11 | Monitoring & logs | Observer une appli (Prometheus, Grafana, Loki) |
+| TP12 | Swarm & Traefik | Mettre en production en cluster |
 
-> Les TP sont **numérotés dans l'ordre conseillé** et la progression est **volontairement graduelle** : on lance des conteneurs (TP1) avant d'en construire (TP3), et on monte une stack à la main (TP4) avant de l'automatiser (TP5). Suivez-les dans l'ordre, quel que soit votre rythme.
+> Les TP sont **numérotés dans l'ordre du cours** et la progression est **volontairement graduelle** : on lance des conteneurs (TP1-TP2), on monte une stack à la main (TP3) **avant** de l'automatiser avec Compose (TP4), et c'est seulement **ensuite** qu'on apprend à **construire** ses propres images (TP5 statique → TP6 toutes les instructions → TP7 multi-stage). Suivez-les dans l'ordre, quel que soit votre rythme.
 
 📌 **Pour aller plus loin et rester autonome** : [**BONNES-PRATIQUES.md**](BONNES-PRATIQUES.md) — mémo de fin de formation (principes, aide-mémoire commandes, check-list « avant la prod » et anti-patterns à bannir).
 
@@ -62,7 +63,7 @@ Chaque TP a une **cible vérifiable** (un site qui répond, une base qui persist
 - **Docker Engine 27+** (idéalement la dernière version) et le plugin **Docker Compose v2** (`docker compose version`)
 - Un shell **bash** (Linux, WSL2, ou macOS)
 - `curl` et `git`
-- Pour les TP de fin de parcours (TP9 monitoring, TP10 cluster) : une machine avec assez de RAM (4 Go libres recommandés)
+- Pour les TP de fin de parcours (TP11 monitoring, TP12 cluster) : une machine avec assez de RAM (4 Go libres recommandés)
 
 Vérifiez votre environnement :
 

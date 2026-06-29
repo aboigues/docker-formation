@@ -25,15 +25,16 @@ jobs:
         tp:
           - tp01-prise-en-main
           - tp02-cli
-          - tp03-premiere-image
-          - tp03b-dockerfile-avance
-          - tp04-stack-manuelle
-          - tp05-compose
-          - tp06-compose-avance
-          - tp07-registry
-          - tp08-securite
-          - tp09-observabilite
-          - tp10-swarm-traefik
+          - tp03-stack-manuelle
+          - tp04-compose
+          - tp05-premiere-image
+          - tp06-dockerfile-instructions
+          - tp07-dockerfile-avance
+          - tp08-compose-avance
+          - tp09-registry
+          - tp10-securite
+          - tp11-observabilite
+          - tp12-swarm-traefik
     name: ${{ matrix.tp }}
     steps:
       - uses: actions/checkout@v4
@@ -45,7 +46,7 @@ jobs:
 
       # Outillage supplémentaire requis par certains TP (installé uniquement si besoin).
       - name: Installer Trivy (TP8)
-        if: matrix.tp == 'tp08-securite'
+        if: matrix.tp == 'tp10-securite'
         uses: aquasecurity/setup-trivy@v0.3.1
         with:
           version: v0.71.1
