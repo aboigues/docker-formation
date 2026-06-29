@@ -1,44 +1,82 @@
-# Stack Swarm : un reverse-proxy Traefik route le trafic vers un service whoami
-# répliqué 3 fois. Déploiement : docker stack deploy -c stack.yml tp10
+# Stack Swarm : un vrai site Drupal RÉPLIQUÉ (3 instances) derrière Traefik,
+# adossé à une base MariaDB. Déploiement : docker stack deploy -c stack.yml tp12
+#
+# Pré-requis : l'image applicative est construite AVANT le déploiement
+#   docker build -t tp12-telemach-drupal:1.0 ../drupal
+# (Swarm ne construit pas les images : il les tire d'un registre / cache local.)
 services:
-  traefik:
-    image: traefik:v3.7.5
-    command:
-      # Provider Swarm (Traefik v3) : il lit les services Swarm via le socket Docker.
-      - --providers.swarm.endpoint=unix:///var/run/docker.sock
-      - --providers.swarm.exposedByDefault=false
-      - --entrypoints.web.address=:80
-      - --api.dashboard=true
-      - --api.insecure=true        # dashboard sans auth — OK en formation, JAMAIS en prod
-    # Ports en mode HOST (bind direct sur le nœud) plutôt que via le maillage
-    # d'ingress de Swarm. Raison : Traefik EST déjà le load-balancer ; le mettre
-    # derrière l'ingress mesh empilerait deux répartitions (IPVS Swarm -> Traefik
-    # -> réplique) et masquerait l'IP source du client (SNAT du mesh). En host,
-    # Traefik reçoit la connexion directe et garde la vraie IP. Le proxy est
-    # épinglé sur un nœud connu (placement manager ci-dessous), donc le bind est
-    # déterministe. Vrai multi-nœuds de bordure : on combinerait host + deploy.mode: global.
-    ports:
-      - target: 80
-        published: 8090
-        mode: host       # point d'entrée web (routage applicatif)
-      - target: 8080
-        published: 8091
-        mode: host       # dashboard / API Traefik
+
+  # --- Base de données : 1 seul réplica (stateful), épinglée au manager + volume ---
+  db:
+    image: mariadb:11.8
+    environment:
+      MARIADB_DATABASE: drupal
+      MARIADB_USER: drupal
+      MARIADB_PASSWORD: drupalpass
+      MARIADB_ROOT_PASSWORD: rootpass
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
     deploy:
-      # Traefik doit tourner sur un MANAGER pour interroger l'API Swarm.
+      replicas: 1
       placement:
         constraints:
           - node.role == manager
 
-  whoami:
-    image: traefik/whoami:v1.11.0
+  # --- Application : Drupal RÉPLIQUÉ 3x. Tous les réplicas partagent la MÊME base
+  #     (settings.php lit la BDD depuis l'env) et le MÊME volume de fichiers. ---
+  drupal:
+    image: tp12-telemach-drupal:1.0
+    hostname: "drupal-{{.Task.Slot}}"   # drupal-1/2/3 : visible dans l'en-tête X-Served-By
+    environment:
+      DRUPAL_DB_HOST: db
+      DRUPAL_DB_NAME: drupal
+      DRUPAL_DB_USER: drupal
+      DRUPAL_DB_PASSWORD: drupalpass
+    volumes:
+      # Stockage partagé des fichiers du site (uploads, assets générés, config).
+      # ⚠️ Sur un Swarm mono-nœud, ce volume nommé est partagé par les 3 réplicas.
+      #    En vrai multi-nœuds, il faudrait un stockage RÉSEAU (NFS, GlusterFS, CSI…).
+      - drupal-files:/opt/drupal/web/sites/default/files
     deploy:
       replicas: 3
       labels:
         # En Swarm, les labels Traefik se mettent sous deploy.labels (niveau service).
         - traefik.enable=true
-        - traefik.http.routers.whoami.rule=Host(`whoami.localhost`)
-        - traefik.http.routers.whoami.entrypoints=web
-        - traefik.http.services.whoami.loadbalancer.server.port=80
+        - traefik.http.routers.drupal.rule=Host(`drupal.localhost`)
+        - traefik.http.routers.drupal.entrypoints=web
+        - traefik.http.services.drupal.loadbalancer.server.port=80
+
+  # --- Reverse-proxy : découvre Drupal via l'API Swarm et répartit sur les 3 réplicas ---
+  traefik:
+    image: traefik:v3.7.5
+    command:
+      - --providers.swarm.endpoint=unix:///var/run/docker.sock
+      - --providers.swarm.exposedByDefault=false
+      - --entrypoints.web.address=:80
+      - --api.dashboard=true
+      - --api.insecure=true        # dashboard sans auth — OK en formation, JAMAIS en prod
+    ports:
+      # Ports en mode HOST (cf. README) : Traefik EST le load-balancer, on évite
+      # d'empiler l'ingress mesh de Swarm par-dessus.
+      - target: 80
+        published: 8090
+        mode: host
+      - target: 8080
+        published: 8091
+        mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+volumes:
+  db-data:
+  drupal-files:
