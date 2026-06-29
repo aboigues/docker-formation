@@ -1,6 +1,54 @@
 # Stack Swarm à COMPLÉTER. Cherchez les « TODO ».
-# Déploiement : docker stack deploy -c stack.yml tp10
+# Déploiement : docker stack deploy -c stack.yml tp12
+# (Construisez d'abord l'image : docker build -t tp12-telemach-drupal:1.0 ../drupal)
 services:
+
+  # --- Base de données : FOURNIE (rien à modifier) ---
+  db:
+    image: mariadb:11.8
+    environment:
+      MARIADB_DATABASE: drupal
+      MARIADB_USER: drupal
+      MARIADB_PASSWORD: drupalpass
+      MARIADB_ROOT_PASSWORD: rootpass
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+  # --- Application Drupal : À COMPLÉTER ---
+  drupal:
+    image: tp12-telemach-drupal:1.0
+    hostname: "drupal-{{.Task.Slot}}"
+    # TODO 1 — Connexion BDD : ajoutez le bloc `environment:` avec
+    #   DRUPAL_DB_HOST=db, DRUPAL_DB_NAME=drupal, DRUPAL_DB_USER=drupal, DRUPAL_DB_PASSWORD=drupalpass
+    # ______
+
+    # TODO 2 — Stockage partagé : montez le volume nommé `drupal-files`
+    #   sur /opt/drupal/web/sites/default/files
+    # ______
+
+    deploy:
+      # TODO 3 — Réplication : 3 instances de Drupal.
+      # ______
+      # TODO 4 — Les 4 labels Traefik (sous deploy.labels, car en Swarm c'est le
+      #   SERVICE qui porte les labels) :
+      #     traefik.enable=true
+      #     traefik.http.routers.drupal.rule=Host(`drupal.localhost`)
+      #     traefik.http.routers.drupal.entrypoints=web
+      #     traefik.http.services.drupal.loadbalancer.server.port=80
+      # ______
+
+  # --- Reverse-proxy : FOURNI (rien à modifier) ---
   traefik:
     image: traefik:v3.7.5
     command:
@@ -9,9 +57,6 @@ services:
       - --entrypoints.web.address=:80
       - --api.dashboard=true
       - --api.insecure=true
-    # Ports en mode HOST (bind direct sur le nœud) plutôt que via l'ingress mesh :
-    # Traefik est lui-même le load-balancer, on évite un double LB et on préserve
-    # l'IP source du client. Le proxy est épinglé sur le manager (placement ci-dessous).
     ports:
       - target: 80
         published: 8090
@@ -26,15 +71,6 @@ services:
         constraints:
           - node.role == manager
 
-  whoami:
-    image: traefik/whoami:v1.11.0
-    deploy:
-      # TODO 1 : lancez ce service en 3 réplicas.
-      replicas: ______
-      labels:
-        # TODO 2 : exposez whoami via Traefik. Il faut 4 labels :
-        #   - activer Traefik (traefik.enable=true)
-        #   - une règle de routage par hôte : Host(`whoami.localhost`)
-        #   - l'entrypoint « web »
-        #   - le port interne du conteneur whoami (80)
-        - ______
+volumes:
+  db-data:
+  drupal-files:

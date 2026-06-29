@@ -50,7 +50,7 @@ Chaque TP a une **cible vérifiable** (un site qui répond, une base qui persist
 | TP9 | Registry privé | Distribuer ses images en interne |
 | TP10 | Sécurité des images | Scanner, durcir, transférer en air-gapped |
 | TP11 | Monitoring & logs | Observer une appli (Prometheus, Grafana, Loki) |
-| TP12 | Swarm & Traefik | Mettre en production en cluster |
+| TP12 | Swarm & Traefik | Déployer un Drupal répliqué (3×) + MariaDB derrière Traefik |
 
 > Les TP sont **numérotés dans l'ordre du cours** et la progression est **volontairement graduelle** : on lance des conteneurs (TP1-TP2), on monte une stack à la main (TP3) **avant** de l'automatiser avec Compose (TP4), et c'est seulement **ensuite** qu'on apprend à **construire** ses propres images (TP5 statique → TP6 toutes les instructions → TP7 multi-stage). Suivez-les dans l'ordre, quel que soit votre rythme.
 
