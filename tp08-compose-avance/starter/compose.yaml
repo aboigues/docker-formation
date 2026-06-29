@@ -1,6 +1,6 @@
 # Stack de base à COMPLÉTER. Cherchez les « TODO ».
 # Règle d'or : aucune valeur sensible en dur — tout passe par .env (${VARIABLE}).
-name: tp8-telescope
+name: tp08-telescope
 
 services:
   api:

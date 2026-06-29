@@ -6,8 +6,8 @@ source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 # Par défaut on teste la solution ; passez "starter" en argument pour tester le vôtre :
 #   ./verify.sh starter
 TARGET="${1:-solution}"
-IMAGE="tp5-landing-${TARGET}:test"
-NAME="tp5-verify-${TARGET}"
+IMAGE="tp05-landing-${TARGET}:test"
+NAME="tp05-verify-${TARGET}"
 PORT=8081
 HERE="$(cd "$(dirname "$0")" && pwd)"
 

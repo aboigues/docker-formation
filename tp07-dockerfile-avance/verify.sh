@@ -6,10 +6,10 @@ source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 # Par défaut on teste la solution ; passez "starter" pour tester le vôtre :
 #   ./verify.sh starter
 TARGET="${1:-solution}"
-IMAGE="tp7-api-${TARGET}:test"
-NAME="tp7-verify-${TARGET}"
+IMAGE="tp07-api-${TARGET}:test"
+NAME="tp07-verify-${TARGET}"
 PORT=8088
-VERSION="tp7-1.0"
+VERSION="tp07-1.0"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
 # Au-dessus de ce seuil, c'est que la toolchain de build a fui dans l'image

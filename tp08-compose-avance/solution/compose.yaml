@@ -1,6 +1,6 @@
 # Stack de base, commune à tous les environnements.
 # Valeurs sensibles et variables lues depuis le fichier .env (jamais en dur ici).
-name: tp8-telescope
+name: tp08-telescope
 
 services:
   api:

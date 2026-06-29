@@ -1,7 +1,7 @@
 # Un registre Docker privé, protégé par authentification htpasswd.
 # (En production on ajouterait TLS ; ici on reste en HTTP sur localhost, que
 #  Docker accepte sans certificat car « localhost » est considéré comme sûr.)
-name: tp9-registry
+name: tp09-registry
 
 services:
   registry:

@@ -16,7 +16,7 @@ Votre mission : conteneuriser une petite API « Telemach Cloud » (un binaire Go
 
 ## 🎯 Objectif vérifiable
 
-Une image `tp7-api` qui :
+Une image `tp07-api` qui :
 1. répond `200` sur `/healthz` et affiche **« Telemach Cloud »** sur `/` (port 8088) ;
 2. expose la **version injectée au build** sur `/version` ;
 3. pèse **moins de 25 Mo** — la preuve que la toolchain de build n'a **pas** fui dans l'image finale.
@@ -31,8 +31,8 @@ Pour comprendre l'intérêt du multi-stage, construisez d'abord la version **na�
 
 ```bash
 cd solution
-docker build -f Dockerfile.naive -t tp7-naive:1.0 .
-docker images tp7-naive:1.0
+docker build -f Dockerfile.naive -t tp07-naive:1.0 .
+docker images tp07-naive:1.0
 ```
 
 > ❓ **Question** : notez la taille (plusieurs **centaines** de Mo). Pourquoi ? (Indice : l'image finale contient encore tout `golang:1.26-alpine`, compilateur compris.)
@@ -55,14 +55,14 @@ N'oubliez pas de compléter aussi le **`.dockerignore`**.
 Puis construisez et lancez **votre** image :
 
 ```bash
-docker build --build-arg VERSION=tp7-1.0 -t tp7-api:1.0 .
-docker run -d --name api -p 8088:8080 tp7-api:1.0
+docker build --build-arg VERSION=tp07-1.0 -t tp07-api:1.0 .
+docker run -d --name api -p 8088:8080 tp07-api:1.0
 curl -s http://localhost:8088/         | grep "Telemach"
-curl -s http://localhost:8088/version  # → tp7-1.0
-docker images tp7-api:1.0             # comparez avec tp7-naive !
+curl -s http://localhost:8088/version  # → tp07-1.0
+docker images tp07-api:1.0             # comparez avec tp07-naive !
 ```
 
-> ❓ **Question** : comparez la taille de `tp7-api:1.0` (multi-stage) avec `tp7-naive:1.0`. Quel facteur de réduction obtenez-vous ?
+> ❓ **Question** : comparez la taille de `tp07-api:1.0` (multi-stage) avec `tp07-naive:1.0`. Quel facteur de réduction obtenez-vous ?
 
 Nettoyez :
 
@@ -126,8 +126,8 @@ L'image `scratch` n'a **ni shell ni bibliothèques**. Le binaire doit être **10
 
 > Chaque défi est **indépendant**.
 
-1. **Construire une seule étape.** `docker build --target build -t tp7-builder .` : seule l'étape `build` est construite. À quoi cela sert-il en CI (lancer les tests dans l'étape de build sans produire l'image finale) ? → doc : https://docs.docker.com/build/building/multi-stage/#stop-at-a-specific-build-stage
+1. **Construire une seule étape.** `docker build --target build -t tp07-builder .` : seule l'étape `build` est construite. À quoi cela sert-il en CI (lancer les tests dans l'étape de build sans produire l'image finale) ? → doc : https://docs.docker.com/build/building/multi-stage/#stop-at-a-specific-build-stage
 2. **Distroless plutôt que scratch.** Remplacez `FROM scratch` par `FROM gcr.io/distroless/static-debian12:nonroot`. Vous gagnez les **certificats CA** et un utilisateur `nonroot` prêt à l'emploi, pour quelques Mo de plus. Comparez les tailles. (Vu au jour 2.)
 3. **HEALTHCHECK sur scratch.** `scratch` n'a ni `wget` ni `curl` : impossible d'y faire un `HEALTHCHECK` classique. Ajoutez à l'appli un mode `--health` qui interroge `/healthz` et renvoie le bon code de sortie, puis `HEALTHCHECK CMD ["/server", "--health"]`. C'est le **pattern** des images minimales.
 4. **Cache des dépendances.** Modifiez une ligne de `main.go` puis reconstruisez. Quelles couches sont rejouées, lesquelles viennent du cache ? Déplacez le `COPY go.mod` **après** `COPY . .` et observez la différence. (Cf. cours « Cache des couches ».)
-5. **Build multi-architecture.** `docker buildx build --platform linux/amd64,linux/arm64 -t tp7-api:multi .` produit une image pour deux architectures depuis la même recette. → doc : https://docs.docker.com/build/building/multi-platform/
+5. **Build multi-architecture.** `docker buildx build --platform linux/amd64,linux/arm64 -t tp07-api:multi .` produit une image pour deux architectures depuis la même recette. → doc : https://docs.docker.com/build/building/multi-platform/

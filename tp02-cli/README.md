@@ -19,8 +19,8 @@ Un script `collect.sh <nom_conteneur>` qui affiche l'IP interne, le nombre de li
 On simule le service `checkout` avec un nginx. Créez d'abord un **réseau dédié** (vous comprendrez pourquoi à l'étape 3) :
 
 ```bash
-docker network create tp2-net
-docker run -d --name checkout --network tp2-net -p 8082:80 nginx:1.30-alpine
+docker network create tp02-net
+docker run -d --name checkout --network tp02-net -p 8082:80 nginx:1.30-alpine
 docker ps
 ```
 
@@ -105,7 +105,7 @@ chmod +x starter/collect.sh
 Nettoyez votre environnement manuel :
 
 ```bash
-docker rm -f checkout && docker network rm tp2-net
+docker rm -f checkout && docker network rm tp02-net
 ```
 
 ---
@@ -146,6 +146,6 @@ if docker top "$1" 2>/dev/null | grep -q nginx; then echo yes; else echo no; fi
 
 1. **`docker cp` à chaud.** Copiez une nouvelle `index.html` depuis l'hôte vers `checkout` sans le redémarrer (`docker cp index.html checkout:/usr/share/nginx/html/`). Rechargez la page. Pratique en hotfix… mais pourquoi est-ce une **mauvaise** pratique durable ?
 2. **`docker stats`.** Lancez `docker stats checkout --no-stream`. Quelle est sa conso CPU/RAM au repos ?
-3. **Réseau & DNS.** Lancez un 2ᵉ conteneur sur `tp2-net` et faites-le `ping checkout` **par son nom**. Refaites l'essai sur le réseau bridge par défaut : pourquoi le ping par nom échoue-t-il là ?
+3. **Réseau & DNS.** Lancez un 2ᵉ conteneur sur `tp02-net` et faites-le `ping checkout` **par son nom**. Refaites l'essai sur le réseau bridge par défaut : pourquoi le ping par nom échoue-t-il là ?
 4. **Format JSON ciblé.** Avec `docker inspect`, sortez d'un coup l'IP, le statut et l'image au format `{{.NetworkSettings... }} {{.State.Status}} {{.Config.Image}}`.
 5. **Enrichissez `collect.sh`** : ajoutez une ligne `RESTARTS=<n>` (via `.RestartCount`) — utile pour repérer un conteneur qui *crash-loop*.

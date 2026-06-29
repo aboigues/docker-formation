@@ -7,8 +7,8 @@ TARGET="${1:-solution}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 CTX="$HERE/$TARGET"
 
-TP6_IMG="tp6-portail:verify"
-TP6_NAME="tp6-portail"
+TP6_IMG="tp06-portail:verify"
+TP6_NAME="tp06-portail"
 TP6_PORT=8085
 TP6_VERSION="1.4.2"   # version de test injectée via --build-arg
 

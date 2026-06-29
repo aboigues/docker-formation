@@ -4,8 +4,8 @@ source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 
 TARGET="${1:-solution}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
-NET="tp2-verify-net"
-NAME="tp2-verify-target"
+NET="tp02-verify-net"
+NAME="tp02-verify-target"
 
 cleanup() {
   docker rm -f "$NAME" >/dev/null 2>&1 || true

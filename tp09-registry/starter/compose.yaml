@@ -1,5 +1,5 @@
 # Registre privé à COMPLÉTER. Cherchez les « TODO ».
-name: tp9-registry
+name: tp09-registry
 
 services:
   registry:

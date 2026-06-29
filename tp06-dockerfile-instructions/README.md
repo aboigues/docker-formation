@@ -14,7 +14,7 @@ Le code JavaScript est **fourni** : le cœur du TP, c'est le `Dockerfile`.
 
 ## 🎯 Objectif vérifiable
 
-Une image `tp6-portail` qui :
+Une image `tp06-portail` qui :
 1. répond `200` sur `/healthz` et affiche **« Telemach Cloud »** sur `/` (port 3000 dans le conteneur) ;
 2. expose sur `/version` la **version injectée au build** via l'instruction `ARG` ;
 3. tourne en **non-root** et **déclare un `HEALTHCHECK`** (bonnes pratiques vérifiées).
@@ -67,13 +67,13 @@ Remplacez chaque `______` en suivant les `# TODO` (de 1 à 10). Points d'attenti
 L'instruction `ARG` se renseigne au build avec `--build-arg` :
 
 ```bash
-docker build --build-arg APP_VERSION=1.4.2 -t tp6-portail:1.4.2 .
+docker build --build-arg APP_VERSION=1.4.2 -t tp06-portail:1.4.2 .
 ```
 
 Lancez le conteneur (on publie le port 3000 du conteneur sur 8085 de l'hôte) :
 
 ```bash
-docker run -d --name tp6-portail -p 8085:3000 tp6-portail:1.4.2
+docker run -d --name tp06-portail -p 8085:3000 tp06-portail:1.4.2
 curl -s http://localhost:8085/            # page « Telemach Cloud »
 curl -s http://localhost:8085/version     # {"version":"1.4.2"}  ← votre ARG !
 ```
@@ -84,8 +84,8 @@ curl -s http://localhost:8085/version     # {"version":"1.4.2"}  ← votre ARG !
 
 ```bash
 docker ps                                  # colonne STATUS : « (healthy) » après ~quelques s
-docker exec tp6-portail id                 # uid=1000(node) → PAS root ✅
-docker inspect -f '{{json .Config.Healthcheck}}' tp6-portail:1.4.2
+docker exec tp06-portail id                 # uid=1000(node) → PAS root ✅
+docker inspect -f '{{json .Config.Healthcheck}}' tp06-portail:1.4.2
 ```
 
 > 🧠 Le `HEALTHCHECK` rend la santé **visible** (`docker ps`) et exploitable par un orchestrateur (Compose `depends_on: condition: service_healthy`, Swarm, Kubernetes…). Sans lui, « le conteneur tourne » ne dit **pas** « l'appli répond ».
@@ -95,7 +95,7 @@ docker inspect -f '{{json .Config.Healthcheck}}' tp6-portail:1.4.2
 L'image fixe `ENTRYPOINT ["node"]` et `CMD ["server.js"]`. Le `CMD` n'est qu'un **argument par défaut**, surchargeable :
 
 ```bash
-docker run --rm tp6-portail:1.4.2 --version   # exécute « node --version » (CMD remplacé)
+docker run --rm tp06-portail:1.4.2 --version   # exécute « node --version » (CMD remplacé)
 ```
 
 > ❓ **Question** : pourquoi `node --version` s'exécute-t-il alors qu'on n'a pas tapé `node` ? Que se passerait-il si on avait tout mis dans un seul `CMD ["node", "server.js"]` à la place ?
@@ -108,7 +108,7 @@ cd ..
 ```
 
 ```bash
-docker rm -f tp6-portail && docker rmi tp6-portail:1.4.2
+docker rm -f tp06-portail && docker rmi tp06-portail:1.4.2
 ```
 
 ---
@@ -167,6 +167,6 @@ CMD ["server.js"]
 
 1. **`npm ci` + lockfile.** En production, on préfère `npm ci` (reproductible, basé sur `package-lock.json`) à `npm install`. Générez le lockfile (`npm install` en local), committez-le, et remplacez l'instruction. Qu'est-ce que `npm ci` garantit de plus ?
 2. **`.dockerignore`.** Ajoutez `node_modules` (déjà fait) et observez : pourquoi est-il crucial de **ne pas** copier le `node_modules` de l'hôte dans l'image ?
-3. **Taille & couches.** Lancez `docker history tp6-portail:1.4.2`. Quelle couche pèse le plus ? Que se passe-t-il si vous **fusionnez** `COPY package.json` et `COPY server.js` en une seule instruction côté cache ?
+3. **Taille & couches.** Lancez `docker history tp06-portail:1.4.2`. Quelle couche pèse le plus ? Que se passe-t-il si vous **fusionnez** `COPY package.json` et `COPY server.js` en une seule instruction côté cache ?
 4. **`ENTRYPOINT` en forme *shell* vs *exec*.** Comparez `ENTRYPOINT node server.js` (forme shell) et `ENTRYPOINT ["node","server.js"]` (forme exec). Lequel transmet correctement le signal `SIGTERM` (arrêt propre) au process Node ? Pourquoi est-ce important pour `docker stop` ?
 5. **Vers le multi-stage.** Cette image embarque `npm` et la toolchain. Au **TP7**, vous verrez comment n'embarquer **que** le strict nécessaire avec un *multi-stage build*.
