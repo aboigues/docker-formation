@@ -24,10 +24,10 @@
 - En entreprise, regardez les **Docker Hardened Images** (`dhi.io/...`) : bases durcies, non-root, signées, SBOM fournie.
 
 ### Dockerfile efficace
-- **Multi-stage** : compiler dans une image lourde, ne livrer que l'artefact. → TP10
-- **Ordonnez du moins au plus volatil** pour exploiter le cache de couches : copier `package.json` + installer **avant** de copier le code.
-- Un **`.dockerignore`** systématique (`.git`, `node_modules`, `*.md`, `.env`, `*.key`) : build plus rapide **et** pas de fuite de fichiers sensibles dans l'image. → TP5, TP10
-- **`USER` non-root** + `EXPOSE` (documentaire) + `HEALTHCHECK`. → TP5, TP10
+- **Multi-stage** : compiler dans une image lourde, ne livrer que l'artefact. → TP7, TP10
+- **Ordonnez du moins au plus volatil** pour exploiter le cache de couches : copier `package.json` + installer **avant** de copier le code. → TP6
+- Un **`.dockerignore`** systématique (`.git`, `node_modules`, `*.md`, `.env`, `*.key`) : build plus rapide **et** pas de fuite de fichiers sensibles dans l'image. → TP5, TP6, TP10
+- **`USER` non-root** + `EXPOSE` (documentaire) + `HEALTHCHECK`. → TP6, TP10
 - Labels **OCI** utiles : `org.opencontainers.image.source`, `...version`, `...revision`.
 
 ### Directives à jour (pièges fréquents)
@@ -170,11 +170,11 @@ docker system prune -a --volumes  # ⚠️ AGRESSIF : tout l'inutilisé, volumes
 
 ## 10. Check-list « avant la prod »
 
-- [ ] Base **pinnée**, **minimale**, **non-root** ; `.dockerignore` présent. → TP5, TP10
-- [ ] **Multi-stage** : pas d'outillage de build dans l'image finale. → TP10
+- [ ] Base **pinnée**, **minimale**, **non-root** ; `.dockerignore` présent. → TP5, TP6, TP10
+- [ ] **Multi-stage** : pas d'outillage de build dans l'image finale. → TP7, TP10
 - [ ] **Scan CVE + secrets** en CI, build qui **échoue** sur HIGH/CRITICAL. → TP10
 - [ ] **Aucun secret** dans l'image / `ENV` ; secrets injectés au runtime. → TP8
-- [ ] **Healthcheck** défini ; dépendances en `service_healthy`. → TP8
+- [ ] **Healthcheck** défini ; dépendances en `service_healthy`. → TP6, TP8
 - [ ] **Limites** CPU/mémoire et **politique de redémarrage**.
 - [ ] **Logs** sur stdout + **rotation** configurée.
 - [ ] **Volumes nommés** pour l'état ; stratégie de **sauvegarde**.
