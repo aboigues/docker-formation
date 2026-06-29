@@ -48,17 +48,15 @@ docker compose ps          # 6 services : app, prometheus, cadvisor, loki, alloy
 
 Ouvrez les interfaces (chemins de menus **précis**, car elles changent souvent) :
 
-- **Prometheus** — http://localhost:9090 → barre du haut **Status** ▸ **Target health** (anciennement *Targets*). Chaque cible y est listée avec son état `UP`/`DOWN`.
+- **Prometheus** — http://localhost:9090 → barre du haut **Status** ▸ **Target health** (anciennement *Targets*). Chaque cible y est listée avec son état `UP`/`DOWN`. Au départ, **seul `prometheus` lui-même est UP** (on ajoutera les autres cibles à l'étape 2 — voir la capture là-bas).
 
-  ![Prometheus — Target health : seule la cible « prometheus » est UP au départ](docs/img/prometheus-targets.png)
+- **cAdvisor** — http://localhost:8080 → page d'accueil (liste des conteneurs), puis **/docker** pour la vue détaillée par conteneur (CPU, mémoire, réseau en temps réel).
 
-- **cAdvisor** — http://localhost:8080 → page d'accueil, puis **/docker** pour la vue par conteneur (CPU, mémoire, réseau en temps réel).
+  ![cAdvisor — page d'accueil : conteneurs et sous-conteneurs](docs/img/cadvisor-home.png)
 
-  ![cAdvisor — vue d'ensemble des conteneurs](docs/img/cadvisor-home.png)
+- **Grafana** — http://localhost:3000, identifiants **admin / admin** (cliquez **Skip** quand il propose de changer le mot de passe). Vous arrivez sur l'accueil :
 
-- **Grafana** — http://localhost:3000, identifiants **admin / admin** (cliquez **Skip** quand il propose de changer le mot de passe).
-
-  ![Grafana — écran de connexion](docs/img/grafana-login.png)
+  ![Grafana — page d'accueil après connexion (admin / admin)](docs/img/grafana-login.png)
 
 - **Appli** — http://localhost:8088 (la page) et http://localhost:8088/metrics (le format texte brut des métriques).
 
@@ -73,6 +71,10 @@ Rechargez la configuration **sans redémarrer** Prometheus (on a activé `--web.
 ```bash
 curl -X POST http://localhost:9090/-/reload
 ```
+
+Retournez sur **Status ▸ Target health** : les **trois** cibles (`prometheus`, `cadvisor`, `telescope-app`) doivent maintenant être **UP**.
+
+![Prometheus — Target health : les 3 cibles UP après ajout des jobs](docs/img/prometheus-targets.png)
 
 Générez du trafic, puis interrogez une métrique dans Prometheus (champ *Expression*) :
 

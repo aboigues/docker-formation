@@ -28,12 +28,18 @@ const page = await ctx.newPage();
 
 let ok = 0, ko = 0;
 
+// Note : on utilise waitUntil:'domcontentloaded' (pas 'networkidle') car les
+// UIs comme Prometheus/Grafana rafraîchissent en continu → le réseau n'est
+// jamais « idle » et la navigation timeout. On laisse ensuite le rendu se poser.
+const NAV = { waitUntil: 'domcontentloaded', timeout: 30000 };
+
 // Capture défensive : un échec ne doit pas interrompre les autres captures.
-async function shot(name, fn) {
+// opts.fullPage (défaut true) : false = capture du viewport seul (pages très longues).
+async function shot(name, fn, opts = {}) {
   try {
     await fn();
-    await page.waitForTimeout(1500); // laisse le rendu se stabiliser
-    await page.screenshot({ path: new URL(`${name}.png`, OUT).pathname, fullPage: true });
+    await page.waitForTimeout(2500); // laisse le rendu (graphes, tableaux) se stabiliser
+    await page.screenshot({ path: new URL(`${name}.png`, OUT).pathname, fullPage: opts.fullPage !== false });
     console.log(`  ✓ ${name}.png`);
     ok++;
   } catch (e) {
@@ -42,36 +48,78 @@ async function shot(name, fn) {
   }
 }
 
+// Grafana affiche parfois des modales d'annonce (« Grafana Assistant »…) qui
+// recouvrent la page. On les ferme (Escape + bouton de fermeture) avant la capture.
+async function dismissOverlays() {
+  for (let k = 0; k < 2; k++) {
+    await page.keyboard.press('Escape').catch(() => {});
+    await page.waitForTimeout(300);
+  }
+  for (const sel of ['button[aria-label="Close"]', 'button[aria-label="Close dialog"]', '[role="dialog"] button[aria-label*="lose"]']) {
+    const b = page.locator(sel);
+    if (await b.count().catch(() => 0)) await b.first().click({ timeout: 1500 }).catch(() => {});
+  }
+  await page.waitForTimeout(400);
+}
+
 console.log('Prometheus…');
 await shot('prometheus-targets', async () => {
-  await page.goto(`${PROM}/targets`, { waitUntil: 'networkidle' });
+  await page.goto(`${PROM}/targets`, NAV);
 });
 await shot('prometheus-query', async () => {
-  await page.goto(`${PROM}/graph?g0.expr=telescope_requests_total&g0.tab=1`, { waitUntil: 'networkidle' });
+  await page.goto(`${PROM}/graph?g0.expr=telescope_requests_total&g0.tab=1`, NAV);
 });
 
 console.log('cAdvisor…');
+// La page cAdvisor est très longue : on ne capture que le viewport (aperçu/jauges du haut).
 await shot('cadvisor-home', async () => {
-  await page.goto(`${CADVISOR}/`, { waitUntil: 'networkidle' });
-});
+  await page.goto(`${CADVISOR}/`, NAV);
+}, { fullPage: false });
 
 console.log('Grafana…');
 // Connexion (admin/admin). Grafana propose ensuite de changer le mot de passe → on saute.
 await shot('grafana-login', async () => {
-  await page.goto(`${GRAFANA}/login`, { waitUntil: 'networkidle' });
+  await page.goto(`${GRAFANA}/login`, NAV);
   await page.fill('input[name="user"]', process.env.GF_USER || 'admin');
   await page.fill('input[name="password"]', process.env.GF_PASS || 'admin');
   await page.click('button[type="submit"]');
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForTimeout(1500);
   // « Skip » l'écran de changement de mot de passe s'il apparaît.
   const skip = page.getByRole('button', { name: /skip/i });
   if (await skip.count()) await skip.first().click().catch(() => {});
+  await dismissOverlays();
 });
 await shot('grafana-datasources', async () => {
-  await page.goto(`${GRAFANA}/connections/datasources`, { waitUntil: 'networkidle' });
+  await page.goto(`${GRAFANA}/connections/datasources`, NAV);
+  await page.waitForTimeout(1500);
+  await dismissOverlays();
 });
 await shot('grafana-explore-loki', async () => {
-  await page.goto(`${GRAFANA}/explore`, { waitUntil: 'networkidle' });
+  await page.goto(`${GRAFANA}/explore`, NAV);
+  await page.waitForTimeout(1500);
+  await dismissOverlays();
+  // Sélectionner la source Loki (best-effort : l'UI Explore ouvre la dernière source utilisée).
+  try {
+    await page.getByTestId('data-testid Data source picker select container').click({ timeout: 4000 });
+    await page.getByText('Loki', { exact: true }).first().click({ timeout: 4000 });
+    await page.waitForTimeout(1000);
+  } catch { /* la source par défaut convient si la sélection échoue */ }
+  // Basculer en mode « Code » (éditeur LogQL libre) plutôt que le Builder.
+  try {
+    for (const loc of [page.getByRole('radio', { name: 'Code' }), page.getByText('Code', { exact: true })]) {
+      if (await loc.count().catch(() => 0)) { await loc.first().click({ timeout: 3000 }).catch(() => {}); break; }
+    }
+    await page.waitForTimeout(800);
+  } catch { /* le Builder convient si le toggle est introuvable */ }
+  // Saisir une requête LogQL et l'exécuter (best-effort).
+  try {
+    const editor = page.locator('.monaco-editor').first();
+    await editor.click({ timeout: 4000 });
+    await page.keyboard.type('{container=~".+"}');
+    await page.keyboard.press('Shift+Enter');
+    await page.waitForTimeout(3000);
+  } catch { /* on capture l'écran Explore même sans requête */ }
 });
 
 await browser.close();
