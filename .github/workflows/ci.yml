@@ -26,10 +26,10 @@ jobs:
           - tp01-prise-en-main
           - tp02-cli
           - tp03-stack-manuelle
-          - tp04-compose
-          - tp05-premiere-image
-          - tp06-dockerfile-instructions
-          - tp07-dockerfile-avance
+          - tp04-premiere-image
+          - tp05-dockerfile-instructions
+          - tp06-dockerfile-avance
+          - tp07-compose
           - tp08-compose-avance
           - tp09-registry
           - tp10-securite

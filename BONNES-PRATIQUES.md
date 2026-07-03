@@ -19,15 +19,15 @@
 ## 1. Construire de bonnes images
 
 ### Choisir la base
-- **Pinnez** une version précise, jamais `latest` : `node:24-alpine`, pas `node`. → TP5, TP8
+- **Pinnez** une version précise, jamais `latest` : `node:24-alpine`, pas `node`. → TP4, TP8
 - Préférez **minimal** : `-alpine`, **distroless** (`gcr.io/distroless/...`) ou **scratch** pour un binaire statique. Moins de paquets = moins de CVE et image plus légère. → TP10
 - En entreprise, regardez les **Docker Hardened Images** (`dhi.io/...`) : bases durcies, non-root, signées, SBOM fournie.
 
 ### Dockerfile efficace
-- **Multi-stage** : compiler dans une image lourde, ne livrer que l'artefact. → TP7, TP10
-- **Ordonnez du moins au plus volatil** pour exploiter le cache de couches : copier `package.json` + installer **avant** de copier le code. → TP6
-- Un **`.dockerignore`** systématique (`.git`, `node_modules`, `*.md`, `.env`, `*.key`) : build plus rapide **et** pas de fuite de fichiers sensibles dans l'image. → TP5, TP6, TP10
-- **`USER` non-root** + `EXPOSE` (documentaire) + `HEALTHCHECK`. → TP6, TP10
+- **Multi-stage** : compiler dans une image lourde, ne livrer que l'artefact. → TP6, TP10
+- **Ordonnez du moins au plus volatil** pour exploiter le cache de couches : copier `package.json` + installer **avant** de copier le code. → TP5
+- Un **`.dockerignore`** systématique (`.git`, `node_modules`, `*.md`, `.env`, `*.key`) : build plus rapide **et** pas de fuite de fichiers sensibles dans l'image. → TP4, TP5, TP10
+- **`USER` non-root** + `EXPOSE` (documentaire) + `HEALTHCHECK`. → TP5, TP10
 - Labels **OCI** utiles : `org.opencontainers.image.source`, `...version`, `...revision`.
 
 ### Directives à jour (pièges fréquents)
@@ -37,7 +37,7 @@
 | `ENV clé valeur` | `ENV clé=valeur` |
 | `npm install --only=production` | `npm install --omit=dev` |
 | `FROM openjdk` | `eclipse-temurin` |
-| clé `version:` dans Compose | (supprimée, ne plus la mettre) → TP4 |
+| clé `version:` dans Compose | (supprimée, ne plus la mettre) → TP7 |
 | `docker-compose` (v1) | `docker compose` (v2) |
 
 ---
@@ -83,7 +83,7 @@
   { "log-driver": "json-file", "log-opts": { "max-size": "10m", "max-file": "3" } }
   ```
 - **Healthcheck** : que le service soit déclaré *healthy*, pas seulement *running* — base des dépendances `service_healthy`. → TP8
-- **Données** : **volumes nommés** pour ce qui doit survivre ; ⚠️ `docker compose down -v` **supprime** les volumes. → TP3, TP4
+- **Données** : **volumes nommés** pour ce qui doit survivre ; ⚠️ `docker compose down -v` **supprime** les volumes. → TP3, TP7
 
 ---
 
@@ -101,7 +101,7 @@
 - Configuration via **`.env`** (et `.env` dans `.gitignore`, seul `.env.example` est versionné). → TP8
 - `depends_on` avec **`condition: service_healthy`** pour un démarrage fiable. → TP8
 - **`profiles`** pour les services optionnels (debug, outils). → TP8
-- Avant tout déploiement : **`docker compose config`** affiche la configuration réellement interprétée (variables résolues, fichiers fusionnés). → TP4, TP8
+- Avant tout déploiement : **`docker compose config`** affiche la configuration réellement interprétée (variables résolues, fichiers fusionnés). → TP7, TP8
 
 ---
 
@@ -170,11 +170,11 @@ docker system prune -a --volumes  # ⚠️ AGRESSIF : tout l'inutilisé, volumes
 
 ## 10. Check-list « avant la prod »
 
-- [ ] Base **pinnée**, **minimale**, **non-root** ; `.dockerignore` présent. → TP5, TP6, TP10
-- [ ] **Multi-stage** : pas d'outillage de build dans l'image finale. → TP7, TP10
+- [ ] Base **pinnée**, **minimale**, **non-root** ; `.dockerignore` présent. → TP4, TP5, TP10
+- [ ] **Multi-stage** : pas d'outillage de build dans l'image finale. → TP6, TP10
 - [ ] **Scan CVE + secrets** en CI, build qui **échoue** sur HIGH/CRITICAL. → TP10
 - [ ] **Aucun secret** dans l'image / `ENV` ; secrets injectés au runtime. → TP8
-- [ ] **Healthcheck** défini ; dépendances en `service_healthy`. → TP6, TP8
+- [ ] **Healthcheck** défini ; dépendances en `service_healthy`. → TP5, TP8
 - [ ] **Limites** CPU/mémoire et **politique de redémarrage**.
 - [ ] **Logs** sur stdout + **rotation** configurée.
 - [ ] **Volumes nommés** pour l'état ; stratégie de **sauvegarde**.
