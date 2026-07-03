@@ -1,7 +1,7 @@
 # TP10 — Sécuriser ses images : scanner, durcir, transférer hors-ligne
 
 > Durée estimée : 1 h · Ports utilisés : `8087`
-> Prérequis : TP5 (Dockerfile). Outil requis : **Trivy** (installation ci-dessous).
+> Prérequis : TP4 à TP6 (Dockerfile). Outil requis : **Trivy** (installation ci-dessous).
 
 ## 🎬 Le contexte
 

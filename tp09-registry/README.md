@@ -1,11 +1,11 @@
 # TP9 — Distribuer ses images : un registre privé
 
 > Durée estimée : 50 min · Ports utilisés : `5000`
-> Prérequis : TP5 (construire une image), TP4/TP8 (Compose).
+> Prérequis : TP4 (construire une image), TP7/TP8 (Compose).
 
 ## 🎬 Le contexte
 
-Vos images maison (l'API du TP8, la landing page du TP5…) ne peuvent pas rester sur le portable de chaque développeur. Il faut un **endroit central** pour les **pousser** et les **récupérer** — comme Docker Hub, mais **chez vous**, pour vos images internes (et sans dépendre d'Internet).
+Vos images maison (l'API du TP8, la landing page du TP4…) ne peuvent pas rester sur le portable de chaque développeur. Il faut un **endroit central** pour les **pousser** et les **récupérer** — comme Docker Hub, mais **chez vous**, pour vos images internes (et sans dépendre d'Internet).
 
 C'est le rôle d'un **registre privé**. Vous allez en monter un, le **protéger par mot de passe**, y **pousser** une image, vérifier qu'on ne peut **pas** y accéder sans identifiants, puis la **récupérer** ailleurs.
 

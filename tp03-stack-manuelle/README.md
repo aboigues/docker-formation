@@ -7,7 +7,7 @@
 
 Le service communication veut un **blog WordPress** pour publier les actualités de l'entreprise. WordPress a besoin d'une **base de données MySQL**. Deux conteneurs doivent donc coopérer : se **trouver** (réseau), **persister** les données (volume) et se **configurer** (variables d'environnement).
 
-Vous allez tout monter **à la main**, commande par commande. L'objectif n'est pas l'efficacité — c'est de **ressentir la douleur** de la gestion manuelle, pour comprendre au TP4 pourquoi Docker Compose existe.
+Vous allez tout monter **à la main**, commande par commande. L'objectif n'est pas l'efficacité — c'est de **ressentir la douleur** de la gestion manuelle, pour comprendre au TP7 pourquoi Docker Compose existe.
 
 ## 🎯 Objectif vérifiable
 
@@ -27,7 +27,7 @@ C'est **le** point central de ce TP. Mettre WordPress et MySQL sur **un seul ré
 
 4. **Communication est-ouest gratuite.** Les conteneurs du réseau se parlent directement, sans NAT ni passage par l'hôte. Ajouter un service (cache, phpMyAdmin…) revient juste à le **brancher sur le même réseau**.
 
-> 🔑 **À retenir** : « même réseau » = **résolution par nom + isolation + base non exposée**. C'est exactement ce que Docker Compose recréera **automatiquement** au TP4 (un réseau par projet) — ici, on le fait à la main pour bien voir *ce que Compose nous épargne*.
+> 🔑 **À retenir** : « même réseau » = **résolution par nom + isolation + base non exposée**. C'est exactement ce que Docker Compose recréera **automatiquement** au TP7 (un réseau par projet) — ici, on le fait à la main pour bien voir *ce que Compose nous épargne*.
 
 ### 🧪 Mini-test : la preuve par l'absence
 
@@ -97,7 +97,7 @@ docker rm -f wp-app
 
 Rechargez la page : si vous aviez commencé l'installation, l'état est **conservé**, car les données vivent dans le volume `wp-db`, pas dans le conteneur.
 
-> 🧠 **Le bilan « douloureux »** : comptez le nombre de commandes (et de variables) qu'il a fallu pour 2 services. Imaginez 10 services. Non reproductible, non versionnable, fragile. → **TP4 : Docker Compose.**
+> 🧠 **Le bilan « douloureux »** : comptez le nombre de commandes (et de variables) qu'il a fallu pour 2 services. Imaginez 10 services. Non reproductible, non versionnable, fragile. → **TP7 : Docker Compose** (juste après le détour par les Dockerfile).
 
 ## Étape 4 — Validez
 

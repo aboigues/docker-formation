@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# TP7 — vérifie l'image multi-stage : l'API répond ET l'image est légère.
+# TP6 — vérifie l'image multi-stage : l'API répond ET l'image est légère.
 # Lancé localement par le participant ET par la CI (sur solution/).
 source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 
 # Par défaut on teste la solution ; passez "starter" pour tester le vôtre :
 #   ./verify.sh starter
 TARGET="${1:-solution}"
-IMAGE="tp07-api-${TARGET}:test"
-NAME="tp07-verify-${TARGET}"
+IMAGE="tp06-api-${TARGET}:test"
+NAME="tp06-verify-${TARGET}"
 PORT=8088
-VERSION="tp07-1.0"
+VERSION="tp06-1.0"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
 # Au-dessus de ce seuil, c'est que la toolchain de build a fui dans l'image

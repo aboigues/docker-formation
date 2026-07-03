@@ -1,7 +1,7 @@
 # TP12 — Mise en production : une vraie appli répliquée (Drupal) sur Swarm + Traefik
 
 > Durée estimée : 1 h 15 · Ports utilisés : `8090` (web via Traefik), `8091` (dashboard Traefik)
-> Prérequis : TP4/TP8 (Compose), TP9 (images). C'est l'aboutissement du parcours.
+> Prérequis : TP7/TP8 (Compose), TP9 (images). C'est l'aboutissement du parcours.
 > Machine avec ~4 Go de RAM libres recommandés (Drupal + MariaDB + 3 réplicas).
 
 ## 🎬 Le contexte

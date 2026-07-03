@@ -1,7 +1,7 @@
 # TP8 — Docker Compose avancé : une vraie appli en plusieurs environnements
 
 > Durée estimée : 1 h 15 · Ports utilisés : `8085` (API), `8086` (Adminer, profil debug), `6379` (Redis, dev)
-> Prérequis : TP4 (les bases de Compose). On passe ici au niveau « production-ready ».
+> Prérequis : TP7 (les bases de Compose). On passe ici au niveau « production-ready ».
 
 ## 🎬 Le contexte
 
@@ -12,7 +12,7 @@ Trois services doivent donc coopérer : **api** (Node/Express) + **db** (Postgre
 - en **dev** : code monté en direct, rechargement à chaud, cache exposé pour debug ;
 - en **prod** : image figée, redémarrage automatique, rien d'exposé inutilement.
 
-Au TP4, votre Compose était « plat ». Ici vous allez le rendre **robuste** (l'API ne démarre que si la base est prête), **paramétrable** (`.env`), **multi-environnements** (override dev / surcouche prod) et **modulaire** (`profiles`).
+Au TP7, votre Compose était « plat ». Ici vous allez le rendre **robuste** (l'API ne démarre que si la base est prête), **paramétrable** (`.env`), **multi-environnements** (override dev / surcouche prod) et **modulaire** (`profiles`).
 
 > 💡 Le **code de l'API est fourni** (dossier `app/`). Le cœur du TP, c'est l'**orchestration Compose** — pas le JavaScript.
 
@@ -59,7 +59,7 @@ Ouvrez `starter/compose.yaml` et complétez les `# TODO` du bas vers le haut.
 postgres://<user>:<password>@db:5432/<database>
 ```
 
-> 🧠 On écrit `db`, pas une IP : Compose fournit un **DNS interne** où chaque service est joignable par son nom (vu au TP4).
+> 🧠 On écrit `db`, pas une IP : Compose fournit un **DNS interne** où chaque service est joignable par son nom (vu au TP7).
 
 **1.b — Le volume de Postgres.** Montez le volume nommé `db-data` sur le répertoire de données de Postgres pour que la base **survive** à un `down`.
 
@@ -67,7 +67,7 @@ postgres://<user>:<password>@db:5432/<database>
 
 ## Étape 2 — Rendre le démarrage fiable (healthchecks + `depends_on`)
 
-Au TP3/TP4, l'API pouvait démarrer **avant** que MySQL soit prêt → erreurs au boot. On corrige ça proprement.
+Aux TP3 et TP7, l'API pouvait démarrer **avant** que MySQL soit prêt → erreurs au boot. On corrige ça proprement.
 
 **2.a — Un `healthcheck` par dépendance :**
 

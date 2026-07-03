@@ -1,11 +1,11 @@
-# TP4 — La même stack, mais avec Docker Compose
+# TP7 — La même stack, mais avec Docker Compose
 
 > Durée estimée : 45 min · Ports utilisés : `8083`
-> Prérequis : TP3 (la même stack montée à la main).
+> Prérequis : TP3 (la même stack montée à la main). Les TP4 à TP6 (Dockerfile) ne sont pas indispensables ici, mais vous savez désormais **construire** vos propres images — Compose sait aussi les *builder* pour vous via `build:`.
 
 ## 🎬 Le contexte
 
-Au TP3, monter WordPress + MySQL à la main vous a coûté ~6 commandes longues, non reproductibles et impossibles à versionner. Un·e collègue qui veut la même stack doit tout retaper sans se tromper. **Inacceptable** en équipe.
+Souvenez-vous du TP3 : monter WordPress + MySQL à la main vous a coûté ~6 commandes longues, non reproductibles et impossibles à versionner. Un·e collègue qui veut la même stack doit tout retaper sans se tromper. **Inacceptable** en équipe. Et maintenant que vous savez écrire des Dockerfile (TP4-TP6), il vous faut un moyen d'**orchestrer** plusieurs conteneurs — les vôtres comme ceux du Hub — sans les lancer un par un.
 
 Docker Compose décrit toute la stack dans **un seul fichier YAML**, versionnable dans Git, déployable en **une commande**. Vous allez convertir le TP3 et mesurer le gain.
 

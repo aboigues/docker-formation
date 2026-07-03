@@ -1,7 +1,7 @@
 # TP11 — Observabilité : métriques, logs et tableaux de bord
 
 > Durée estimée : 1 h 15 · Ports utilisés : `8088` (appli), `9090` (Prometheus), `8080` (cAdvisor), `3100` (Loki), `3000` (Grafana)
-> Prérequis : TP4/TP8 (Compose). Machine avec ~4 Go de RAM libres recommandés.
+> Prérequis : TP7/TP8 (Compose). Machine avec ~4 Go de RAM libres recommandés.
 
 ## 🎬 Le contexte
 

@@ -1,7 +1,7 @@
-# TP5 — Construire sa première image
+# TP4 — Construire sa première image
 
 > Durée estimée : 45 min · Ports utilisés : `8081`
-> Prérequis : TP1 à TP4 (lancer des conteneurs, CLI, stack manuelle, Compose).
+> Prérequis : TP1 à TP3 (lancer des conteneurs, maîtriser la CLI, monter une stack multi-conteneurs à la main).
 
 ## 🎬 Le contexte
 
