@@ -1,0 +1,98 @@
+name: Scan de vulnérabilités des images (hebdomadaire)
+
+# Scanne périodiquement les images Docker TIERCES utilisées par les TP.
+#
+# La liste des images est DÉRIVÉE du repo à chaque exécution
+# (scripts/list-tp-images.py) : source de vérité unique = les fichiers des TP
+# (Dockerfile, Compose, Swarm, scripts). Aucun tag à maintenir en double ici.
+#
+# Report-only : les résultats remontent dans « Security » → « Code scanning »
+# (SARIF). Le job N'ÉCHOUE PAS sur une CVE — c'est une veille, pas une barrière.
+# Déclenchable à la demande via « Run workflow » (workflow_dispatch).
+#
+# Sécurité chaîne d'appro : on N'utilise PAS les actions `aquasecurity/setup-trivy`
+# / `aquasecurity/trivy-action` (compromises en 2025, release malveillante v0.69.4).
+# On lance l'image officielle `aquasec/trivy` épinglée ; seule l'action first-party
+# `github/codeql-action/upload-sarif` de GitHub est utilisée.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # tous les lundis à 06:00 UTC
+  workflow_dispatch:
+  # Auto-test du scanner : ne se déclenche QUE si le workflow ou le script de
+  # découverte change (pas sur les PR de contenu des TP). Valide la plomberie
+  # complète (discover → scan → SARIF) avant merge, puis au merge sur main.
+  pull_request:
+    paths:
+      - ".github/workflows/image-scan.yml"
+      - "scripts/list-tp-images.py"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/image-scan.yml"
+      - "scripts/list-tp-images.py"
+
+permissions:
+  contents: read
+  security-events: write # requis pour publier le SARIF dans code scanning
+
+jobs:
+  discover:
+    name: Découvrir les images des TP
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.list.outputs.images }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: PyYAML (lecture des fichiers Compose / Swarm)
+        run: python3 -m pip install --quiet pyyaml
+      - id: list
+        name: Générer la matrice d'images
+        run: |
+          images="$(python3 scripts/list-tp-images.py --format json)"
+          echo "Images détectées : $images"
+          echo "images=$images" >> "$GITHUB_OUTPUT"
+
+  scan:
+    name: ${{ matrix.image }}
+    needs: discover
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false # une image en erreur ne masque pas les autres
+      matrix:
+        image: ${{ fromJson(needs.discover.outputs.images) }}
+    steps:
+      - name: Identifiant de scan (nom de fichier + catégorie SARIF)
+        run: echo "SCAN_ID=$(echo '${{ matrix.image }}' | tr '/:' '--')" >> "$GITHUB_ENV"
+
+      - name: Ignorer les images non pullables (construites localement par un TP)
+        id: guard
+        run: |
+          if docker manifest inspect "${{ matrix.image }}" >/dev/null 2>&1; then
+            echo "pullable=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::${{ matrix.image }} n'est pas pullable (image construite localement) — scan ignoré."
+            echo "pullable=no" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Scan Trivy (HIGH/CRITICAL corrigibles) → SARIF
+        if: steps.guard.outputs.pullable == 'yes'
+        env:
+          # Évite le rate-limiting GitHub lors du téléchargement de la base Trivy.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          docker run --rm -e GITHUB_TOKEN -v "$PWD:/out" \
+            aquasec/trivy:0.72.0 image \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --format sarif --output "/out/${SCAN_ID}.sarif" \
+            --no-progress \
+            "${{ matrix.image }}"
+
+      - name: Publier le SARIF dans code scanning
+        if: steps.guard.outputs.pullable == 'yes'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ env.SCAN_ID }}.sarif
+          category: ${{ env.SCAN_ID }}
