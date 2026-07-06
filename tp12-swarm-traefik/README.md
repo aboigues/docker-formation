@@ -120,7 +120,8 @@ Le site reste joignable pendant l'opération : les autres réplicas encaissent.
 ## Étape 7 — Validez, puis démontez
 
 ```bash
-./verify.sh
+./verify.sh              # teste VOTRE travail (dossier starter/)
+./verify.sh solution     # (option) rejoue la solution de référence
 ```
 
 ```bash

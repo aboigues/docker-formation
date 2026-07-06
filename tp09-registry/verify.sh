@@ -3,7 +3,7 @@
 # catalogue protégé (401 sans identifiants), persistance.
 source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 
-TARGET="${1:-solution}"
+TARGET="${1:-starter}"
 cd "$TARGET"
 
 REG="localhost:5000"
@@ -59,8 +59,20 @@ check "L'image n'est plus en local" \
 docker pull "$DEST" >/dev/null
 check "Pull réussi depuis le registre privé" docker image inspect "$DEST"
 
-step "7) Persistance : les données du registre vivent dans un volume nommé"
+step "7) Persistance : l'image survit à la RECRÉATION du conteneur registre"
 check "Le volume registry-data existe" \
   bash -c "docker volume ls --format '{{.Name}}' | grep -q 'registry-data'"
+# On DÉTRUIT le conteneur (down SANS -v : le volume nommé doit survivre) puis on le
+# recrée. Prouver l'existence du volume ne suffit pas — il faut qu'après recréation du
+# conteneur, l'image poussée soit toujours servie par le registre.
+docker compose down >/dev/null 2>&1
+docker compose up -d >/dev/null
+i=0
+until [ "$(curl -s -o /dev/null -w '%{http_code}' "http://$REG/v2/")" = "401" ]; do
+  i=$((i+2)); sleep 2
+  [ "$i" -ge 30 ] && { docker compose logs; break; }
+done
+assert_contains "Après recréation du conteneur, demo/alpine est toujours dans le registre" "demo/alpine" \
+  "$(curl -fsS -u "$REG_USER:$REG_PASS" "http://$REG/v2/_catalog")"
 
 summary

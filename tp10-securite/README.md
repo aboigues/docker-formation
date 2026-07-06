@@ -109,8 +109,8 @@ curl -s http://localhost:8087/health                         # ok
 
 ```bash
 cd ..
-./verify.sh           # teste la solution de référence (durcie)
-# ./verify.sh starter # ... ou testez VOTRE Dockerfile une fois durci
+./verify.sh              # teste VOTRE Dockerfile durci (dossier starter/)
+./verify.sh solution     # (option) rejoue la solution de référence (durcie)
 ```
 
 ---

@@ -3,7 +3,7 @@
 # isolation réseau, profiles et surcouches dev/prod.
 source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 
-TARGET="${1:-solution}"
+TARGET="${1:-starter}"
 cd "$TARGET"
 API="http://localhost:8085"
 

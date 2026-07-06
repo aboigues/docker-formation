@@ -2,7 +2,7 @@
 # TP7 — vérifie que la stack Compose lève WordPress + MySQL.
 source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 
-TARGET="${1:-solution}"
+TARGET="${1:-starter}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 DIR="$HERE/$TARGET"
 PROJECT="tp07verify"

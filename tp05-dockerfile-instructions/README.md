@@ -104,7 +104,8 @@ docker run --rm tp05-portail:1.4.2 --version   # exécute « node --version » (
 
 ```bash
 cd ..
-./verify.sh
+./verify.sh              # teste VOTRE travail (dossier starter/)
+./verify.sh solution     # (option) rejoue la solution de référence
 ```
 
 ```bash

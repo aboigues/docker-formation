@@ -3,7 +3,7 @@
 # Grafana est provisionné (Prometheus + Loki), et les logs arrivent dans Loki via Alloy.
 source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 
-TARGET="${1:-solution}"
+TARGET="${1:-starter}"
 cd "$TARGET"
 
 cleanup() { docker compose down -v --remove-orphans >/dev/null 2>&1 || true; }

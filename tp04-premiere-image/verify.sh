@@ -5,7 +5,7 @@ source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 
 # Par défaut on teste la solution ; passez "starter" en argument pour tester le vôtre :
 #   ./verify.sh starter
-TARGET="${1:-solution}"
+TARGET="${1:-starter}"
 IMAGE="tp04-landing-${TARGET}:test"
 NAME="tp04-verify-${TARGET}"
 PORT=8081

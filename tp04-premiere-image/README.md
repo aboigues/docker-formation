@@ -71,10 +71,11 @@ docker rm -f landing
 Depuis le dossier du TP :
 
 ```bash
-./verify.sh
+./verify.sh              # teste VOTRE travail (dossier starter/)
+./verify.sh solution     # (option) rejoue la solution de référence
 ```
 
-Le script construit l'image de la **solution**, la lance, vérifie la réponse HTTP et le contenu, puis nettoie tout. Tant que vous n'avez pas le ✅, votre TP n'est pas terminé.
+Le script construit l'image de **votre** dossier `starter/`, la lance, vérifie la réponse HTTP et le contenu, puis nettoie tout. Tant que vous n'avez pas le ✅, votre TP n'est pas terminé.
 
 ---
 

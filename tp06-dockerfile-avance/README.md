@@ -75,8 +75,8 @@ docker rm -f api
 Depuis le dossier du TP :
 
 ```bash
-./verify.sh          # teste la solution de référence
-./verify.sh starter  # teste VOTRE Dockerfile
+./verify.sh              # teste VOTRE Dockerfile (dossier starter/)
+./verify.sh solution     # (option) rejoue la solution de référence
 ```
 
 Le script construit l'image, la lance, vérifie la réponse HTTP, la version injectée **et la taille de l'image**, puis nettoie tout. Tant que vous n'avez pas le ✅, votre TP n'est pas terminé.

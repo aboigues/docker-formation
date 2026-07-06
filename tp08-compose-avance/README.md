@@ -149,7 +149,8 @@ docker compose -f compose.yaml -f compose.prod.yaml config | less   # la config 
 
 ```bash
 cd ..              # revenir à la racine du TP
-./verify.sh        # teste la solution de référence (comme la CI)
+./verify.sh              # teste VOTRE travail (dossier starter/)
+./verify.sh solution     # (option) rejoue la solution de référence (comme la CI)
 ```
 
 ```bash
