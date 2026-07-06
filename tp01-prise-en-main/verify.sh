@@ -23,11 +23,24 @@ assert_contains "La page d'accueil nginx répond" "nginx" "$BODY"
 
 step "3) Cycle de vie : stop / start"
 docker stop "$NAME" >/dev/null
+# Selon la version de Docker (runners CI chargés notamment), l'état peut mettre un
+# court instant à basculer après le retour de `docker stop`/`docker start`. On attend
+# (borné) d'atteindre l'état voulu avant de l'affirmer, sinon le test devient instable.
+i=0
+until [ -z "$(docker ps --filter name="$NAME" --filter status=running -q)" ]; do
+  i=$((i+1)); sleep 1
+  if [ "$i" -ge 10 ]; then break; fi
+done
 check "Après stop, le conteneur n'est plus 'running'" \
   bash -c "[ -z \"\$(docker ps --filter name=$NAME --filter status=running -q)\" ]"
 check "Après stop, le conteneur existe toujours (ps -a)" \
   bash -c "docker ps -a --filter name=$NAME -q | grep -q ."
 docker start "$NAME" >/dev/null
+i=0
+until [ -n "$(docker ps --filter name="$NAME" --filter status=running -q)" ]; do
+  i=$((i+1)); sleep 1
+  if [ "$i" -ge 10 ]; then break; fi
+done
 check "Après start, le conteneur est de nouveau 'running'" \
   bash -c "docker ps --filter name=$NAME --filter status=running -q | grep -q ."
 
