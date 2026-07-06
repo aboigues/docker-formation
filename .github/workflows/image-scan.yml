@@ -1,0 +1,74 @@
+name: Scan de vulnérabilités des images (hebdomadaire)
+
+# Scanne périodiquement les images Docker TIERCES utilisées par les TP.
+#
+# Report-only : les résultats remontent dans l'onglet « Security » → « Code scanning »
+# (format SARIF). Le job N'ÉCHOUE PAS sur une CVE — c'est une veille, pas une barrière.
+# Déclenchable à la demande via « Run workflow » (workflow_dispatch).
+#
+# Sécurité chaîne d'appro : on N'utilise PAS les actions `aquasecurity/setup-trivy` /
+# `aquasecurity/trivy-action` (compromises en 2025, release malveillante v0.69.4).
+# On lance directement l'image officielle `aquasec/trivy` épinglée, et seule l'action
+# first-party `github/codeql-action/upload-sarif` de GitHub est utilisée.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # tous les lundis à 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write # requis pour publier le SARIF dans code scanning
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false # une image en erreur ne doit pas masquer les autres
+      matrix:
+        image:
+          - alpine:3.23
+          - nginx:1.30-alpine
+          - mysql:8.4
+          - wordpress:6.8-php8.3-apache
+          - mariadb:11.8
+          - postgres:18-alpine
+          - redis:8-alpine
+          - registry:3
+          - adminer:5
+          - drupal:11.3-apache
+          - traefik:v3.7.5
+          - grafana/grafana:13.0.2
+          - grafana/loki:3.7.2
+          - grafana/alloy:v1.17.0
+          - prom/prometheus:v3.12.0
+          - gcr.io/cadvisor/cadvisor:v0.55.1
+          - node:24-alpine
+          - golang:1.26-alpine
+          - gcr.io/distroless/static-debian12:nonroot
+          - httpd:2
+          - busybox:1.37
+    name: ${{ matrix.image }}
+    steps:
+      - name: Identifiant de scan (nom de fichier + catégorie SARIF)
+        run: echo "SCAN_ID=$(echo '${{ matrix.image }}' | tr '/:' '--')" >> "$GITHUB_ENV"
+
+      - name: Scan Trivy (HIGH/CRITICAL corrigibles) → SARIF
+        env:
+          # Évite le rate-limiting GitHub lors du téléchargement de la base Trivy.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          docker run --rm -e GITHUB_TOKEN -v "$PWD:/out" \
+            aquasec/trivy:0.72.0 image \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --format sarif --output "/out/${SCAN_ID}.sarif" \
+            --no-progress \
+            "${{ matrix.image }}"
+
+      - name: Publier le SARIF dans code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ env.SCAN_ID }}.sarif
+          category: ${{ env.SCAN_ID }}
