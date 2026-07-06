@@ -19,6 +19,18 @@ on:
   schedule:
     - cron: "0 6 * * 1" # tous les lundis à 06:00 UTC
   workflow_dispatch:
+  # Auto-test du scanner : ne se déclenche QUE si le workflow ou le script de
+  # découverte change (pas sur les PR de contenu des TP). Valide la plomberie
+  # complète (discover → scan → SARIF) avant merge, puis au merge sur main.
+  pull_request:
+    paths:
+      - ".github/workflows/image-scan.yml"
+      - "scripts/list-tp-images.py"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/image-scan.yml"
+      - "scripts/list-tp-images.py"
 
 permissions:
   contents: read
