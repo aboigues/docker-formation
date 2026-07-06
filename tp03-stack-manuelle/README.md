@@ -102,7 +102,8 @@ Rechargez la page : si vous aviez commencé l'installation, l'état est **conser
 ## Étape 4 — Validez
 
 ```bash
-./verify.sh
+./verify.sh              # teste VOTRE travail (dossier starter/)
+./verify.sh solution     # (option) rejoue la solution de référence
 ```
 
 ## Étape 5 — Démontez proprement

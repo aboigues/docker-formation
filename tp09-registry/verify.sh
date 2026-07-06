@@ -3,7 +3,7 @@
 # catalogue protégé (401 sans identifiants), persistance.
 source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 
-TARGET="${1:-solution}"
+TARGET="${1:-starter}"
 cd "$TARGET"
 
 REG="localhost:5000"

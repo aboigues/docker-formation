@@ -125,7 +125,8 @@ curl -s -u telescope:registry_secret http://localhost:5000/v2/_catalog   # toujo
 
 ```bash
 cd ..
-./verify.sh
+./verify.sh              # teste VOTRE travail (dossier starter/)
+./verify.sh solution     # (option) rejoue la solution de référence
 ```
 
 ```bash

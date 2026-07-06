@@ -99,7 +99,8 @@ chmod +x starter/collect.sh
 ## Étape 6 — Validez
 
 ```bash
-./verify.sh        # teste la solution de référence
+./verify.sh              # teste VOTRE travail (dossier starter/)
+./verify.sh solution     # (option) rejoue la solution de référence
 ```
 
 Nettoyez votre environnement manuel :

@@ -2,7 +2,7 @@
 # TP2 — vérifie que collect.sh extrait correctement les infos d'un conteneur.
 source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 
-TARGET="${1:-solution}"
+TARGET="${1:-starter}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 NET="tp02-verify-net"
 NAME="tp02-verify-target"

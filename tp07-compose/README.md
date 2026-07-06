@@ -85,7 +85,8 @@ docker compose down        # supprime conteneurs + réseau, GARDE le volume
 Depuis le dossier du TP :
 
 ```bash
-./verify.sh
+./verify.sh              # teste VOTRE travail (dossier starter/)
+./verify.sh solution     # (option) rejoue la solution de référence
 ```
 
 ---

@@ -3,7 +3,7 @@
 #   appli qui répond, version injectée au build (ARG), conteneur non-root, HEALTHCHECK présent.
 source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 
-TARGET="${1:-solution}"
+TARGET="${1:-starter}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 CTX="$HERE/$TARGET"
 

@@ -5,7 +5,7 @@
 source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 set +e  # les boucles d'attente gèrent leurs propres erreurs ; le verdict vient de summary
 
-TARGET="${1:-solution}"
+TARGET="${1:-starter}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 cd "$HERE/$TARGET" || exit 1
 STACK="tp12"

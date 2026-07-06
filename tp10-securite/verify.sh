@@ -3,7 +3,7 @@
 # HIGH/CRITICAL (Trivy), fonctionnelle, et transférable hors-ligne (save/load).
 source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 
-TARGET="${1:-solution}"
+TARGET="${1:-starter}"
 cd "$TARGET"
 
 IMG="telescope-secure:tp10-$TARGET"

@@ -2,7 +2,7 @@
 # TP3 — vérifie que la stack WordPress + MySQL fonctionne et persiste.
 source "$(git rev-parse --show-toplevel)/scripts/lib.sh"
 
-TARGET="${1:-solution}"
+TARGET="${1:-starter}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 DEPLOY="$HERE/$TARGET/deploy.sh"
 
