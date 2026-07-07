@@ -45,6 +45,8 @@ docker swarm init                 # transforme votre Docker en manager d'un clus
 docker node ls                    # vous êtes « Leader »
 ```
 
+> 🧠 **Votre machine devient `node1`, l'unique nœud du cluster — et il est `Manager` / `Leader`.** C'est lui qui reçoit vos commandes (`docker service`, `docker stack`), qui stocke l'**état désiré** du cluster et qui **décide où placer** chaque réplica. Retenez ce rôle : dans la stack, `db` (MariaDB) et `traefik` portent une contrainte `node.role == manager` → ils **atterrissent forcément sur node1**. Ici, mono-nœud, **tout** tourne sur node1 ; c'est pour ça que, plus bas, un simple `docker ps`/`docker exec` sur votre machine « voit » les réplicas Drupal (ils sont **locaux au manager**). Sur un vrai cluster (Annexe A), ce ne serait plus vrai — on y revient.
+
 > 🧠 `drupal/settings.php` lit la BDD depuis des variables d'env (`DRUPAL_DB_*`). Résultat : **tous** les réplicas ont la même config, sans installation par réplica.
 
 > ❓ **Question** : un seul nœud, est-ce encore un « cluster » ? Que faudrait-il pour une vraie tolérance de panne ? (Voir l'**[Annexe A](#annexe-a--un-vrai-cluster-à-3-nœuds-en-local-docker-in-docker)** : un cluster 3 nœuds en 5 min, sans VM.)
@@ -80,12 +82,16 @@ Patientez que **MariaDB** soit prêt et que les **3 réplicas Drupal** tournent.
 On installe via **drush**, dans **n'importe lequel** des réplicas (ils partagent la même base) :
 
 ```bash
+# docker ps ne liste QUE les conteneurs de node1 (votre machine = le manager).
+# En mono-nœud, les 3 réplicas y sont : on en attrape un.
 CID=$(docker ps --filter "label=com.docker.swarm.service.name=tp12_drupal" -q | head -1)
 docker exec "$CID" drush -y site:install standard \
   --site-name="Telemach Swarm" --account-name=admin --account-pass=admin
 ```
 
 > 🧠 Une **seule** installation suffit : elle crée les tables dans la base **partagée**. Les 3 réplicas servent aussitôt ce même site — c'est exactement le principe « plusieurs frontaux, une base ».
+
+> ⚠️ **Pourquoi ce `docker exec` marche ici.** `docker ps`/`docker exec` sont **locaux au nœud** : ils ne parlent qu'au démon Docker de node1. Si un réplica tournait sur node2/node3 (vrai cluster), il serait **invisible** depuis node1 — il faudrait s'y connecter (SSH sur cette machine), car un manager **orchestre** les nœuds mais ne relaie pas un `docker exec` vers eux. En mono-nœud, la question ne se pose pas : tout est sur node1.
 
 ## Étape 5 — Tester le routage et la **répartition de charge**
 
@@ -103,7 +109,28 @@ done
 
 Ouvrez le **dashboard Traefik** : http://localhost:8091 → routeur `drupal` et ses cibles.
 
-> ❓ **Question** : `X-Served-By` change d'un appel à l'autre — qui décide vers quel réplica part chaque requête ? Et pourquoi tous renvoient-ils le **même** contenu ?
+> ❓ **Question** : `X-Served-By` change d'un appel à l'autre — qui décide vers quel réplica part chaque requête ? Et pourquoi tous renvoient-ils le **même** contenu ? (Le contenu est identique car les 3 réplicas partagent **la même base + les mêmes fichiers** : ce sont des frontaux interchangeables.)
+
+### 🔑 Qui répartit la charge quand on scale ? (Swarm le fait **tout seul**, sans Traefik)
+
+C'est LE point à comprendre. Dès qu'un service Swarm a **plusieurs réplicas**, il existe **deux couches** de répartition possibles — et **la première est native, gratuite, sans aucun proxy** :
+
+**1. Le load-balancer natif de Swarm (couche 4 — TCP/UDP).** Chaque service reçoit une **IP virtuelle unique et stable, la VIP** (Virtual IP). Personne ne parle directement aux conteneurs : on parle à la VIP du service, et le **noyau Linux** (module **IPVS**, sur chaque nœud) distribue les connexions **en round-robin** vers les réplicas sains. Deux formes :
+
+- **Interne (service → service) : la VIP par nom.** Dans notre stack, Drupal se connecte à la base via `DRUPAL_DB_HOST=db`. Ce `db` **n'est pas un conteneur**, c'est le **nom du service** : le DNS interne de Swarm le résout vers la **VIP** de `db`, et IPVS route vers le(s) réplica(s). Passez `db` à 3 réplicas et **la même ligne `DRUPAL_DB_HOST=db`** serait déjà load-balancée — **sans rien changer, sans Traefik**. (On ne le fait pas ici : répliquer une base SQL demande bien plus, cf. règle 1.)
+- **Externe (routing mesh).** Si on avait publié le port de Drupal en mode **ingress** (`docker service create --publish 8090:80 --replicas 3 …`), **chaque nœud** du cluster écouterait sur `:8090` et renverrait chaque connexion, via IPVS, vers **un** des 3 réplicas — **où qu'il soit dans le cluster**. C'est le **routing mesh** : un port publié = joignable partout, réparti automatiquement. **Zéro proxy, zéro conf.**
+
+**2. Le load-balancer applicatif — Traefik (couche 7 — HTTP).** Ce que Swarm ne sait **pas** faire : lire l'en-tête `Host`, router `drupal.localhost` vers le bon service, faire du HTTPS/Let's Encrypt, des sticky sessions, du path-based routing… C'est le rôle de Traefik, qui répartit **par requête HTTP** (et non par connexion TCP). C'est lui qui produit le `X-Served-By` variable que vous venez d'observer.
+
+> ⚠️ **Pourquoi, dans CE TP, on ne « voit » pas la couche 1 ?** Regardez la stack : les ports de Traefik sont publiés en **`mode: host`** (pas `ingress`). C'est **délibéré** — on ne veut pas empiler le routing mesh de Swarm **sous** Traefik (double load-balancing L4+L7 inutile). Résultat : ici c'est **Traefik seul** qui répartit vers Drupal. Mais la couche native, elle, **fonctionne quand même en coulisse** pour l'accès `drupal → db`. Pour la voir « à nu » (sans Traefik), c'est l'objet de la démo ci-dessous et de l'Annexe A.
+
+> 🔬 **Démo express « Swarm répartit sans Traefik »** (facultatif, ~1 min). On crée un service jouet publié en ingress et on frappe le port : les réponses tournent entre réplicas **sans aucun proxy**.
+> ```bash
+> docker service create --name lb-demo --replicas 3 --publish 9000:80 traefik/whoami
+> for i in $(seq 1 6); do curl -s http://localhost:9000/ | grep Hostname; done
+> #   -> le Hostname change à chaque appel : IPVS round-robin sur les 3 réplicas
+> docker service rm lb-demo
+> ```
 
 ## Étape 6 — Éprouver la résilience (le moment « waouh »)
 
