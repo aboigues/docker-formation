@@ -33,12 +33,12 @@ trivy --version
 
 ## Étape 1 — Mesurer le problème (l'image naïve)
 
-`starter/Dockerfile` construit l'image « à l'ancienne » : une seule étape, sur `golang:1.26-alpine`, en **root**. Construisez-la et regardez les dégâts :
+`starter/Dockerfile` construit l'image « à l'ancienne » : une seule étape, sur `golang:1.26-bookworm` (l'image Go **complète**, à base de Debian), en **root**. Construisez-la et regardez les dégâts :
 
 ```bash
 cd starter
 docker build -t telescope:naive .
-docker images telescope:naive                                  # ~300 Mo
+docker images telescope:naive                                  # ~800 Mo
 trivy image --severity HIGH,CRITICAL telescope:naive           # combien de failles ?
 docker run --rm telescope:naive id 2>/dev/null || echo "(pas de shell pour 'id')"
 ```
@@ -75,7 +75,7 @@ USER nonroot:nonroot
 
 ```bash
 docker build -t telescope:hardened .
-docker images "telescope:*"                                    # ~10 Mo vs ~300 Mo
+docker images "telescope:*"                                    # ~10 Mo vs ~800 Mo
 trivy image --severity HIGH,CRITICAL --exit-code 1 telescope:hardened && echo "✅ propre"
 ```
 
