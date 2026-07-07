@@ -200,10 +200,20 @@ L'image `node:24-alpine` n'a ni `curl` ni `wget`, mais Node 24 a `fetch` intégr
 
 ```yaml
     volumes:
-      - ../app:/usr/src/app
-      - /usr/src/app/node_modules
+      - ../app:/usr/src/app          # bind mount : votre code hôte
+      - /usr/src/app/node_modules    # volume anonyme : garde les deps de l'image
 ```
-La 1re ligne monte votre code ; la 2de « protège » le dossier `node_modules` de l'image (volume anonyme), sinon le montage de l'hôte le masquerait.
+
+**Ce qui se passe, étape par étape :**
+
+1. **La 1re ligne est un *bind mount*** : elle remplace tout `/usr/src/app` dans le conteneur par votre dossier hôte `../app`. Or, sur l'hôte, `node_modules` **n'existe pas** (les dépendances ont été installées **dans l'image** au `build`, pas sur votre poste). Résultat : le conteneur ne voit plus `express` → `Cannot find module 'express'`.
+2. **La 2de ligne n'a pas de partie gauche** (`hôte:conteneur`), seulement un chemin conteneur : c'est un **volume anonyme** — un volume géré par Docker, sans nom, monté sur le sous-dossier `/usr/src/app/node_modules`.
+3. **Le montage le plus profond gagne.** `…/node_modules` est plus spécifique que `…/app` : à cet endroit précis, c'est le volume anonyme qui s'applique, **par-dessus** le bind mount.
+4. **Pourquoi il contient les bonnes deps ?** C'est LA propriété clé des volumes Docker (nommés **ou** anonymes) : à sa **première création**, un volume vide est **pré-rempli avec le contenu de l'image** à ce chemin. Le `node_modules` de l'image y est donc recopié — un bind mount, lui, ne fait jamais ça.
+
+**Bilan :** votre code vient de l'hôte (édition à chaud), `node_modules` vient de l'image (deps intactes). Le meilleur des deux.
+
+> ⚠️ Corollaire : ce volume anonyme n'est peuplé qu'**une fois**. Si vous **ajoutez une dépendance** dans `package.json`, il faut la réinstaller (rebuild de l'image + `docker compose up --build --force-recreate`, ou `npm install` dans le conteneur) — le volume ne se met pas à jour tout seul.
 </details>
 
 ---
