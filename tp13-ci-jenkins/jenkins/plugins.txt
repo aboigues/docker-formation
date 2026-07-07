@@ -1,0 +1,9 @@
+# Plugins Jenkins requis par le TP13.
+# jenkins-plugin-cli résout automatiquement les dépendances transitives.
+#
+# configuration-as-code : configurer Jenkins depuis un fichier YAML (JCasC)
+# job-dsl               : créer le job du pipeline « as code » depuis casc.yaml
+# workflow-aggregator   : Pipeline (Jenkinsfile déclaratif : stages, steps…)
+configuration-as-code
+job-dsl
+workflow-aggregator

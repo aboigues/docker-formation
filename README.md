@@ -51,6 +51,7 @@ Chaque TP a une **cible vérifiable** (un site qui répond, une base qui persist
 | TP10 | Sécurité des images | Scanner, durcir, transférer en air-gapped |
 | TP11 | Monitoring & logs | Observer une appli (Prometheus, Grafana, Loki) |
 | TP12 | Swarm & Traefik | Déployer un Drupal répliqué (3×) + MariaDB derrière Traefik |
+| TP13 | Chaîne d'intégration (CI) | Un Jenkins conteneurisé qui build → teste → scanne → pousse une image |
 
 > Les TP sont **numérotés dans l'ordre du cours** et la progression est **volontairement graduelle** — *exécuter → construire → orchestrer* : on lance des conteneurs (TP1-TP2), on monte une stack multi-conteneurs à la main (TP3), **puis** on apprend à **construire** ses propres images (TP4 statique → TP5 toutes les instructions → TP6 multi-stage), et **enfin** on **orchestre** le tout avec Docker Compose (TP7 les bases → TP8 avancé). Suivez-les dans l'ordre, quel que soit votre rythme.
 

@@ -2,6 +2,10 @@ name: TP — vérification
 
 # « Si ce n'est pas testé par GitHub Actions, ça ne fonctionne pas. »
 # Chaque TP est validé en exécutant son verify.sh sur la solution de référence.
+#
+# Matrice DYNAMIQUE : on ne rejoue que les TP réellement modifiés par le commit
+# (ex. un changement dans tp05 ne relance pas tp13, le plus lourd). Un changement
+# PARTAGÉ (scripts/ ou ce workflow) relance en revanche TOUS les TP.
 
 on:
   push:
@@ -13,28 +17,75 @@ on:
     paths:
       - "tp*/**"
       - "scripts/**"
+      - ".github/workflows/ci.yml"
   workflow_dispatch:
 
 jobs:
-  tp:
+  # 1) Déterminer la liste des TP à tester à partir des fichiers modifiés.
+  select:
     runs-on: ubuntu-latest
-    timeout-minutes: 12   # garde-fou : aucun TP ne doit tourner aussi longtemps
+    outputs:
+      tps: ${{ steps.pick.outputs.tps }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # historique complet nécessaire pour le diff
+
+      - id: pick
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          # Liste canonique des TP (source de vérité : ignore les dossiers morts éventuels).
+          CANON="tp01-prise-en-main tp02-cli tp03-stack-manuelle tp04-premiere-image \
+                 tp05-dockerfile-instructions tp06-dockerfile-avance tp07-compose \
+                 tp08-compose-avance tp09-registry tp10-securite tp11-observabilite \
+                 tp12-swarm-traefik tp13-ci-jenkins"
+
+          to_json() { # transforme des arguments en tableau JSON compact ([] si aucun)
+            if [ "$#" -eq 0 ]; then printf '[]'; else printf '%s\n' "$@" | jq -R . | jq -cs .; fi
+          }
+
+          # Fichiers modifiés selon le contexte (PR vs push).
+          CHANGED=""
+          if [ "$EVENT" = "pull_request" ]; then
+            git fetch --no-tags --depth=200 origin "$BASE_REF" >/dev/null 2>&1 || true
+            CHANGED="$(git diff --name-only "origin/${BASE_REF}...HEAD" 2>/dev/null || true)"
+          elif [ -n "${BEFORE:-}" ] \
+               && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
+               && git cat-file -e "$BEFORE" 2>/dev/null; then
+            CHANGED="$(git diff --name-only "$BEFORE" "$SHA" 2>/dev/null || true)"
+          fi
+
+          # Plage inconnue (1er push, workflow_dispatch…) OU fichier partagé -> on teste TOUT.
+          if [ -z "$CHANGED" ] || printf '%s\n' "$CHANGED" \
+               | grep -qE '^(scripts/|\.github/workflows/ci\.yml$)'; then
+            TPS="$(to_json $CANON)"
+          else
+            # Sinon : seulement les TP canoniques réellement touchés.
+            SEL=""
+            for tp in $(printf '%s\n' "$CHANGED" | grep -oE '^tp[^/]+' | sort -u); do
+              case " $CANON " in *" $tp "*) SEL="$SEL $tp" ;; esac
+            done
+            TPS="$(to_json $SEL)"
+          fi
+
+          echo "tps=$TPS" >> "$GITHUB_OUTPUT"
+          echo "TP sélectionnés pour ce run : $TPS"
+
+  # 2) Tester chaque TP retenu (matrice construite à la volée).
+  tp:
+    needs: select
+    if: ${{ needs.select.outputs.tps != '[]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 18   # garde-fou (TP13 : build image Jenkins + boot + pipeline complet)
     strategy:
       fail-fast: false
       matrix:
-        tp:
-          - tp01-prise-en-main
-          - tp02-cli
-          - tp03-stack-manuelle
-          - tp04-premiere-image
-          - tp05-dockerfile-instructions
-          - tp06-dockerfile-avance
-          - tp07-compose
-          - tp08-compose-avance
-          - tp09-registry
-          - tp10-securite
-          - tp11-observabilite
-          - tp12-swarm-traefik
+        tp: ${{ fromJSON(needs.select.outputs.tps) }}
     name: ${{ matrix.tp }}
     steps:
       - uses: actions/checkout@v4
@@ -45,7 +96,7 @@ jobs:
           docker compose version
 
       # Outillage supplémentaire requis par certains TP (installé uniquement si besoin).
-      - name: Installer Trivy (TP8)
+      - name: Installer Trivy (TP10)
         if: matrix.tp == 'tp10-securite'
         uses: aquasecurity/setup-trivy@v0.3.1
         with:
