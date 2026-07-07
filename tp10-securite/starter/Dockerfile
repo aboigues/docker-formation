@@ -1,9 +1,15 @@
-# Image NAÏVE : elle FONCTIONNE, mais elle est grosse (~300 Mo), embarque tout
-# l'outillage de compilation, et tourne en ROOT. À DURCIR (voir TODO ci-dessous).
+# Image NAÏVE : elle FONCTIONNE, mais elle est grosse (~800 Mo), embarque tout
+# l'outillage de compilation, une distrib Debian complète (des centaines de
+# paquets, donc des CVE), et tourne en ROOT. À DURCIR (voir TODO ci-dessous).
 #
 # Objectif : la transformer en image multi-stage, minimale et non-root,
 # qui passe le scan Trivy sans faille HIGH/CRITICAL.
-FROM golang:1.26-alpine
+#
+# Base volontairement vulnérable (support pédagogique) : le marqueur ci-dessous
+# l'exclut de la veille hebdomadaire (scripts/list-tp-images.py), sinon ses CVE
+# — intentionnelles — pollueraient le tableau « code scanning ».
+# image-scan: ignore
+FROM golang:1.26-bookworm
 WORKDIR /src
 COPY go.mod ./
 COPY main.go ./

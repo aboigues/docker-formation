@@ -75,7 +75,15 @@ def main() -> int:
             continue
 
         if is_dockerfile(path):
+            # Un commentaire `# image-scan: ignore` sur sa propre ligne exclut le
+            # PROCHAIN FROM de la veille (Docker n'autorise pas de commentaire en
+            # fin de ligne FROM). Sert aux bases volontairement vulnérables
+            # (support pédagogique) pour ne pas polluer « code scanning ».
+            ignore_next_from = False
             for line in text.splitlines():
+                if re.search(r"#\s*image-scan:\s*ignore", line, re.IGNORECASE):
+                    ignore_next_from = True
+                    continue
                 m = re.match(r"\s*FROM\s+(.*)", line, re.IGNORECASE)
                 if not m:
                     continue
@@ -86,7 +94,9 @@ def main() -> int:
                 # FROM <image> AS <alias>
                 if len(parts) >= 3 and parts[1].upper() == "AS":
                     aliases.add(parts[2])
-                if image.lower() == "scratch":
+                skip = ignore_next_from or image.lower() == "scratch"
+                ignore_next_from = False
+                if skip:
                     continue
                 candidates.add(image)
 
