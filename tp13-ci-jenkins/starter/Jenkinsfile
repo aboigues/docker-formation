@@ -1,0 +1,64 @@
+// TP13 — Pipeline à COMPLÉTER. Votre mission : faire passer les 4 étapes au vert.
+// Les commandes `sh` s'exécutent dans le conteneur Jenkins mais s'adressent au
+// daemon Docker de l'HÔTE (le socket est monté dans compose.yaml).
+//
+// Rappel : après chaque modification de ce fichier, rechargez le pipeline avec
+//   docker compose restart jenkins
+// puis relancez un build depuis l'interface (http://localhost:8080).
+pipeline {
+  agent any
+
+  environment {
+    REGISTRY = 'localhost:5000'
+    IMAGE    = 'telemach/whoami'
+    REF      = "${REGISTRY}/${IMAGE}"
+    TAG      = "1.0.${BUILD_NUMBER}"
+    NET      = "tp13-test-${BUILD_NUMBER}"
+  }
+
+  stages {
+
+    stage('Build') {
+      steps {
+        echo '=== STAGE BUILD ==='
+        // TODO 1 : construire l'image depuis le code source (/workspace/app)
+        //          et l'étiqueter "$REF:$TAG".
+        //   Indice : docker build -t ... <chemin_du_contexte>
+        sh 'echo "TODO 1 : docker build" && false'
+      }
+    }
+
+    stage('Test') {
+      steps {
+        echo '=== STAGE TEST ==='
+        // TODO 2 : lancer un conteneur de l'image et vérifier que la route
+        //          http://<conteneur>:8080/health répond « ok ».
+        //   Indice : créez un réseau ("$NET"), lancez le conteneur dessus,
+        //   puis interrogez-le avec un conteneur jetable
+        //   (ex. `alpine:3.23 wget -q -O- http://<nom>:8080/health`).
+        sh 'echo "TODO 2 : smoke test" && false'
+      }
+    }
+
+    stage('Scan') {
+      steps {
+        echo '=== STAGE SCAN ==='
+        // TODO 3 : scanner "$REF:$TAG" avec Trivy (conteneur aquasec/trivy:0.72.0)
+        //          et FAIRE ÉCHOUER le build si une faille HIGH/CRITICAL est trouvée.
+        //   Indice : trivy a besoin du socket Docker pour lire l'image locale
+        //   (-v /var/run/docker.sock:/var/run/docker.sock) ; option --exit-code 1.
+        //   Terminez par : echo "Aucune vulnerabilite HIGH/CRITICAL : image validee"
+        sh 'echo "TODO 3 : trivy scan" && false'
+      }
+    }
+
+    stage('Push') {
+      steps {
+        echo '=== STAGE PUSH ==='
+        // TODO 4 : pousser "$REF:$TAG" ET "$REF:latest" vers le registre privé.
+        //   Indice : docker push ... (et docker tag pour créer « latest »).
+        sh 'echo "TODO 4 : docker push" && false'
+      }
+    }
+  }
+}

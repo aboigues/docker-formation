@@ -1,0 +1,91 @@
+// TP13 — Pipeline de référence : Build → Test → Scan → Push.
+// Chaque « stage » est une étape de la chaîne d'intégration. Les commandes `sh`
+// tournent dans le conteneur Jenkins, mais s'adressent au daemon Docker de l'HÔTE
+// (socket monté) : les images construites/poussées sont donc bien réelles.
+pipeline {
+  agent any
+
+  environment {
+    REGISTRY = 'localhost:5000'
+    IMAGE    = 'telemach/whoami'
+    REF      = "${REGISTRY}/${IMAGE}"
+    TAG      = "1.0.${BUILD_NUMBER}"        // une version unique par build
+    NET      = "tp13-test-${BUILD_NUMBER}"  // réseau jetable pour le smoke test
+  }
+
+  stages {
+
+    // 1) CONSTRUIRE l'image applicative à partir du code source.
+    stage('Build') {
+      steps {
+        echo '=== STAGE BUILD ==='
+        sh 'docker build -t "$REF:$TAG" /workspace/app'
+      }
+    }
+
+    // 2) TESTER : on démarre un conteneur et on vérifie que /health répond « ok ».
+    stage('Test') {
+      steps {
+        echo '=== STAGE TEST ==='
+        sh '''
+          docker network create "$NET" >/dev/null 2>&1 || true
+          docker rm -f "app-test-$BUILD_NUMBER" >/dev/null 2>&1 || true
+          docker run -d --name "app-test-$BUILD_NUMBER" --network "$NET" "$REF:$TAG"
+
+          ok=0
+          for i in $(seq 1 15); do
+            if docker run --rm --network "$NET" alpine:3.23 \
+                 wget -q -O- "http://app-test-$BUILD_NUMBER:8080/health" | grep -q ok; then
+              ok=1; break
+            fi
+            sleep 2
+          done
+
+          docker rm -f "app-test-$BUILD_NUMBER" >/dev/null 2>&1 || true
+          docker network rm "$NET" >/dev/null 2>&1 || true
+          [ "$ok" = 1 ] || { echo "smoke test ECHEC"; exit 1; }
+          echo "smoke test OK : /health repond ok"
+        '''
+      }
+    }
+
+    // 3) SCANNER : Trivy (en conteneur) refuse l'image si elle contient une faille
+    //    HIGH ou CRITICAL. --exit-code 1 fait échouer le pipeline le cas échéant.
+    stage('Scan') {
+      steps {
+        echo '=== STAGE SCAN ==='
+        sh '''
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:0.72.0 image \
+              --quiet --no-progress \
+              --severity HIGH,CRITICAL --exit-code 1 \
+              "$REF:$TAG"
+          echo "Aucune vulnerabilite HIGH/CRITICAL : image validee"
+        '''
+      }
+    }
+
+    // 4) PUBLIER : l'image validée part dans le registre privé (tag versionné + latest).
+    stage('Push') {
+      steps {
+        echo '=== STAGE PUSH ==='
+        sh '''
+          docker push "$REF:$TAG"
+          docker tag  "$REF:$TAG" "$REF:latest"
+          docker push "$REF:latest"
+        '''
+      }
+    }
+  }
+
+  post {
+    always {
+      // On ne laisse pas traîner les images de build sur l'hôte.
+      sh 'docker image rm "$REF:$TAG" "$REF:latest" >/dev/null 2>&1 || true'
+    }
+    success {
+      echo "PIPELINE OK — image publiee : ${REF}:${TAG}"
+    }
+  }
+}

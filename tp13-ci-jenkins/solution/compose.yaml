@@ -1,0 +1,31 @@
+# TP13 — la « plateforme de CI » : un serveur Jenkins + un registre privé.
+# Astuce : le Jenkinsfile est monté depuis ce dossier -> pour tester une
+# nouvelle version du pipeline, éditez ./Jenkinsfile puis `docker compose restart jenkins`.
+name: tp13
+
+services:
+  # Registre privé (rappel du TP9). Sans authentification ici pour rester simple :
+  # publié sur localhost:5000, que Docker considère « insecure » par défaut.
+  registry:
+    image: registry:2
+    ports:
+      - "5000:5000"
+
+  # Serveur d'intégration continue, construit à partir de ../jenkins (JCasC).
+  jenkins:
+    build:
+      context: ../jenkins
+    ports:
+      - "8080:8080"
+    # Jenkins pilote le daemon Docker de l'HÔTE via son socket (« Docker-out-of-Docker »).
+    # group_add donne au user « jenkins » le droit de lire le socket (groupe du socket hôte).
+    group_add:
+      - "${DOCKER_GID:-999}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../app:/workspace/app:ro          # le code source à construire
+      - ./Jenkinsfile:/var/jenkins_home/Jenkinsfile:ro  # le pipeline (lu par JCasC)
+      - jenkins-data:/var/jenkins_home
+
+volumes:
+  jenkins-data:
