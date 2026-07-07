@@ -136,6 +136,69 @@ docker logout localhost:5000
 
 ---
 
+## 🌍 Bonus — Pousser **votre** image sur Docker Hub
+
+Vous venez de monter un registre **privé**. Docker Hub, c'est le **même mécanisme**, mais **public** et hébergé : le registre par défaut de Docker. Le trio reste identique — *login → tag → push* — seul le **préfixe du tag** change. Sur `localhost:5000` on préfixait par l'adresse du registre ; sur Docker Hub, le préfixe est simplement **votre nom d'utilisateur**.
+
+### 1. Créer un compte
+
+1. Allez sur **https://hub.docker.com** et créez un compte gratuit. Le nom d'utilisateur choisi **est** votre espace de noms : toutes vos images s'appelleront `votre-user/…` (remplacez `votre-user` par votre identifiant Docker Hub dans les commandes ci-dessous).
+2. Confirmez votre adresse e-mail.
+
+### 2. Créer un jeton d'accès (recommandé)
+
+Plutôt que votre mot de passe de compte, utilisez un **Personal Access Token** : il est **révocable** et se limite au push/pull, sans donner accès aux réglages du compte.
+
+- Docker Hub → **Account settings → Personal access tokens → Generate new token**.
+- Portée **Read & Write**, copiez le jeton (il ne s'affiche **qu'une fois**).
+
+### 3. Se connecter
+
+`docker login` **sans adresse** vise Docker Hub par défaut :
+
+```bash
+docker login -u votre-user           # colle le jeton quand le mot de passe est demandé
+# ou, sans laisser le secret dans l'historique shell :
+echo "$DOCKERHUB_TOKEN" | docker login -u votre-user --password-stdin
+```
+
+### 4. Taguer avec votre nom d'utilisateur
+
+Le tag doit commencer par `votre-user/`. Reprenons l'image du TP :
+
+```bash
+docker tag localhost:5000/demo/alpine:1.0 votre-user/demo-alpine:1.0
+```
+
+> 💡 Ici **pas de préfixe d'hôte** (`localhost:5000/…`) : sans hôte, Docker vise Docker Hub. `votre-user/demo-alpine:1.0` = registre Docker Hub, dépôt `votre-user/demo-alpine`, tag `1.0`.
+
+### 5. Pousser
+
+```bash
+docker push votre-user/demo-alpine:1.0
+```
+
+Votre image est en ligne : **n'importe qui** peut désormais faire `docker pull votre-user/demo-alpine:1.0` (un dépôt est **public** par défaut).
+
+### 6. Vérifier et nettoyer
+
+```bash
+# Simuler une autre machine
+docker rmi votre-user/demo-alpine:1.0
+docker pull votre-user/demo-alpine:1.0     # revient depuis Docker Hub
+docker logout
+```
+
+Sur **hub.docker.com**, votre dépôt apparaît dans **Repositories**. Vous pouvez y ajouter une description, et le passer en **privé** dans **Settings** (le plan gratuit inclut des dépôts privés).
+
+> ❓ **Question** : quelle est la différence de visibilité entre pousser sur `localhost:5000` (TP) et sur `votre-user/…` (Docker Hub) ? Dans quels cas préférer l'un ou l'autre ?
+
+> 🛑 **Ne poussez jamais** d'image contenant des secrets (clés, mots de passe, `.env`) sur un dépôt public — elle devient consultable et téléchargeable par tous, et un tag « supprimé » peut rester dans des caches. C'est la même prudence que le `.gitignore` de l'étape 1.
+
+> 📌 **Rate limits.** Docker Hub applique des **quotas de pull** pour les utilisateurs anonymes ; s'authentifier (`docker login`) relève ces limites. C'est l'une des raisons d'être d'un registre privé ou d'un cache pull-through (voir « Pour aller plus loin »).
+
+---
+
 ## 💡 Indices
 
 <details>
@@ -171,6 +234,9 @@ docker push localhost:5000/demo/alpine:1.0
 - **`docker push` / `docker pull`** : https://docs.docker.com/reference/cli/docker/image/push/
 - **API HTTP V2 du registre (`/v2/_catalog`, `/tags/list`)** : https://distribution.github.io/distribution/spec/api/
 - **Registre non sécurisé (`insecure-registries`, `daemon.json`)** : https://docs.docker.com/reference/cli/dockerd/#insecure-registries · https://docs.docker.com/engine/security/protect-access/
+- **Docker Hub (dépôts, visibilité)** : https://docs.docker.com/docker-hub/repos/
+- **Jetons d'accès personnels Docker Hub** : https://docs.docker.com/security/for-developers/access-tokens/
+- **Quotas de pull Docker Hub (rate limits)** : https://docs.docker.com/docker-hub/usage/
 
 > 💡 Le préfixe du tag **EST** l'adresse du registre : `localhost:5000/demo/alpine:1.0` → registre `localhost:5000`, dépôt `demo/alpine`, tag `1.0`. Sans préfixe d'hôte, Docker vise Docker Hub par défaut.
 
