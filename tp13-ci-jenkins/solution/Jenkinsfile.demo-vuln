@@ -1,0 +1,84 @@
+// TP13 — DÉMO « garde-fou sécurité » : que se passe-t-il quand l'image est vulnérable ?
+// On ne construit rien : on re-badge une image PUBLIQUE volontairement « grasse »
+// (golang:1.26, base Debian, des centaines de paquets) puis on la fait passer par
+// le même pipeline. Résultat attendu : Trivy REFUSE l'image → le pipeline vire au
+// ROUGE à l'étape SCAN et l'étape PUSH n'est JAMAIS atteinte.
+//
+// Utilisation : remplacer le Jenkinsfile monté par celui-ci, par ex.
+//   cp solution/Jenkinsfile.demo-vuln solution/Jenkinsfile
+//   (cd solution && docker compose restart jenkins) ; puis « Build Now ».
+pipeline {
+  agent any
+
+  environment {
+    REGISTRY = 'localhost:5000'
+    IMAGE    = 'telemach/demo-vuln'
+    REF      = "${REGISTRY}/${IMAGE}"
+    TAG      = "1.0.${BUILD_NUMBER}"
+    // 👇 L'image publique « à problèmes ». Change-la si tu veux (ex. node:18, python:3.9…).
+    // Astuce démo : une image EOL (node:18, debian:11…) garantit des CVE HIGH/CRITICAL.
+    BASE     = 'golang:1.26'
+  }
+
+  stages {
+
+    // 1) « BUILD » : ici on tire simplement l'image publique et on la re-tague.
+    stage('Build') {
+      steps {
+        echo '=== STAGE BUILD ==='
+        sh 'docker pull "$BASE"'
+        sh 'docker tag  "$BASE" "$REF:$TAG"'
+      }
+    }
+
+    // 2) TEST : pas de test applicatif ici (image générique) — on marque l'étape OK.
+    stage('Test') {
+      steps {
+        echo '=== STAGE TEST ==='
+        echo 'smoke test OK (demo : pas d application a tester sur cette image)'
+      }
+    }
+
+    // 3) SCAN : Trivy refuse toute image contenant du HIGH/CRITICAL (--exit-code 1).
+    //    C'est ICI que le pipeline va casser volontairement.
+    stage('Scan') {
+      steps {
+        echo '=== STAGE SCAN ==='
+        sh '''
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:0.72.0 image \
+              --quiet --no-progress \
+              --severity HIGH,CRITICAL --exit-code 1 \
+              "$REF:$TAG"
+          echo "Aucune vulnerabilite HIGH/CRITICAL : image validee"
+        '''
+      }
+    }
+
+    // 4) PUSH : ne sera JAMAIS exécuté tant que le SCAN échoue. C'est le but.
+    stage('Push') {
+      steps {
+        echo '=== STAGE PUSH ==='
+        sh '''
+          docker push "$REF:$TAG"
+          docker tag  "$REF:$TAG" "$REF:latest"
+          docker push "$REF:latest"
+        '''
+      }
+    }
+  }
+
+  post {
+    always {
+      sh 'docker image rm "$REF:$TAG" "$REF:latest" "$BASE" >/dev/null 2>&1 || true'
+    }
+    failure {
+      echo "PIPELINE BLOQUE — Trivy a refuse l image (failles HIGH/CRITICAL)."
+      echo "L etape PUSH n a pas eu lieu : le garde-fou securite a fait son travail."
+    }
+    success {
+      echo "Pipeline VERT (l image ne contenait aucune faille HIGH/CRITICAL)."
+    }
+  }
+}
