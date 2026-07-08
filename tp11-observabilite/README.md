@@ -1,6 +1,8 @@
 # TP11 — Observabilité : métriques, logs et tableaux de bord
 
-> Durée estimée : 1 h 15 · Ports utilisés : `8088` (appli), `9090` (Prometheus), `8080` (cAdvisor), `3100` (Loki), `3000` (Grafana)
+> Durée estimée : 1 h 15 · Ports utilisés : `8088` (appli), `9091` (Prometheus, cf. note ci-dessous), `8080` (cAdvisor), `3100` (Loki), `3000` (Grafana)
+>
+> ⚠️ **Alma Linux / RHEL** : le port `9090` est déjà occupé par **Cockpit** (interface d'admin web activée par défaut). Prometheus est donc publié sur `9091` côté hôte (le conteneur, lui, écoute toujours sur `9090` : Grafana et le scraping interne ne changent pas). Sur une machine où `9090` est libre, vous pouvez rétablir `"9090:9090"` dans `compose.yaml` si vous préférez.
 > Prérequis : TP7/TP8 (Compose). Machine avec ~4 Go de RAM libres recommandés.
 
 ## 🎬 Le contexte
@@ -48,7 +50,7 @@ docker compose ps          # 6 services : app, prometheus, cadvisor, loki, alloy
 
 Ouvrez les interfaces (chemins de menus **précis**, car elles changent souvent) :
 
-- **Prometheus** — http://localhost:9090 → barre du haut **Status** ▸ **Target health** (anciennement *Targets*). Chaque cible y est listée avec son état `UP`/`DOWN`. Au départ, **seul `prometheus` lui-même est UP** (on ajoutera les autres cibles à l'étape 2 — voir la capture là-bas).
+- **Prometheus** — http://localhost:9091 → barre du haut **Status** ▸ **Target health** (anciennement *Targets*). Chaque cible y est listée avec son état `UP`/`DOWN`. Au départ, **seul `prometheus` lui-même est UP** (on ajoutera les autres cibles à l'étape 2 — voir la capture là-bas).
 
 - **cAdvisor** — http://localhost:8080 → page d'accueil (liste des conteneurs), puis **/docker** pour la vue détaillée par conteneur (CPU, mémoire, réseau en temps réel).
 
@@ -69,7 +71,7 @@ Ouvrez les interfaces (chemins de menus **précis**, car elles changent souvent)
 Rechargez la configuration **sans redémarrer** Prometheus (on a activé `--web.enable-lifecycle`) :
 
 ```bash
-curl -X POST http://localhost:9090/-/reload
+curl -X POST http://localhost:9091/-/reload
 ```
 
 Retournez sur **Status ▸ Target health** : les **trois** cibles (`prometheus`, `cadvisor`, `telescope-app`) doivent maintenant être **UP**.

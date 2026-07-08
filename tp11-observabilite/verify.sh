@@ -13,7 +13,7 @@ cleanup  # repartir propre
 # Attend qu'une requête PromQL renvoie une série de valeur 1 (cible « up »).
 wait_metric() {
   local q="$1" t="${2:-90}" i=0
-  until curl -fsS -G "http://localhost:9090/api/v1/query" --data-urlencode "query=$q" 2>/dev/null | grep -q ',"1"]'; do
+  until curl -fsS -G "http://localhost:9091/api/v1/query" --data-urlencode "query=$q" 2>/dev/null | grep -q ',"1"]'; do
     i=$((i + 3)); sleep 3
     [ "$i" -ge "$t" ] && return 1
   done
@@ -27,7 +27,7 @@ wait_for_http "http://localhost:3000/api/health" 90 || { docker compose logs gra
 
 step "3) Prometheus est prêt"
 i=0
-until curl -fsS "http://localhost:9090/-/ready" >/dev/null 2>&1; do
+until curl -fsS "http://localhost:9091/-/ready" >/dev/null 2>&1; do
   i=$((i + 3)); sleep 3
   [ "$i" -ge 60 ] && { docker compose logs prometheus; exit 1; }
 done
@@ -43,19 +43,19 @@ assert_contains "telescope_requests_total exposé sur /metrics" "telescope_reque
 step "6) Les cibles Prometheus sont UP (app + cAdvisor)"
 if ! wait_metric 'up{job="telescope-app"}' 120; then
   echo "--- diagnostic : cibles Prometheus ---"
-  curl -fsS "http://localhost:9090/api/v1/targets" 2>/dev/null | sed 's/},{/},\n{/g' \
+  curl -fsS "http://localhost:9091/api/v1/targets" 2>/dev/null | sed 's/},{/},\n{/g' \
     | grep -Ei '"job"|"health"|"lastError"|"scrapeUrl"' | head -40
   echo "--- logs app ---"; docker compose logs app 2>&1 | tail -15
 fi
 assert_contains "telescope-app : up == 1" ',"1"]' \
-  "$(curl -fsS -G "http://localhost:9090/api/v1/query" --data-urlencode 'query=up{job="telescope-app"}')"
+  "$(curl -fsS -G "http://localhost:9091/api/v1/query" --data-urlencode 'query=up{job="telescope-app"}')"
 wait_metric 'up{job="cadvisor"}' 120 || true
 assert_contains "cadvisor : up == 1" ',"1"]' \
-  "$(curl -fsS -G "http://localhost:9090/api/v1/query" --data-urlencode 'query=up{job="cadvisor"}')"
+  "$(curl -fsS -G "http://localhost:9091/api/v1/query" --data-urlencode 'query=up{job="cadvisor"}')"
 
 step "7) Une métrique APPLICATIVE est bien collectée"
 check "telescope_requests_total est présent dans Prometheus" \
-  bash -c "curl -fsS -G 'http://localhost:9090/api/v1/query' --data-urlencode 'query=telescope_requests_total' | grep -q '\"result\":\[{'"
+  bash -c "curl -fsS -G 'http://localhost:9091/api/v1/query' --data-urlencode 'query=telescope_requests_total' | grep -q '\"result\":\[{'"
 
 step "8) Grafana : sources de données provisionnées (Prometheus + Loki)"
 DS="$(curl -fsS -u admin:admin "http://localhost:3000/api/datasources")"
