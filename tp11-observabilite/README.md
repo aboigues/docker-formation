@@ -210,3 +210,16 @@ npm run capture            # → écrit docs/img/*.png
 Le script est **défensif** : si une interface n'est pas joignable, il saute la capture concernée et continue (il loggue ✓/✗ pour chacune). Variables d'environnement reconnues : `PROM_URL`, `CADVISOR_URL`, `GRAFANA_URL`, `GF_USER`, `GF_PASS`.
 
 > ℹ️ `node_modules/` est **ignoré** par Git (voir `.gitignore`) ; seuls les **PNG** sont committés. Les captures ne sont **pas** requises pour valider le TP — `./verify.sh` teste la stack, pas les images.
+
+
+---
+
+<div align="center">
+
+**[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
+
+🌐 [www.telemach-learning.fr](https://www.telemach-learning.fr)
+
+© 2026 Telemach Learning — Code formation DEVOPS-001
+
+</div>

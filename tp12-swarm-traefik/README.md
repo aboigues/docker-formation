@@ -296,3 +296,16 @@ docker network rm swarm-net
 ```
 
 > ⚠️ Cette annexe est **isolée** : votre Docker hôte n'a jamais été mis en Swarm. Vous pouvez donc la faire avant **ou** après le TP principal sans rien casser.
+
+
+---
+
+<div align="center">
+
+**[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
+
+🌐 [www.telemach-learning.fr](https://www.telemach-learning.fr)
+
+© 2026 Telemach Learning — Code formation DEVOPS-001
+
+</div>

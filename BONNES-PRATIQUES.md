@@ -196,3 +196,16 @@ docker system prune -a --volumes  # ⚠️ AGRESSIF : tout l'inutilisé, volumes
 - **The Twelve-Factor App** (config, logs, services externes) : https://12factor.net/fr/
 
 > 🎓 Bonne continuation ! Le meilleur moyen de rester autonome : **relire ce mémo** au début de chaque nouveau projet conteneurisé, et garder le réflexe *« minimal, immuable, observable, moindre privilège »*.
+
+
+---
+
+<div align="center">
+
+**[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
+
+🌐 [www.telemach-learning.fr](https://www.telemach-learning.fr)
+
+© 2026 Telemach Learning — Code formation DEVOPS-001
+
+</div>

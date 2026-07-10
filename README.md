@@ -1,7 +1,9 @@
 # 🐳 Formation Docker — Travaux Pratiques
 
-> Code formation **DEVOPS-001** — © 2026 Telemach Learning
-> Support théorique : présentations Gamma. **Ce dépôt contient uniquement les TP.**
+> Code formation **DEVOPS-001** — © 2026 [Telemach Learning](https://www.telemach-learning.fr)
+> Support théorique : présentations Gamma disponibles sur [www.telemach-learning.fr](https://www.telemach-learning.fr). **Ce dépôt contient uniquement les TP.**
+
+Une formation [**Telemach Learning**](https://www.telemach-learning.fr) — retrouvez l'ensemble de notre catalogue sur [www.telemach-learning.fr](https://www.telemach-learning.fr).
 
 Bienvenue dans les travaux pratiques de la formation Docker (3 jours). Ici, on **apprend en faisant** : chaque TP se construit pas à pas, à partir d'un squelette à compléter — pas de copier/coller passif.
 
@@ -96,3 +98,15 @@ La CI fait exactement la même chose sur chaque `solution/` — voir [`.github/w
 - Les mots de passe des TP sont **fictifs** et ne doivent jamais être réutilisés ailleurs.
 
 Bon courage, et surtout : **tapez les commandes vous-même.** 💪
+
+---
+
+<div align="center">
+
+**[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
+
+🌐 [www.telemach-learning.fr](https://www.telemach-learning.fr)
+
+© 2026 Telemach Learning — Code formation DEVOPS-001
+
+</div>

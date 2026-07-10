@@ -168,3 +168,16 @@ trivy image --severity HIGH,CRITICAL --exit-code 1 mon-image:tag
 4. **Signature d'image.** Découvrez `cosign` (projet Sigstore) : signez votre image et vérifiez la signature. Pourquoi la **provenance** d'une image compte autant que son contenu ?
 5. **Healthcheck distroless.** L'image n'a pas de shell : comment ajouter un `HEALTHCHECK` ? (Piste : un mini binaire de health, ou déléguer la sonde à l'orchestrateur — cf. TP12.)
 6. **Docker Hardened Images.** Lisez la page des **Docker Hardened Images** (`dhi.io`). Quelles garanties supplémentaires offrent-elles par rapport à une image distroless que l'on maintient soi-même ?
+
+
+---
+
+<div align="center">
+
+**[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
+
+🌐 [www.telemach-learning.fr](https://www.telemach-learning.fr)
+
+© 2026 Telemach Learning — Code formation DEVOPS-001
+
+</div>

@@ -149,3 +149,16 @@ docker compose down -v            # arrête et supprime Jenkins + registre + vol
 ```
 
 `verify.sh` nettoie déjà tout seul (il inclut un `cleanup`).
+
+
+---
+
+<div align="center">
+
+**[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
+
+🌐 [www.telemach-learning.fr](https://www.telemach-learning.fr)
+
+© 2026 Telemach Learning — Code formation DEVOPS-001
+
+</div>

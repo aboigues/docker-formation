@@ -249,3 +249,16 @@ docker push localhost:5000/demo/alpine:1.0
 3. **Nettoyage (garbage collection).** Poussez deux fois la même image avec des tags différents, puis lisez la doc sur le `registry garbage-collect`. Pourquoi un registre grossit-il même quand on « supprime » des tags ?
 4. **TLS pour de vrai.** Placez un reverse-proxy (Caddy ou Nginx) devant le registre pour le servir en HTTPS avec un certificat. Qu'est-ce qui change côté client par rapport au mode `localhost` ?
 5. **Cache pull-through.** Configurez le registre en **miroir** de Docker Hub (`REGISTRY_PROXY_REMOTEURL`). En quoi cela accélère-t-il les builds d'une équipe et réduit-il les *rate limits* Docker Hub ?
+
+
+---
+
+<div align="center">
+
+**[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
+
+🌐 [www.telemach-learning.fr](https://www.telemach-learning.fr)
+
+© 2026 Telemach Learning — Code formation DEVOPS-001
+
+</div>

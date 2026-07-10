@@ -158,3 +158,16 @@ Vérifiez que les **deux** conteneurs sont sur le **même réseau** (`--network 
 2. **Healthcheck manuel.** Avant de lancer WordPress, attendez **vraiment** que MySQL réponde avec une boucle : `until docker exec wp-mysql mysqladmin ping -h localhost --silent; do sleep 2; done`. Pourquoi est-ce plus fiable qu'un simple `sleep 30` ?
 3. **Sauvegarde de la base.** Exportez la base sans arrêter le service : `docker exec wp-mysql mysqldump -u root -prootsecret wordpress > backup.sql`. Quelle taille fait le dump ?
 4. **Isolation réseau.** MySQL n'a **pas besoin** d'être exposé sur l'hôte (pas de `-p`). Vérifiez que `localhost:3306` n'est **pas** accessible depuis votre machine, alors que WordPress joint bien MySQL en interne. Quel principe de sécurité cela illustre-t-il ?
+
+
+---
+
+<div align="center">
+
+**[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
+
+🌐 [www.telemach-learning.fr](https://www.telemach-learning.fr)
+
+© 2026 Telemach Learning — Code formation DEVOPS-001
+
+</div>

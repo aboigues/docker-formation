@@ -131,3 +131,16 @@ L'image `scratch` n'a **ni shell ni bibliothèques**. Le binaire doit être **10
 3. **HEALTHCHECK sur scratch.** `scratch` n'a ni `wget` ni `curl` : impossible d'y faire un `HEALTHCHECK` classique. Ajoutez à l'appli un mode `--health` qui interroge `/healthz` et renvoie le bon code de sortie, puis `HEALTHCHECK CMD ["/server", "--health"]`. C'est le **pattern** des images minimales.
 4. **Cache des dépendances.** Modifiez une ligne de `main.go` puis reconstruisez. Quelles couches sont rejouées, lesquelles viennent du cache ? Déplacez le `COPY go.mod` **après** `COPY . .` et observez la différence. (Cf. cours « Cache des couches ».)
 5. **Build multi-architecture.** `docker buildx build --platform linux/amd64,linux/arm64 -t tp06-api:multi .` produit une image pour deux architectures depuis la même recette. → doc : https://docs.docker.com/build/building/multi-platform/
+
+
+---
+
+<div align="center">
+
+**[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
+
+🌐 [www.telemach-learning.fr](https://www.telemach-learning.fr)
+
+© 2026 Telemach Learning — Code formation DEVOPS-001
+
+</div>

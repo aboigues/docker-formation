@@ -150,3 +150,16 @@ if docker top "$1" 2>/dev/null | grep -q nginx; then echo yes; else echo no; fi
 3. **Réseau & DNS.** Lancez un 2ᵉ conteneur sur `tp02-net` et faites-le `ping checkout` **par son nom**. Refaites l'essai sur le réseau bridge par défaut : pourquoi le ping par nom échoue-t-il là ?
 4. **Format JSON ciblé.** Avec `docker inspect`, sortez d'un coup l'IP, le statut et l'image au format `{{.NetworkSettings... }} {{.State.Status}} {{.Config.Image}}`.
 5. **Enrichissez `collect.sh`** : ajoutez une ligne `RESTARTS=<n>` (via `.RestartCount`) — utile pour repérer un conteneur qui *crash-loop*.
+
+
+---
+
+<div align="center">
+
+**[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
+
+🌐 [www.telemach-learning.fr](https://www.telemach-learning.fr)
+
+© 2026 Telemach Learning — Code formation DEVOPS-001
+
+</div>

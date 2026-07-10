@@ -171,3 +171,16 @@ CMD ["server.js"]
 3. **Taille & couches.** Lancez `docker history tp05-portail:1.4.2`. Quelle couche pèse le plus ? Que se passe-t-il si vous **fusionnez** `COPY package.json` et `COPY server.js` en une seule instruction côté cache ?
 4. **`ENTRYPOINT` en forme *shell* vs *exec*.** Comparez `ENTRYPOINT node server.js` (forme shell) et `ENTRYPOINT ["node","server.js"]` (forme exec). Lequel transmet correctement le signal `SIGTERM` (arrêt propre) au process Node ? Pourquoi est-ce important pour `docker stop` ?
 5. **Vers le multi-stage.** Cette image embarque `npm` et la toolchain. Au **TP6**, vous verrez comment n'embarquer **que** le strict nécessaire avec un *multi-stage build*.
+
+
+---
+
+<div align="center">
+
+**[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
+
+🌐 [www.telemach-learning.fr](https://www.telemach-learning.fr)
+
+© 2026 Telemach Learning — Code formation DEVOPS-001
+
+</div>
