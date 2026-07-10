@@ -117,3 +117,16 @@ Vérifiez que vous lancez `docker build` **depuis le dossier qui contient `site/
 3. **Page d'erreur personnalisée.** Ajoutez une page `404.html` et configurez nginx (`error_page 404 /404.html;`). Testez avec `curl -i http://localhost:8081/inexistant`.
 4. **Versionnez par tag.** Construisez `telemach-landing:1.1` après une modif, gardez `:1.0`. Listez les deux. Comment revenir à la `1.0` en cas de problème ?
 5. **Build arg.** Injectez la date de build via `ARG BUILD_DATE` + `LABEL`, et passez-la avec `--build-arg BUILD_DATE=$(date -I)`. Vérifiez avec `docker inspect`. → doc : https://docs.docker.com/reference/dockerfile/#arg
+
+
+---
+
+<div align="center">
+
+**[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
+
+🌐 [www.telemach-learning.fr](https://www.telemach-learning.fr)
+
+© 2026 Telemach Learning — Code formation DEVOPS-001
+
+</div>

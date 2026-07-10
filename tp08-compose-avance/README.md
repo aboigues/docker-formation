@@ -239,3 +239,16 @@ L'image `node:24-alpine` n'a ni `curl` ni `wget`, mais Node 24 a `fetch` intégr
 3. **Secrets Compose.** Remplacez le mot de passe Postgres par un **`secret`** Compose (fichier monté dans `/run/secrets/`) au lieu d'une variable d'environnement. Pourquoi est-ce plus sûr ? (doc : *Compose file — secrets*).
 4. **Scaler l'API.** `docker compose up -d --scale api=3`. Pourquoi le mapping `8085:3000` pose-t-il problème au-delà d'une instance ? (réponse complète au TP12 avec un reverse-proxy).
 5. **`docker compose watch`.** Remplacez le bind mount dev par la fonctionnalité `develop: watch:` (sync + rebuild ciblé). En quoi est-ce plus propre qu'un montage de volume brut ?
+
+
+---
+
+<div align="center">
+
+**[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
+
+🌐 [www.telemach-learning.fr](https://www.telemach-learning.fr)
+
+© 2026 Telemach Learning — Code formation DEVOPS-001
+
+</div>

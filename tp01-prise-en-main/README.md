@@ -116,3 +116,16 @@ Le script rejoue le scénario (hello-world, lancement de nginx, vérification HT
 3. **Port aléatoire.** Lancez nginx avec `-P` (majuscule) au lieu de `-p 8081:80`. Puis `docker port <nom>` : quel port l'hôte a-t-il choisi ?
 4. **Deux serveurs en même temps.** Lancez deux nginx sur deux ports différents (8081 et 8082). Pourquoi ne peut-on PAS les mettre tous les deux sur 8081 ?
 5. **Variables d'environnement.** Lancez `docker run -d -e POSTGRES_PASSWORD=demo postgres:18` et lisez `docker logs` : la base démarre. Cherchez sur Docker Hub la liste des variables supportées par l'image `postgres`.
+
+
+---
+
+<div align="center">
+
+**[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
+
+🌐 [www.telemach-learning.fr](https://www.telemach-learning.fr)
+
+© 2026 Telemach Learning — Code formation DEVOPS-001
+
+</div>

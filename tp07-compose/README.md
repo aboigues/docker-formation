@@ -137,3 +137,16 @@ services:
 3. **Scaler ?** Essayez `docker compose up -d --scale wordpress=2`. Que se passe-t-il ? Pourquoi le mapping de port `8083:80` pose-t-il problème au-delà d'une instance ? (On résoudra ça au TP12 avec un reverse-proxy.)
 4. **Externaliser les secrets.** Déplacez les mots de passe dans un fichier `.env` et référencez-les avec `${...}` dans le YAML. Ajoutez `.env` au `.gitignore`. (C'est le cœur du TP8.)
 5. **Profiles.** Ajoutez un service `adminer` (interface DB web) derrière un `profiles: ["debug"]`, et ne le lancez qu'avec `docker compose --profile debug up -d`.
+
+
+---
+
+<div align="center">
+
+**[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
+
+🌐 [www.telemach-learning.fr](https://www.telemach-learning.fr)
+
+© 2026 Telemach Learning — Code formation DEVOPS-001
+
+</div>
