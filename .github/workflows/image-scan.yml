@@ -6,8 +6,9 @@ name: Scan de vulnérabilités des images (hebdomadaire)
 # (scripts/list-tp-images.py) : source de vérité unique = les fichiers des TP
 # (Dockerfile, Compose, Swarm, scripts). Aucun tag à maintenir en double ici.
 #
-# Report-only : les résultats remontent dans « Security » → « Code scanning »
-# (SARIF). Le job N'ÉCHOUE PAS sur une CVE — c'est une veille, pas une barrière.
+# Les résultats remontent dans « Security » → « Code scanning » (SARIF) ET le job
+# ÉCHOUE si une CVE HIGH/CRITICAL corrigible est trouvée. Le SARIF est publié même
+# en cas d'échec (upload en `!cancelled()`).
 # Déclenchable à la demande via « Run workflow » (workflow_dispatch).
 #
 # Sécurité chaîne d'appro : on N'utilise PAS les actions `aquasecurity/setup-trivy`
@@ -86,12 +87,13 @@ jobs:
             aquasec/trivy:0.72.0 image \
             --severity HIGH,CRITICAL \
             --ignore-unfixed \
+            --exit-code 1 \
             --format sarif --output "/out/${SCAN_ID}.sarif" \
             --no-progress \
             "${{ matrix.image }}"
 
       - name: Publier le SARIF dans code scanning
-        if: steps.guard.outputs.pullable == 'yes'
+        if: ${{ !cancelled() && steps.guard.outputs.pullable == 'yes' }}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ env.SCAN_ID }}.sarif
