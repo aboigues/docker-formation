@@ -24,7 +24,7 @@ up() {
     docker run -d --name "$DB" ______
   fi
 
-  # TODO 4 : lancer WordPress (telemachlearning/wordpress:6.8-php8.3-apache) s'il ne tourne pas déjà.
+  # TODO 4 : lancer WordPress (wordpress:7.0-php8.5-apache) s'il ne tourne pas déjà.
   #   - réseau "$NET", port 8083:80
   #   - variables : WORDPRESS_DB_HOST=$DB (le NOM du conteneur MySQL),
   #                 WORDPRESS_DB_NAME=wordpress, WORDPRESS_DB_USER=wpuser,

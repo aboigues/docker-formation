@@ -16,7 +16,7 @@ services:
       MYSQL_PASSWORD: ______
 
   wordpress:
-    # TODO 4 : image WordPress durcie (telemachlearning/wordpress:6.8-php8.3-apache)
+    # TODO 4 : image WordPress 7.0 (php8.5-apache)
     image: ______
     ports:
       # TODO 5 : publier le port 80 du conteneur sur le 8083 de l'hôte

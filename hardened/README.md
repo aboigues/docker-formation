@@ -1,19 +1,35 @@
 # Images durcies `telemachlearning/*`
 
-Images dérivées des images tierces utilisées par les TP, reconstruites avec les
-paquets système à jour. Publiées sur Docker Hub sous le namespace
-`telemachlearning`, en **amd64 + arm64** (les Mac Apple Silicon sont courants en
-salle ; les images amont publient jusqu'à 7 architectures, on ne garde que les
-deux qui servent).
+Deux images seulement : `grafana/grafana:13.0.2` et `gcr.io/cadvisor/cadvisor:v0.55.1`.
+Publiées en **amd64 + arm64** (les Mac Apple Silicon sont courants en salle).
+
+## Quand durcir — et surtout quand ne PAS durcir
+
+La question n'est pas « cette image a-t-elle des CVE ? » mais **« son tag est-il
+encore reconstruit par son mainteneur ? »**. Deux populations, mesurées sur les
+images de ce dépôt :
+
+| Type de tag | Exemples | Âge observé | CVE de paquets OS |
+|---|---|---|---|
+| **Glissant**, entretenu | `nginx:1.30-alpine`, `postgres:18-alpine`, `adminer:5`, `jenkins:lts-jdk21` | 0 à 22 j | transitoires — **l'amont les corrige tout seul** |
+| **Version épinglée**, figé | `grafana/grafana:13.0.2` (44 j), `cadvisor:v0.55.1` (203 j) | > 30 j | permanentes — **personne ne les corrigera** |
+
+Sur un tag glissant, durcir est une perte de temps : `postgres:18-alpine` avait
+1 CVE, le rebuild amont suivant l'efface sans qu'on lève le petit doigt. Seules
+les **versions épinglées** justifient une image dérivée, parce qu'elles sont
+gelées par construction.
+
+Et avant de durcir, toujours vérifier qu'un **tag maintenu** ne règle pas le
+problème : `wordpress:6.8-php8.3-apache` (plus reconstruit depuis 226 jours)
+portait 606 CVE ; `wordpress:7.0-php8.5-apache`, reconstruit la veille, en a 0.
+Une ligne de tag a suffi — aucune image maison n'était nécessaire.
 
 ## Ce que le durcissement corrige — et ce qu'il ne corrige pas
 
-Un `apt-get upgrade` / `apk upgrade` dans une image dérivée ne corrige que les
-CVE de **paquets système**. Les CVE de **binaires compilés** (stdlib Go, modules
-Node, dépendances Composer) sont figées dans le binaire amont : seul un rebuild
-depuis les sources par le mainteneur les corrige. C'est pourquoi le scan
-hebdomadaire (`.github/workflows/image-scan.yml`) ne bloque que sur
-`--pkg-types os`.
+Un `apk upgrade` ne corrige que les CVE de **paquets système**. Les CVE de
+**binaires compilés** (stdlib Go, modules Node, dépendances Composer) sont figées
+dans le binaire amont. C'est pourquoi le scan (`.github/workflows/image-scan.yml`)
+ne bloque que sur `--pkg-types os`.
 
 Ces CVE de binaires sont d'ailleurs massivement non exploitables. Sur le `gosu`
 de `mariadb:11.8`, Trivy remonte 15 HIGH/CRITICAL là où `govulncheck` (analyse
@@ -26,31 +42,17 @@ CVE de paquets OS, HIGH/CRITICAL, corrigeables (`--ignore-unfixed`) :
 
 | Image | Amont | Durcie |
 |---|---:|---:|
-| `wordpress:6.8-php8.3-apache` | 606 | **0** |
-| `gcr.io/cadvisor/cadvisor:v0.55.1` | 19 | **0** |
 | `grafana/grafana:13.0.2` | 7 | **0** |
-| `jenkins/jenkins:lts-jdk21` | 6 | **0** |
-| `adminer:5` | 1 | **0** |
-| `postgres:18-alpine` | 1 | **0** |
+| `gcr.io/cadvisor/cadvisor:v0.55.1` | 19 | **0** |
 
-Sur les 606 de WordPress, 356 sont `linux-libc-dev` (en-têtes du noyau : le
-conteneur utilise celui de l'hôte, ces CVE n'y sont pas exploitables). Les ~180
-restantes — `apache2`, `imagemagick` — sont réelles.
+Comportement vérifié identique à l'amont (Grafana HTTP 200, cAdvisor v0.55.1).
 
-Comportement vérifié identique à l'amont : WordPress HTTP 302 (redirection
-install), Adminer 200, Grafana 200, Jenkins 200, cAdvisor v0.55.1,
-PostgreSQL 18.4 (`pg_isready` OK).
+## Ces images périment aussi
 
-## ⚠️ Ces images périment
-
-Le durcissement est **figé à l'instant du build**. À la prochaine CVE Debian ou
-Alpine, elles redeviennent rouges — exactement comme `wordpress:6.8-php8.3-apache`
-l'est devenu côté amont. Sans reconstruction régulière, on remplace des images
-officielles que Docker reconstruit par des images maison que personne ne
-reconstruit : ce serait un recul.
-
-Tant qu'aucun workflow de rebuild automatique n'existe, **reconstruire à la main
-dès que le scan hebdomadaire repasse au rouge**.
+Le durcissement est figé à l'instant du build. La barrière du scan applique la
+même règle à nos images qu'aux autres : **CVE de paquets OS ET image de plus de
+30 jours** ⇒ échec. Nos images ne bénéficient d'aucun passe-droit — quand elles
+vieillissent et accumulent des CVE, le scan le dit et il faut les reconstruire.
 
 ## Reconstruire et publier
 
@@ -58,24 +60,23 @@ dès que le scan hebdomadaire repasse au rouge**.
 # Builder multi-arch (une fois)
 docker buildx create --name tpmultiarch --driver docker-container --use
 
-# Puis, par image (exemple WordPress)
+# Puis, par image
 docker buildx build --builder tpmultiarch \
   --platform linux/amd64,linux/arm64 \
-  -f hardened/wordpress/Dockerfile \
-  -t telemachlearning/wordpress:6.8-php8.3-apache \
-  --push hardened/wordpress
+  -f hardened/grafana/Dockerfile \
+  -t telemachlearning/grafana:13.0.2 \
+  --push hardened/grafana
 ```
 
-Le tag reprend celui de l'amont : la provenance reste lisible et on n'utilise
-jamais `latest`. Le build arm64 tourne sous émulation QEMU (comptez ~8 min pour
-WordPress, ~5 min pour Jenkins).
+Le tag reprend celui de l'amont : la provenance reste lisible, et on n'utilise
+jamais `latest`. Le build arm64 tourne sous émulation QEMU (~5 min).
 
 Vérifier après publication :
 
 ```bash
-docker manifest inspect telemachlearning/wordpress:6.8-php8.3-apache   # amd64 + arm64
+docker manifest inspect telemachlearning/grafana:13.0.2      # amd64 + arm64
 trivy image --severity HIGH,CRITICAL --ignore-unfixed --pkg-types os \
-  telemachlearning/wordpress:6.8-php8.3-apache                          # doit être vide
+  telemachlearning/grafana:13.0.2                            # doit être vide
 ```
 
 ---

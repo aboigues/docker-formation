@@ -10,7 +10,8 @@ name: Scan de vulnérabilités des images (hebdomadaire)
 #
 #   1. VEILLE  — scan complet (paquets OS + binaires), publié en SARIF dans
 #      « Security » → « Code scanning ». Ne fait PAS échouer le job.
-#   2. BARRIÈRE — `--pkg-types os` uniquement, avec `--exit-code 1`.
+#   2. BARRIÈRE — échoue si l'image a des CVE de paquets OS **ET** n'a pas été
+#      reconstruite depuis plus de STALE_DAYS jours.
 #
 # Pourquoi la barrière ignore les binaires : une CVE « stdlib » d'un binaire Go
 # signale seulement la version du toolchain gravée à la compilation. Le seul
@@ -18,13 +19,29 @@ name: Scan de vulnérabilités des images (hebdomadaire)
 # image tierce. Et ces CVE sont massivement non atteignables : sur le `gosu` de
 # mariadb:11.8, Trivy remonte 15 HIGH/CRITICAL là où `govulncheck` (analyse
 # d'atteignabilité officielle Go) en trouve 0 — gosu fait un setuid puis un exec,
-# il n'appelle jamais net/http. Bloquer là-dessus rendrait le job rouge en
-# permanence sans qu'aucune action ne soit possible.
+# il n'appelle jamais net/http.
 #
-# Les CVE de paquets OS, elles, SONT corrigeables ici (image dérivée +
-# apt-get/apk upgrade) : c'est donc sur elles, et elles seules, qu'on bloque.
-# La veille continue de tout remonter — une CVE de binaire réellement atteignable
-# reste visible dans Code scanning pour jugement humain.
+# Pourquoi la CONJONCTION avec l'âge — c'est le cœur du réglage. Des CVE sur un
+# tag encore entretenu sont TRANSITOIRES : le rebuild amont suivant les efface,
+# sans action de notre part. Bloquer dessus, c'est crier au loup. Mesuré sur les
+# images de ce dépôt :
+#
+#   tags glissants (nginx, postgres, adminer, jenkins…) : 0 à 22 jours d'âge
+#     -> leurs CVE disparaissent d'elles-mêmes
+#   versions épinglées (grafana:13.0.2 44 j, cadvisor:v0.55.1 203 j)
+#     -> gelées par construction, personne ne corrigera jamais
+#
+# Le seuil de 30 jours est calé au-dessus du pire tag glissant observé (22 j) :
+# en dessous, l'amont a encore une chance de faire le travail ; au-dessus, il ne
+# le fera plus et c'est à nous d'agir (bumper le tag, ou durcir — voir hardened/).
+#
+# Cette règle s'applique AUSSI à nos propres images telemachlearning/* : aucun
+# passe-droit, elles rougissent quand elles vieillissent et portent des CVE.
+#
+# Corollaire : c'est l'ÂGE DU TAG qui est le signal utile, pas le nombre de CVE.
+# wordpress:6.8-php8.3-apache portait 606 CVE parce que Docker avait cessé de le
+# reconstruire 226 jours plus tôt ; wordpress:7.0-php8.5-apache en avait 0.
+# Une ligne de tag, aucune image maison.
 #
 # Déclenchable à la demande via « Run workflow » (workflow_dispatch).
 #
@@ -117,13 +134,59 @@ jobs:
           sarif_file: ${{ env.SCAN_ID }}.sarif
           category: ${{ env.SCAN_ID }}
 
-      # Passe 2 — BARRIÈRE : uniquement ce qu'un `apt-get/apk upgrade` corrigerait.
+      # Âge de l'image : date `created` de la config OCI, lue depuis le registre.
+      # Marche partout (Docker Hub, GCR…), sans API propre à un hub.
+      #
+      # Piège : les builds REPRODUCTIBLES (distroless, ko, Chainguard…) figent
+      # `created` à l'epoch 1970 pour que le digest soit déterministe. Une date
+      # antérieure à 2015 ne signifie donc pas « image abandonnée » mais « date
+      # non renseignée ». On sort alors `days=-1` : l'âge est inconnu, la barrière
+      # ne bloque pas (la veille, elle, continue de tout remonter). Bloquer là-dessus
+      # rendrait rouge en permanence des images justement conçues pour être minimales.
+      - name: Âge de l'image (date de reconstruction amont)
+        id: age
+        if: steps.guard.outputs.pullable == 'yes'
+        run: |
+          created="$(docker buildx imagetools inspect "${{ matrix.image }}" \
+            --format '{{json .Image}}' \
+            | python3 -c 'import json,sys; d=json.load(sys.stdin); c=d.get("linux/amd64", d); print(c.get("created") or "")')"
+
+          if [ -z "$created" ]; then
+            echo "::warning::${{ matrix.image }} : pas de date de création — âge inconnu, la barrière ne bloquera pas."
+            echo "days=-1" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          created_ts=$(date -u -d "$created" +%s 2>/dev/null || echo "")
+          if [ -z "$created_ts" ]; then
+            echo "::warning::${{ matrix.image }} : date '$created' illisible — âge inconnu, la barrière ne bloquera pas."
+            echo "days=-1" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # 2015-01-01 = 1420070400. En deçà : build reproductible, date factice.
+          if [ "$created_ts" -lt 1420070400 ]; then
+            echo "::notice::${{ matrix.image }} : date figée ($created) — build reproductible, âge non déterminable."
+            echo "days=-1" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          days=$(( ( $(date -u +%s) - created_ts ) / 86400 ))
+          echo "${{ matrix.image }} : reconstruite le ${created} (il y a ${days} j)"
+          echo "days=$days" >> "$GITHUB_OUTPUT"
+
+      # Passe 2 — BARRIÈRE : CVE de paquets OS **sur une image périmée**.
+      # Sur un tag encore entretenu, les CVE sont transitoires (l'amont les efface
+      # au rebuild suivant) : on ne bloque pas. Voir l'en-tête pour les mesures.
       # Réutilise le cache de la passe 1 (base de vulns + couches déjà téléchargées).
-      - name: Échec si CVE de paquets OS (corrigeables dans une image dérivée)
+      - name: Échec si CVE de paquets OS ET image périmée (> 30 j)
         if: steps.guard.outputs.pullable == 'yes'
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          STALE_DAYS: "30"
+          AGE_DAYS: ${{ steps.age.outputs.days }}
         run: |
+          set +e
           docker run --rm -e GITHUB_TOKEN \
             -v "$PWD/.trivy-cache:/root/.cache/trivy" \
             aquasec/trivy:0.72.0 image \
@@ -133,3 +196,23 @@ jobs:
             --exit-code 1 \
             --no-progress \
             "${{ matrix.image }}"
+          has_cves=$?
+          set -e
+
+          if [ "$has_cves" -eq 0 ]; then
+            echo "✅ aucune CVE de paquet OS."
+            exit 0
+          fi
+          if [ "$AGE_DAYS" -lt 0 ]; then
+            echo "::warning::${{ matrix.image }} a des CVE de paquets OS mais son âge est indéterminable"
+            echo "::warning::(build reproductible). Pas d'échec — à examiner dans « Code scanning »."
+            exit 0
+          fi
+          if [ "$AGE_DAYS" -le "$STALE_DAYS" ]; then
+            echo "::notice::${{ matrix.image }} a des CVE de paquets OS mais n'a que ${AGE_DAYS} j :"
+            echo "::notice::tag encore entretenu, l'amont les corrigera — pas d'échec."
+            exit 0
+          fi
+          echo "::error::${{ matrix.image }} : CVE de paquets OS sur une image de ${AGE_DAYS} j (> ${STALE_DAYS})."
+          echo "::error::L'amont ne reconstruit plus ce tag. Bumpez vers un tag maintenu, ou durcissez (voir hardened/)."
+          exit 1
