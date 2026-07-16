@@ -67,13 +67,14 @@ Ouvrez `starter/deploy.sh`. Il pilote la stack avec deux sous-commandes : `up` (
 - créer le réseau `wp-net` ;
 - créer le volume `wp-db` ;
 - lancer **MySQL** (`mysql:8.4`) sur le réseau, avec le volume monté sur `/var/lib/mysql`, et les variables `MYSQL_ROOT_PASSWORD`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD` ;
-- lancer **WordPress** (`telemachlearning/wordpress:6.8-php8.3-apache`) sur le réseau, port `8083:80`, en pointant `WORDPRESS_DB_HOST` vers le **nom du conteneur MySQL**.
+- lancer **WordPress** (`wordpress:7.0-php8.5-apache`) sur le réseau, port `8083:80`, en pointant `WORDPRESS_DB_HOST` vers le **nom du conteneur MySQL**.
 
-> **Pourquoi `telemachlearning/wordpress` et pas `wordpress` ?** C'est l'image
-> officielle, reconstruite avec ses paquets système à jour : l'officielle traîne
-> aujourd'hui 606 CVE HIGH/CRITICAL corrigeables (Apache, ImageMagick). Tirer ses
-> images d'un registre interne durci plutôt que du Hub est la norme en entreprise.
-> Voir [`hardened/`](../hardened/) pour les sources et la méthode.
+> 🧠 **Pourquoi ce tag précis ?** Ce TP utilisait `wordpress:6.8-php8.3-apache`.
+> Ce tag n'est plus reconstruit par Docker depuis 226 jours et accumule
+> **606 CVE HIGH/CRITICAL corrigeables** (Apache, ImageMagick). `7.0-php8.5-apache`,
+> reconstruit hier, en a **0**. Même image officielle, même effort : la différence
+> tient au fait qu'un tag soit encore entretenu ou non. Vos CVE viennent rarement
+> d'une fatalité, souvent d'un épinglage oublié.
 
 ## Étape 2 — Monter la stack
 
