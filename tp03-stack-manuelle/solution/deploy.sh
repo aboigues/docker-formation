@@ -31,7 +31,7 @@ up() {
       -e WORDPRESS_DB_NAME=wordpress \
       -e WORDPRESS_DB_USER=wpuser \
       -e WORDPRESS_DB_PASSWORD=wpsecret \
-      wordpress:6.8-php8.3-apache
+      telemachlearning/wordpress:6.8-php8.3-apache
   fi
 
   echo "Stack montée. WordPress → http://localhost:8083"

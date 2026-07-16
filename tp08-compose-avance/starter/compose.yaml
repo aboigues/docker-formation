@@ -26,7 +26,7 @@ services:
       ______
 
   db:
-    image: postgres:18-alpine
+    image: telemachlearning/postgres:18-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -46,7 +46,7 @@ services:
     healthcheck:
       ______
 
-  # TODO : ajoutez un service `adminer` (image adminer:5, port 8086:8080) placé
+  # TODO : ajoutez un service `adminer` (image telemachlearning/adminer:5, port 8086:8080) placé
   #        derrière `profiles: ["debug"]` pour qu'il ne démarre QUE sur demande.
 
 volumes:

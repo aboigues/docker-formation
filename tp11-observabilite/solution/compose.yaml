@@ -28,7 +28,7 @@ services:
       - "9091:9090"
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.55.1
+    image: telemachlearning/cadvisor:v0.55.1
     privileged: true
     devices:
       - /dev/kmsg
@@ -59,7 +59,7 @@ services:
 
   # --- VISUALISATION ---
   grafana:
-    image: grafana/grafana:13.0.2
+    image: telemachlearning/grafana:13.0.2
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin

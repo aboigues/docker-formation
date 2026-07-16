@@ -31,13 +31,15 @@ CVE de paquets OS, HIGH/CRITICAL, corrigeables (`--ignore-unfixed`) :
 | `grafana/grafana:13.0.2` | 7 | **0** |
 | `jenkins/jenkins:lts-jdk21` | 6 | **0** |
 | `adminer:5` | 1 | **0** |
+| `postgres:18-alpine` | 1 | **0** |
 
 Sur les 606 de WordPress, 356 sont `linux-libc-dev` (en-têtes du noyau : le
 conteneur utilise celui de l'hôte, ces CVE n'y sont pas exploitables). Les ~180
 restantes — `apache2`, `imagemagick` — sont réelles.
 
 Comportement vérifié identique à l'amont : WordPress HTTP 302 (redirection
-install), Adminer 200, Grafana 200, Jenkins 200, cAdvisor v0.55.1.
+install), Adminer 200, Grafana 200, Jenkins 200, cAdvisor v0.55.1,
+PostgreSQL 18.4 (`pg_isready` OK).
 
 ## ⚠️ Ces images périment
 

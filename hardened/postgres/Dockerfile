@@ -6,9 +6,7 @@
 # sinon la barrière bloquerait sur les CVE que ce Dockerfile corrige justement.
 # C'est l'image PUBLIÉE (telemachlearning/*), elle, qui est scannée.
 # image-scan: ignore
-FROM wordpress:6.8-php8.3-apache
+FROM postgres:18-alpine
 USER root
-RUN apt-get update \
- && apt-get upgrade -y --no-install-recommends \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+RUN apk upgrade --no-cache
+USER postgres

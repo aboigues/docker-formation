@@ -127,7 +127,7 @@ docker compose exec cache redis-cli keys 'link:*'
 
 ## Étape 5 — Le profil `debug` (Adminer à la demande)
 
-On ne veut **pas** d'interface d'admin de base lancée en permanence. Ajoutez (TODO du `compose.yaml`) un service `adminer` (image `adminer:5`, port `8086:8080`) derrière `profiles: ["debug"]`, puis :
+On ne veut **pas** d'interface d'admin de base lancée en permanence. Ajoutez (TODO du `compose.yaml`) un service `adminer` (image `telemachlearning/adminer:5`, port `8086:8080`) derrière `profiles: ["debug"]`, puis :
 
 ```bash
 docker compose --profile debug up -d adminer

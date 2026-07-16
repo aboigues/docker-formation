@@ -3,7 +3,7 @@
 #   • un client Docker pour piloter le daemon de l'HÔTE (« Docker-out-of-Docker »)
 #   • les plugins nécessaires, pré-installés
 #   • une configuration 100 % décrite en fichier (JCasC) : AUCUN clic d'installation
-FROM jenkins/jenkins:lts-jdk21
+FROM telemachlearning/jenkins:lts-jdk21
 
 # ------------------------------------------------------------------------------
 # 1) Outillage : client Docker + curl
