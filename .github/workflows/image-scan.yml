@@ -6,9 +6,26 @@ name: Scan de vulnérabilités des images (hebdomadaire)
 # (scripts/list-tp-images.py) : source de vérité unique = les fichiers des TP
 # (Dockerfile, Compose, Swarm, scripts). Aucun tag à maintenir en double ici.
 #
-# Les résultats remontent dans « Security » → « Code scanning » (SARIF) ET le job
-# ÉCHOUE si une CVE HIGH/CRITICAL corrigible est trouvée. Le SARIF est publié même
-# en cas d'échec (upload en `!cancelled()`).
+# Deux passes, deux rôles distincts :
+#
+#   1. VEILLE  — scan complet (paquets OS + binaires), publié en SARIF dans
+#      « Security » → « Code scanning ». Ne fait PAS échouer le job.
+#   2. BARRIÈRE — `--pkg-types os` uniquement, avec `--exit-code 1`.
+#
+# Pourquoi la barrière ignore les binaires : une CVE « stdlib » d'un binaire Go
+# signale seulement la version du toolchain gravée à la compilation. Le seul
+# correctif est de recompiler le logiciel AMONT — hors de notre portée sur une
+# image tierce. Et ces CVE sont massivement non atteignables : sur le `gosu` de
+# mariadb:11.8, Trivy remonte 15 HIGH/CRITICAL là où `govulncheck` (analyse
+# d'atteignabilité officielle Go) en trouve 0 — gosu fait un setuid puis un exec,
+# il n'appelle jamais net/http. Bloquer là-dessus rendrait le job rouge en
+# permanence sans qu'aucune action ne soit possible.
+#
+# Les CVE de paquets OS, elles, SONT corrigeables ici (image dérivée +
+# apt-get/apk upgrade) : c'est donc sur elles, et elles seules, qu'on bloque.
+# La veille continue de tout remonter — une CVE de binaire réellement atteignable
+# reste visible dans Code scanning pour jugement humain.
+#
 # Déclenchable à la demande via « Run workflow » (workflow_dispatch).
 #
 # Sécurité chaîne d'appro : on N'utilise PAS les actions `aquasecurity/setup-trivy`
@@ -77,24 +94,42 @@ jobs:
             echo "pullable=no" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Scan Trivy (HIGH/CRITICAL corrigibles) → SARIF
+      # Passe 1 — VEILLE : tout est remonté, rien ne bloque.
+      - name: Scan Trivy complet (HIGH/CRITICAL corrigibles) → SARIF
         if: steps.guard.outputs.pullable == 'yes'
         env:
           # Évite le rate-limiting GitHub lors du téléchargement de la base Trivy.
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          docker run --rm -e GITHUB_TOKEN -v "$PWD:/out" \
+          docker run --rm -e GITHUB_TOKEN \
+            -v "$PWD:/out" -v "$PWD/.trivy-cache:/root/.cache/trivy" \
             aquasec/trivy:0.72.0 image \
             --severity HIGH,CRITICAL \
             --ignore-unfixed \
-            --exit-code 1 \
             --format sarif --output "/out/${SCAN_ID}.sarif" \
             --no-progress \
             "${{ matrix.image }}"
 
       - name: Publier le SARIF dans code scanning
-        if: ${{ !cancelled() && steps.guard.outputs.pullable == 'yes' }}
+        if: steps.guard.outputs.pullable == 'yes'
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ env.SCAN_ID }}.sarif
           category: ${{ env.SCAN_ID }}
+
+      # Passe 2 — BARRIÈRE : uniquement ce qu'un `apt-get/apk upgrade` corrigerait.
+      # Réutilise le cache de la passe 1 (base de vulns + couches déjà téléchargées).
+      - name: Échec si CVE de paquets OS (corrigeables dans une image dérivée)
+        if: steps.guard.outputs.pullable == 'yes'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          docker run --rm -e GITHUB_TOKEN \
+            -v "$PWD/.trivy-cache:/root/.cache/trivy" \
+            aquasec/trivy:0.72.0 image \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --pkg-types os \
+            --exit-code 1 \
+            --no-progress \
+            "${{ matrix.image }}"
