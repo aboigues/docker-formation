@@ -188,6 +188,39 @@ cAdvisor n'est pas automatisée — la barrière signalera quand elles auront vi
 
 ---
 
+## 6. Revue des alertes « Code scanning » — 27 juillet 2026
+
+**Périmètre :** les 850 alertes ouvertes accumulées depuis la mise en place du
+scan. Revue exhaustive, catégorie par catégorie, sans dismiss en masse.
+
+### 6.1 Ce qui a été fermé
+
+| Lot | Nombre | Motif de fermeture |
+|---|---:|---|
+| Catégories orphelines (`wordpress-6.8-php8.3-apache`, `gcr.io-cadvisor-cadvisor-v0.55.1`, `grafana-grafana-13.0.2`) | 624 | `won't fix` — tag remplacé dans le repo, la catégorie SARIF n'est plus jamais réémise donc GitHub ne pouvait pas fermer l'alerte tout seul |
+| `telemachlearning/cadvisor` + `telemachlearning/grafana` (CVE binaires) | 61 | `won't fix` — images reconstruites et republiées (0 CVE de paquet OS vérifié via `trivy --pkg-types os`), CVE restantes figées dans le binaire Go amont, hors périmètre de `apk upgrade` |
+| Drupal, fixture de test | 5 | `used in tests` — chemin `opt/drupal/.../package_manager/tests/fixtures/fake_site/vendor/composer/installed.json` : données de paquets volontairement factices pour tester le détecteur de vulnérabilités du module `package_manager`, pas une dépendance de production |
+
+Point de méthode pour le prochain qui automatise ce nettoyage : `gh api -X PATCH`
+en boucle `while read ... done < fichier` peut bloquer silencieusement (stdin
+partagé entre la boucle et la commande). Un `for` sur un tableau, ou un script
+lancé en arrière-plan avec `</dev/null` explicite sur chaque appel, fonctionne à
+coup sûr.
+
+### 6.2 Ce qui reste ouvert, volontairement — 160 alertes
+
+| Catégorie | Nombre | Pourquoi ouvertes |
+|---|---:|---|
+| CVE de paquets OS sur tags maintenus (`adminer:5` 10 j, `drupal:11.3-apache` 4 j, `jenkins/jenkins:lts-jdk21` 18 j, `postgres:18-alpine` 20 j, `wordpress:7.0-php8.5-apache` 7 j) | 12 | tous < 30 j — transitoires par construction, cf. §2.3 |
+| CVE de binaires compilés amont (`jenkins`/`git-lfs`, `grafana/loki`, `prom/prometheus`, `registry`, `mysql`/`gosu`, `grafana/alloy`, `node`, `traefik`) | ~148 | figées dans le binaire, non corrigibles sans recompilation upstream — même nature que gosu/mariadb en §2.2 |
+
+Ces deux catégories ne sont **pas** fermées : GitHub ne permet de commenter une
+alerte qu'en la faisant passer à `dismissed` (le champ `dismissed_comment`
+n'existe pas sur une alerte `open`). Les garder ouvertes et documenter la revue
+ici est le seul moyen de tracer « évalué, pas ignoré » sans mentir sur leur état.
+
+---
+
 <div align="center">
 
 **[Telemach Learning](https://www.telemach-learning.fr)** — Formations DevOps, Cloud & Conteneurs
