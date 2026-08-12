@@ -28,7 +28,11 @@ services:
       start_period: 10s
 
   db:
-    image: postgres:18-alpine
+    # Alpine 18 n'a plus été reconstruite depuis le 2026-07-08 (35+ jours,
+    # CVE-2026-33630 sur c-ares non corrigée en amont) ; postgres:18 (Debian)
+    # reste activement reconstruite. Même version majeure 18, seule la base OS
+    # change — le comportement Postgres 18+ ci-dessous est inchangé.
+    image: postgres:18
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
