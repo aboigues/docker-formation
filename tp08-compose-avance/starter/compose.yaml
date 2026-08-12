@@ -26,7 +26,9 @@ services:
       ______
 
   db:
-    image: postgres:18-alpine
+    # postgres:18-alpine n'est plus reconstruite depuis 35+ jours (CVE non
+    # corrigée en amont) ; postgres:18 (Debian) reste activement reconstruite.
+    image: postgres:18
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
