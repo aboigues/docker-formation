@@ -24,8 +24,17 @@ IMAGES=(
 # passant par l'image officielle aquasec/trivy épinglée — même convention que
 # .github/workflows/image-scan.yml (pas d'action tierce type
 # aquasecurity/setup-trivy, compromise en 2025).
+#
+# Le socket Docker est monté : sans lui, Trivy (qui tourne dans SON PROPRE
+# conteneur, isolé du daemon hôte) ne voit pas l'image "$image" qu'on vient de
+# charger en local via `buildx --load` — il retombe silencieusement sur un
+# pull distant et mesure l'ANCIENNE image déjà publiée sur le registre, pas
+# celle qu'on vient de construire. Bug réel constaté le 2026-09-16 : le
+# tableau affichait 14/14 et 18/18 restants alors que les images fraîchement
+# reconstruites et publiées étaient à 0/0 une fois scannées directement.
 count_os_cves() {
   docker run --rm -e GITHUB_TOKEN \
+    -v /var/run/docker.sock:/var/run/docker.sock \
     aquasec/trivy:0.72.0 image \
     --quiet --scanners vuln --pkg-types os --severity CRITICAL,HIGH \
     --format json --no-progress "$1" 2>/dev/null |
