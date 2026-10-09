@@ -50,7 +50,7 @@ services:
 
   # --- Reverse-proxy : FOURNI (rien à modifier) ---
   traefik:
-    image: traefik:v3.7.5
+    image: traefik:v3.7.14
     command:
       - --providers.swarm.endpoint=unix:///var/run/docker.sock
       - --providers.swarm.exposedByDefault=false
