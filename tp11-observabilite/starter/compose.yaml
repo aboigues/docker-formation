@@ -49,7 +49,7 @@ services:
       - "3100:3100"
 
   alloy:
-    image: grafana/alloy:v1.17.0
+    image: grafana/alloy:v1.20.1
     user: root                       # nécessaire pour lire le socket Docker
     volumes:
       - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
