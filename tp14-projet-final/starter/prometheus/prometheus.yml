@@ -1,0 +1,22 @@
+# Prometheus — ce qu'on mesure dans la stack tp14.
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: shop-api
+    static_configs:
+      - targets: ["shop-api:8080"]
+
+  - job_name: cadvisor
+    dns_sd_configs:
+      - names: ["tasks.cadvisor"]
+        type: A
+        port: 8080
+
+  - job_name: traefik
+    static_configs:
+      - targets: ["traefik:8082"]
+
+  - job_name: loadgen
+    static_configs:
+      - targets: ["loadgen:9100"]

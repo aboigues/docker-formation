@@ -1,0 +1,175 @@
+# Telemach Shop — la stack de PRODUCTION (TP14), version corrigée.
+#
+#   SHOP_VERSION=1.0.0 docker stack deploy -c stack.yml tp14
+#
+# Pré-requis : le registre tourne (registry.yml) et les images y ont été
+# poussées par ./ship.sh. Swarm ne construit rien : il TIRE les images.
+services:
+
+  # ===========================================================================
+  # L'APPLICATION
+  # ===========================================================================
+
+  db:
+    image: postgres:18-alpine
+    # Plafond de connexions du serveur : c'est LA ressource partagée par tous les
+    # réplicas de l'API (cf. INC-103).
+    command: ["postgres", "-c", "max_connections=40"]
+    environment:
+      POSTGRES_DB: shop
+      POSTGRES_USER: shop
+      POSTGRES_PASSWORD: shoppass
+    volumes:
+      - db-data:/var/lib/postgresql
+      - ./db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shop -d shop"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  shop-api:
+    # Phase 2 : l'image vient du REGISTRE, avec une version explicite.
+    image: localhost:5000/telemach/shop-api:${SHOP_VERSION:-1.0.0}
+    environment:
+      DB_HOST: db
+      DB_NAME: shop
+      DB_USER: shop
+      DB_PASSWORD: shoppass
+      # INC-102 : cache BORNÉ. Sans limite, chaque URL distincte (et le front
+      # ajoute « _=<horodatage> » à chaque appel) crée une entrée -> fuite -> OOM.
+      CACHE_MAX_ENTRIES: "500"
+      # INC-103 : pool dimensionné pour la taille MAX du service.
+      #   réplicas max (6) × DB_MAX_CONNS (5) = 30  ≤  max_connections (40) − marge
+      DB_MAX_CONNS: "5"
+    # INC-104 : Swarm n'envoie du trafic qu'à un réplica SAIN. L'image distroless
+    # n'a ni curl ni wget : l'appli fournit sa propre sous-commande de sonde.
+    healthcheck:
+      test: ["CMD", "/shop-api", "healthcheck"]
+      interval: 3s
+      timeout: 2s
+      retries: 3
+      start_period: 30s
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 128M
+      # INC-104 : mise à jour progressive SANS coupure.
+      update_config:
+        parallelism: 1
+        order: start-first        # le nouveau réplica démarre AVANT l'arrêt de l'ancien
+        delay: 5s
+        monitor: 20s
+        failure_action: rollback  # nouvelle version malade -> retour automatique
+      rollback_config:
+        order: start-first
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.shop.rule=Host(`shop.localhost`)
+        - traefik.http.routers.shop.entrypoints=web
+        - traefik.http.routers.shop.middlewares=shop-retry
+        - traefik.http.middlewares.shop-retry.retry.attempts=3
+        - traefik.http.services.shop.loadbalancer.server.port=8080
+
+  traefik:
+    image: traefik:v3.7.14
+    command:
+      - --providers.swarm.endpoint=unix:///var/run/docker.sock
+      - --providers.swarm.exposedByDefault=false
+      - --providers.swarm.refreshSeconds=2
+      - --entrypoints.web.address=:80
+      - --entrypoints.metrics.address=:8082
+      - --metrics.prometheus=true
+      - --metrics.prometheus.entryPoint=metrics
+      - --api.dashboard=true
+      - --api.insecure=true        # dashboard sans auth — OK en formation, JAMAIS en prod
+    ports:
+      - target: 80
+        published: 8090
+        mode: host
+      - target: 8080
+        published: 8091
+        mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  # Les clients de la boutique (trafic simulé). Toujours actif : la boutique est ouverte.
+  loadgen:
+    image: localhost:5000/telemach/loadgen:1.0.0
+    environment:
+      TARGET: http://traefik
+      HOST_HEADER: shop.localhost
+      WORKERS: "8"
+      THINK_MS: "100"
+
+  # ===========================================================================
+  # L'OBSERVABILITÉ (cf. TP11)
+  # ===========================================================================
+
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-lifecycle
+    volumes:
+      - ./prometheus:/etc/prometheus:ro
+    ports:
+      - target: 9090
+        published: 9091
+        mode: host
+
+  # Mesure les conteneurs. « global » = un exemplaire sur CHAQUE nœud du cluster.
+  cadvisor:
+    image: telemachlearning/cadvisor:v0.55.1
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - target: 8080
+        published: 8080
+        mode: host
+    deploy:
+      mode: global
+
+  loki:
+    image: grafana/loki:3.7.8
+    command: -config.file=/etc/loki/local-config.yaml
+
+  alloy:
+    image: grafana/alloy:v1.20.1
+    user: root                       # nécessaire pour lire le socket Docker
+    volumes:
+      - ./alloy:/etc/alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    deploy:
+      mode: global
+
+  grafana:
+    image: telemachlearning/grafana:13.0.2
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - target: 3000
+        published: 3000
+        mode: host
+
+volumes:
+  db-data:

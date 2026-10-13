@@ -1,0 +1,29 @@
+# Prometheus — ce qu'on mesure dans la stack tp14.
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  # Phase 3 : en Swarm, « shop-api » est l'IP VIRTUELLE (VIP) du service : chaque
+  # scrape tomberait sur UN réplica au hasard. « tasks.shop-api » renvoie au
+  # contraire l'IP de CHAQUE réplica -> une cible par réplica.
+  - job_name: shop-api
+    dns_sd_configs:
+      - names: ["tasks.shop-api"]
+        type: A
+        port: 8080
+
+  - job_name: cadvisor
+    dns_sd_configs:
+      - names: ["tasks.cadvisor"]
+        type: A
+        port: 8080
+
+  - job_name: traefik
+    static_configs:
+      - targets: ["traefik:8082"]
+
+  - job_name: loadgen
+    dns_sd_configs:
+      - names: ["tasks.loadgen"]
+        type: A
+        port: 9100
