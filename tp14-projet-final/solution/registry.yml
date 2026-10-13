@@ -1,0 +1,21 @@
+# Le registre privé de l'équipe : une INFRASTRUCTURE partagée, déployée AVANT
+# l'application (le Swarm y tirera les images). Stack séparée : on peut détruire
+# et redéployer l'appli sans perdre les images publiées.
+#   docker stack deploy -c registry.yml tp14-infra
+services:
+  registry:
+    image: registry:3.1.2
+    ports:
+      # mode host : publié directement sur le nœud (cf. TP12 sur l'ingress mesh).
+      - target: 5000
+        published: 5000
+        mode: host
+    volumes:
+      - registry-data:/var/lib/registry
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+volumes:
+  registry-data:
