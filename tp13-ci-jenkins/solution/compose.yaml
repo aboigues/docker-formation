@@ -18,9 +18,7 @@ services:
     ports:
       - "8080:8080"
     # Jenkins pilote le daemon Docker de l'HÔTE via son socket (« Docker-out-of-Docker »).
-    # group_add donne au user « jenkins » le droit de lire le socket (groupe du socket hôte).
-    group_add:
-      - "${DOCKER_GID:-999}"
+    # Au démarrage, l'entrypoint de l'image lit le GID du socket et y rattache le user « jenkins ».
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ../app:/workspace/app:ro          # le code source à construire

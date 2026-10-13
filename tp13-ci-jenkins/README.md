@@ -57,13 +57,14 @@ La séquence des étapes est un fichier **`Jenkinsfile`** (versionné avec le co
 
 ## Étape 1 — Démarrer la plateforme de CI
 
-Placez-vous dans `starter/` et donnez à Jenkins l'accès au socket Docker :
+Placez-vous dans `starter/` et démarrez la plateforme :
 
 ```bash
 cd starter
-export DOCKER_GID=$(stat -c '%g' /var/run/docker.sock)   # GID du socket de l'hôte
-docker compose up -d --build                             # build de l'image Jenkins + démarrage
+docker compose up -d --build      # build de l'image Jenkins + démarrage
 ```
+
+> 🔑 **Accès au socket** : le user `jenkins` n'est pas root. Au démarrage, l'entrypoint de l'image (`jenkins/entrypoint.sh`) lit le GID du socket **tel que le conteneur le voit**, ajoute `jenkins` à ce groupe, puis lance Jenkins en `jenkins`. Rien à configurer côté hôte.
 
 Le **premier** build installe les plugins : patientez ~1 à 2 min. Suivez le démarrage :
 
@@ -127,7 +128,7 @@ cd ..                 # racine du TP
 
 ## 💡 Indices (si vous bloquez)
 
-- **`docker: permission denied` sur le socket** → vous avez oublié `export DOCKER_GID=$(stat -c '%g' /var/run/docker.sock)` **avant** `docker compose up`.
+- **`docker: permission denied` sur le socket** → vérifiez la ligne `[entrypoint] socket Docker : GID …` dans `docker compose logs jenkins`, puis `docker compose exec jenkins id` : le groupe du socket doit apparaître. Si l'image est ancienne, reconstruisez-la : `docker compose up -d --build`.
 - **Le job n'apparaît pas dans Jenkins** → regardez `docker compose logs jenkins` : une erreur de syntaxe dans `Jenkinsfile` empêche JCasC de créer le job. Corrigez, puis `docker compose restart jenkins`.
 - **L'étape Scan échoue avec des CVE** → vérifiez que vous scannez bien `"$REF:$TAG"` (l'image du build), pas une image tierce.
 - **Le push échoue (`connection refused`)** → le registre se joint via `localhost:5000`, pas `registry:5000` (le `docker push` est exécuté par le daemon de **l'hôte**).

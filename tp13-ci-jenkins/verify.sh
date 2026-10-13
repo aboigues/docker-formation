@@ -16,10 +16,6 @@ JOB="telemach-pipeline"
 AUTH="admin:admin"
 IMG_REPO="telemach/whoami"
 
-# Le user « jenkins » du conteneur doit pouvoir lire le socket Docker de l'hôte :
-# on transmet le GID du socket à compose (group_add).
-export DOCKER_GID="$(stat -c '%g' /var/run/docker.sock 2>/dev/null || echo 999)"
-
 cleanup() {
   docker compose down -v >/dev/null 2>&1 || true
   # Images publiées par le pipeline (elles vivent sur le daemon de l'hôte).

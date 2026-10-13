@@ -39,4 +39,10 @@ ENV CASC_JENKINS_CONFIG=/var/jenkins_conf/casc.yaml
 # On saute l'assistant de première connexion : tout est déjà dans casc.yaml.
 ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
 
-USER jenkins
+# ------------------------------------------------------------------------------
+# 4) Accès au socket Docker
+#    Le conteneur DÉMARRE en root le temps de rattacher « jenkins » au groupe du
+#    socket monté (GID lu au runtime), puis Jenkins tourne en « jenkins ».
+# ------------------------------------------------------------------------------
+COPY --chmod=0755 entrypoint.sh /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
