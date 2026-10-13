@@ -21,7 +21,7 @@ Un **Jenkins configuré au démarrage** (aucun clic d'installation), qui exécut
 1. **Build** — construire l'image de l'appli (`app/`) ;
 2. **Test** — la lancer et vérifier que `/health` répond `ok` ;
 3. **Scan** — passer **Trivy** ; échouer si une faille **HIGH/CRITICAL** existe ;
-4. **Push** — publier l'image (tag versionné + `latest`) dans le **registre privé**.
+4. **Push** — publier l'image (tag versionné, **jamais `latest`**) dans le **registre privé**.
 
 Le pipeline passe au **vert** et l'image se retrouve **réellement** dans le registre. `./verify.sh` déclenche le build et contrôle tout cela.
 
@@ -57,13 +57,14 @@ La séquence des étapes est un fichier **`Jenkinsfile`** (versionné avec le co
 
 ## Étape 1 — Démarrer la plateforme de CI
 
-Placez-vous dans `starter/` et donnez à Jenkins l'accès au socket Docker :
+Placez-vous dans `starter/` et démarrez la plateforme :
 
 ```bash
 cd starter
-export DOCKER_GID=$(stat -c '%g' /var/run/docker.sock)   # GID du socket de l'hôte
-docker compose up -d --build                             # build de l'image Jenkins + démarrage
+docker compose up -d --build      # build de l'image Jenkins + démarrage
 ```
+
+> 🔑 **Accès au socket** : le user `jenkins` n'est pas root. Au démarrage, l'entrypoint de l'image (`jenkins/entrypoint.sh`) lit le GID du socket **tel que le conteneur le voit**, ajoute `jenkins` à ce groupe, puis lance Jenkins en `jenkins`. Rien à configurer côté hôte.
 
 Le **premier** build installe les plugins : patientez ~1 à 2 min. Suivez le démarrage :
 
@@ -92,7 +93,7 @@ Ouvrez **`starter/Jenkinsfile`** et remplissez les **4 TODO**. Rappels utiles :
 | 1 | **Build** | `docker build -t "$REF:$TAG" /workspace/app` |
 | 2 | **Test** | lancer le conteneur sur `"$NET"`, puis l'interroger depuis un conteneur jetable (`alpine:3.23 wget -q -O- http://<nom>:8080/health`) et vérifier la réponse `ok` |
 | 3 | **Scan** | `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.72.0 image --severity HIGH,CRITICAL --exit-code 1 "$REF:$TAG"` puis afficher `Aucune vulnerabilite HIGH/CRITICAL : image validee` |
-| 4 | **Push** | `docker push "$REF:$TAG"`, puis `docker tag`/`docker push` pour publier aussi `"$REF:latest"` |
+| 4 | **Push** | `docker push "$REF:$TAG"` — uniquement le tag versionné : un `latest` ne dit pas **quelle** version tourne |
 
 > 🧠 **Pourquoi Trivy passe-t-il au vert ?** Parce que `app/Dockerfile` est un **multi-stage vers `scratch`** (image vide, non-root) : aucun paquet système, donc aucune CVE d'OS. Le durcissement du TP10 est ce qui rend la CI « verte ».
 
@@ -111,7 +112,7 @@ Quand le pipeline est **vert**, l'image est dans le registre. Contrôlez-le sans
 
 ```bash
 curl -s http://localhost:5000/v2/telemach/whoami/tags/list      # -> les tags publiés
-docker pull localhost:5000/telemach/whoami:latest               # on la récupère vraiment
+docker pull localhost:5000/telemach/whoami:1.0.1                # tag = 1.0.<n° du build> : on la récupère vraiment
 ```
 
 ## Étape 5 — Valider automatiquement (comme la CI)
@@ -127,7 +128,7 @@ cd ..                 # racine du TP
 
 ## 💡 Indices (si vous bloquez)
 
-- **`docker: permission denied` sur le socket** → vous avez oublié `export DOCKER_GID=$(stat -c '%g' /var/run/docker.sock)` **avant** `docker compose up`.
+- **`docker: permission denied` sur le socket** → vérifiez la ligne `[entrypoint] socket Docker : GID …` dans `docker compose logs jenkins`, puis `docker compose exec jenkins id` : le groupe du socket doit apparaître. Si l'image est ancienne, reconstruisez-la : `docker compose up -d --build`.
 - **Le job n'apparaît pas dans Jenkins** → regardez `docker compose logs jenkins` : une erreur de syntaxe dans `Jenkinsfile` empêche JCasC de créer le job. Corrigez, puis `docker compose restart jenkins`.
 - **L'étape Scan échoue avec des CVE** → vérifiez que vous scannez bien `"$REF:$TAG"` (l'image du build), pas une image tierce.
 - **Le push échoue (`connection refused`)** → le registre se joint via `localhost:5000`, pas `registry:5000` (le `docker push` est exécuté par le daemon de **l'hôte**).

@@ -16,10 +16,6 @@ JOB="telemach-pipeline"
 AUTH="admin:admin"
 IMG_REPO="telemach/whoami"
 
-# Le user « jenkins » du conteneur doit pouvoir lire le socket Docker de l'hôte :
-# on transmet le GID du socket à compose (group_add).
-export DOCKER_GID="$(stat -c '%g' /var/run/docker.sock 2>/dev/null || echo 999)"
-
 cleanup() {
   docker compose down -v >/dev/null 2>&1 || true
   # Images publiées par le pipeline (elles vivent sur le daemon de l'hôte).
@@ -88,11 +84,12 @@ TAGS="$(curl -fsS "http://$REG/v2/$IMG_REPO/tags/list" 2>/dev/null)"
 info "tags dans le registre : ${TAGS:-<aucun>}"
 assert_contains "Le dépôt $IMG_REPO existe dans le registre" "$IMG_REPO" "$TAGS"
 assert_contains "Un tag versionné (1.0.x) est publié" '1.0.' "$TAGS"
-assert_contains "Le tag 'latest' est publié" 'latest' "$TAGS"
+check "Aucun tag 'latest' n'est publié" bash -c "! grep -q latest <<<'$TAGS'"
 
 step "9) L'image publiée est réellement re-tirable depuis le registre"
-docker pull "$REG/$IMG_REPO:latest" >/dev/null 2>&1
-check "docker pull depuis le registre privé réussit" \
-  docker image inspect "$REG/$IMG_REPO:latest"
+VERSION="$(grep -o '1\.0\.[0-9]*' <<<"$TAGS" | sort -V | tail -1)"
+docker pull "$REG/$IMG_REPO:$VERSION" >/dev/null 2>&1
+check "docker pull de $IMG_REPO:$VERSION depuis le registre privé réussit" \
+  docker image inspect "$REG/$IMG_REPO:$VERSION"
 
 summary
