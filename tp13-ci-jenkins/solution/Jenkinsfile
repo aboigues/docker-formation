@@ -66,15 +66,12 @@ pipeline {
       }
     }
 
-    // 4) PUBLIER : l'image validée part dans le registre privé (tag versionné + latest).
+    // 4) PUBLIER : l'image validée part dans le registre privé (tag versionné uniquement :
+    //    jamais de « latest », qui ne dit pas QUELLE version on déploie).
     stage('Push') {
       steps {
         echo '=== STAGE PUSH ==='
-        sh '''
-          docker push "$REF:$TAG"
-          docker tag  "$REF:$TAG" "$REF:latest"
-          docker push "$REF:latest"
-        '''
+        sh 'docker push "$REF:$TAG"'
       }
     }
   }
@@ -82,7 +79,7 @@ pipeline {
   post {
     always {
       // On ne laisse pas traîner les images de build sur l'hôte.
-      sh 'docker image rm "$REF:$TAG" "$REF:latest" >/dev/null 2>&1 || true'
+      sh 'docker image rm "$REF:$TAG" >/dev/null 2>&1 || true'
     }
     success {
       echo "PIPELINE OK — image publiee : ${REF}:${TAG}"

@@ -60,18 +60,14 @@ pipeline {
     stage('Push') {
       steps {
         echo '=== STAGE PUSH ==='
-        sh '''
-          docker push "$REF:$TAG"
-          docker tag  "$REF:$TAG" "$REF:latest"
-          docker push "$REF:latest"
-        '''
+        sh 'docker push "$REF:$TAG"'
       }
     }
   }
 
   post {
     always {
-      sh 'docker image rm "$REF:$TAG" "$REF:latest" "$BASE" >/dev/null 2>&1 || true'
+      sh 'docker image rm "$REF:$TAG" "$BASE" >/dev/null 2>&1 || true'
     }
     failure {
       echo "PIPELINE BLOQUE — Trivy a refuse l image (failles HIGH/CRITICAL)."

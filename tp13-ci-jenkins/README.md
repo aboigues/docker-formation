@@ -21,7 +21,7 @@ Un **Jenkins configuré au démarrage** (aucun clic d'installation), qui exécut
 1. **Build** — construire l'image de l'appli (`app/`) ;
 2. **Test** — la lancer et vérifier que `/health` répond `ok` ;
 3. **Scan** — passer **Trivy** ; échouer si une faille **HIGH/CRITICAL** existe ;
-4. **Push** — publier l'image (tag versionné + `latest`) dans le **registre privé**.
+4. **Push** — publier l'image (tag versionné, **jamais `latest`**) dans le **registre privé**.
 
 Le pipeline passe au **vert** et l'image se retrouve **réellement** dans le registre. `./verify.sh` déclenche le build et contrôle tout cela.
 
@@ -93,7 +93,7 @@ Ouvrez **`starter/Jenkinsfile`** et remplissez les **4 TODO**. Rappels utiles :
 | 1 | **Build** | `docker build -t "$REF:$TAG" /workspace/app` |
 | 2 | **Test** | lancer le conteneur sur `"$NET"`, puis l'interroger depuis un conteneur jetable (`alpine:3.23 wget -q -O- http://<nom>:8080/health`) et vérifier la réponse `ok` |
 | 3 | **Scan** | `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.72.0 image --severity HIGH,CRITICAL --exit-code 1 "$REF:$TAG"` puis afficher `Aucune vulnerabilite HIGH/CRITICAL : image validee` |
-| 4 | **Push** | `docker push "$REF:$TAG"`, puis `docker tag`/`docker push` pour publier aussi `"$REF:latest"` |
+| 4 | **Push** | `docker push "$REF:$TAG"` — uniquement le tag versionné : un `latest` ne dit pas **quelle** version tourne |
 
 > 🧠 **Pourquoi Trivy passe-t-il au vert ?** Parce que `app/Dockerfile` est un **multi-stage vers `scratch`** (image vide, non-root) : aucun paquet système, donc aucune CVE d'OS. Le durcissement du TP10 est ce qui rend la CI « verte ».
 
@@ -112,7 +112,7 @@ Quand le pipeline est **vert**, l'image est dans le registre. Contrôlez-le sans
 
 ```bash
 curl -s http://localhost:5000/v2/telemach/whoami/tags/list      # -> les tags publiés
-docker pull localhost:5000/telemach/whoami:latest               # on la récupère vraiment
+docker pull localhost:5000/telemach/whoami:1.0.1                # tag = 1.0.<n° du build> : on la récupère vraiment
 ```
 
 ## Étape 5 — Valider automatiquement (comme la CI)

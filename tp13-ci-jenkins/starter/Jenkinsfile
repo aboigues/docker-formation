@@ -55,8 +55,8 @@ pipeline {
     stage('Push') {
       steps {
         echo '=== STAGE PUSH ==='
-        // TODO 4 : pousser "$REF:$TAG" ET "$REF:latest" vers le registre privé.
-        //   Indice : docker push ... (et docker tag pour créer « latest »).
+        // TODO 4 : pousser "$REF:$TAG" vers le registre privé.
+        //   Indice : docker push ... (tag versionné uniquement, pas de « latest »).
         sh 'echo "TODO 4 : docker push" && false'
       }
     }
