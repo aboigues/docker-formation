@@ -53,7 +53,10 @@ services:
       interval: 3s
       timeout: 2s
       retries: 3
-      start_period: 30s
+      # Délai de grâce : au tout premier déploiement, la base télécharge son image
+      # puis charge 1 M produits (~3 min à froid). Trop court, Swarm tue en boucle
+      # des réplicas qui attendent simplement la base.
+      start_period: 240s
     deploy:
       replicas: 3
       resources:
