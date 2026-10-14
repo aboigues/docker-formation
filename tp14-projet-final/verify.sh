@@ -137,7 +137,14 @@ while [ "$i" -lt 90 ]; do
 done
 info "cibles shop-api UP = ${UP:-0}"
 check "3 cibles shop-api distinctes dans Prometheus" bash -c "[ '${UP:-0}' = 3 ]"
-check "cAdvisor est scrapé" bash -c "[ \"\$(curl -fsS -G http://localhost:9091/api/v1/query --data-urlencode 'query=up{job=\"cadvisor\"}' | grep -c '\"1\"\]')\" -ge 1 ]"
+# cAdvisor (global, port en mode host) démarre souvent en dernier, et la découverte
+# DNS de Prometheus ne se rafraîchit que toutes les 30 s : il faut l'attendre aussi.
+i=0; CADV=""
+while [ "$i" -lt 60 ]; do
+  CADV="$(promq 'count(up{job="cadvisor"} == 1)')"; [ "${CADV:-0}" -ge 1 ] && break; i=$((i+5)); sleep 5
+done
+info "cibles cAdvisor UP = ${CADV:-0}"
+check "cAdvisor est scrapé" bash -c "[ '${CADV:-0}' -ge 1 ]"
 
 # =============================================================================
 step "6) INC-101 — La recherche par catégorie utilise un index"
