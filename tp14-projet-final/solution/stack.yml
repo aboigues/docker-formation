@@ -81,7 +81,7 @@ services:
         - traefik.http.services.shop.loadbalancer.server.port=8080
 
   traefik:
-    image: traefik:v3.7.14
+    image: traefik:v3.7.17
     command:
       - --providers.swarm.endpoint=unix:///var/run/docker.sock
       - --providers.swarm.exposedByDefault=false
@@ -152,7 +152,7 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
 
   alloy:
-    image: grafana/alloy:v1.20.1
+    image: grafana/alloy:v1.21.3
     user: root                       # nécessaire pour lire le socket Docker
     volumes:
       - ./alloy:/etc/alloy:ro
