@@ -14,7 +14,8 @@ Compose avec `build:`) pour garder la matrice propre.
 
 Usage :
   list-tp-images.py            # une image par ligne (trié, dédupliqué)
-  list-tp-images.py --format json   # tableau JSON (pour une matrice GitHub Actions)
+  list-tp-images.py --format json   # tableau JSON des images
+  list-tp-images.py --format matrix # [{image, categorie}] pour la matrice GitHub Actions
 """
 from __future__ import annotations
 
@@ -61,6 +62,52 @@ def valid_image(ref: str) -> bool:
     """
     name = ref.rsplit(":", 1)[0]  # retire le tag éventuel
     return re.fullmatch(r"[a-z0-9][a-z0-9._/-]*", name) is not None
+
+
+# --- Catégories SARIF ---------------------------------------------------------
+# Une alerte de code scanning ne se ferme que si la MÊME catégorie est renvoyée
+# sans elle. Avec le tag dans la catégorie, chaque montée de version laissait
+# les alertes de l'ancienne version ouvertes à vie (alertes « fantômes »).
+# La catégorie est donc le nom de l'image, SANS tag.
+#
+# Piège : une même image peut être scannée en plusieurs tags dans un même run
+# (registry 2/3, loki 3.7.2/3.7.8…) ; une catégorie partagée ferait s'écraser
+# leurs uploads. Dans ce cas seulement, on suffixe un RANG (tags triés par
+# version) : le bump d'un tag réutilise son rang, donc sa catégorie.
+# Cas résiduel : si un des tags disparaît, le dernier rang devient orphelin et
+# ses alertes sont à fermer à la main.
+
+
+def _nom_et_tag(ref: str) -> tuple[str, str]:
+    ref = ref.split("@", 1)[0]  # digest éventuel
+    nom, _, tag = ref.rpartition(":")
+    if not nom or "/" in tag:  # pas de tag (le « : » était celui d'un port de registre)
+        return ref, "latest"
+    return nom, tag
+
+
+def _cle_version(tag: str) -> tuple:
+    # « 1.10 » après « 1.9 », « 18 » avant « 18-alpine »
+    return tuple(
+        (0, int(t), "") if t.isdigit() else (1, 0, t) for t in re.findall(r"\d+|\D+", tag)
+    )
+
+
+def categories_sarif(images: list[str]) -> dict[str, str]:
+    """Catégorie SARIF STABLE (sans tag) de chaque image, unique dans le lot."""
+    groupes: dict[str, list[str]] = {}
+    for image in images:
+        groupes.setdefault(_nom_et_tag(image)[0], []).append(image)
+    categories = {}
+    for nom, refs in groupes.items():
+        base = "trivy-image-" + re.sub(r"[^A-Za-z0-9._-]", "-", nom)
+        if len(refs) == 1:
+            categories[refs[0]] = base
+            continue
+        refs.sort(key=lambda r: (_cle_version(_nom_et_tag(r)[1]), r))
+        for rang, ref in enumerate(refs, start=1):
+            categories[ref] = f"{base}-rang-{rang}"
+    return categories
 
 
 def main() -> int:
@@ -136,7 +183,10 @@ def main() -> int:
         and "$" not in img and valid_image(img)
     )
 
-    if "--format" in sys.argv and "json" in sys.argv:
+    if "--format" in sys.argv and "matrix" in sys.argv:
+        categories = categories_sarif(images)
+        print(json.dumps([{"image": i, "categorie": categories[i]} for i in images]))
+    elif "--format" in sys.argv and "json" in sys.argv:
         print(json.dumps(images))
     else:
         print("\n".join(images))

@@ -61,11 +61,13 @@ on:
     paths:
       - ".github/workflows/image-scan.yml"
       - "scripts/list-tp-images.py"
+      - "scripts/test_list_tp_images.py"
   push:
     branches: [main]
     paths:
       - ".github/workflows/image-scan.yml"
       - "scripts/list-tp-images.py"
+      - "scripts/test_list_tp_images.py"
 
 permissions:
   contents: read
@@ -81,10 +83,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: PyYAML (lecture des fichiers Compose / Swarm)
         run: python3 -m pip install --quiet pyyaml
+      # Un calcul de catégorie faux brouillerait l'onglet Security sans bruit
+      # (uploads écrasés, alertes fantômes) : on le vérifie avant chaque scan.
+      - name: Tests du calcul des catégories SARIF
+        run: python3 -m unittest discover -s scripts -p 'test_*.py'
       - id: list
         name: Générer la matrice d'images
         run: |
-          images="$(python3 scripts/list-tp-images.py --format json)"
+          images="$(python3 scripts/list-tp-images.py --format matrix)"
           echo "Images détectées : $images"
           echo "images=$images" >> "$GITHUB_OUTPUT"
 
@@ -96,9 +102,10 @@ jobs:
     strategy:
       fail-fast: false # une image en erreur ne masque pas les autres
       matrix:
-        image: ${{ fromJson(needs.discover.outputs.images) }}
+        # [{image, categorie}] — voir categories_sarif() dans scripts/list-tp-images.py
+        include: ${{ fromJson(needs.discover.outputs.images) }}
     steps:
-      - name: Identifiant de scan (nom de fichier + catégorie SARIF)
+      - name: Identifiant de scan (nom du fichier SARIF, tag compris)
         run: echo "SCAN_ID=$(echo '${{ matrix.image }}' | tr '/:' '--')" >> "$GITHUB_ENV"
 
       - name: Ignorer les images non pullables (construites localement par un TP)
@@ -132,7 +139,9 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ env.SCAN_ID }}.sarif
-          category: ${{ env.SCAN_ID }}
+          # Catégorie STABLE (sans tag) : une montée de version ferme les alertes
+          # corrigées au lieu de les laisser ouvertes à vie sous l'ancien tag.
+          category: ${{ matrix.categorie }}
 
       # Âge de l'image : date `created` de la config OCI, lue depuis le registre.
       # Marche partout (Docker Hub, GCR…), sans API propre à un hub.
