@@ -6,7 +6,7 @@
 # sinon la barrière bloquerait sur les CVE que ce Dockerfile corrige justement.
 # C'est l'image PUBLIÉE (telemachlearning/*), elle, qui est scannée.
 # image-scan: ignore
-FROM grafana/grafana:13.0.2
+FROM grafana/grafana:13.3.0
 USER root
 RUN apk upgrade --no-cache
 USER grafana

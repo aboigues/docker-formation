@@ -96,7 +96,7 @@ services:
   # ===========================================================================
 
   prometheus:
-    image: prom/prometheus:v3.15.0
+    image: prom/prometheus:v3.16.0
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --web.enable-lifecycle
@@ -109,7 +109,7 @@ services:
 
   # Mesure les conteneurs. « global » = un exemplaire sur CHAQUE nœud du cluster.
   cadvisor:
-    image: telemachlearning/cadvisor:v0.55.1
+    image: telemachlearning/cadvisor:v0.60.6
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
@@ -124,7 +124,7 @@ services:
       mode: global
 
   loki:
-    image: grafana/loki:3.7.8
+    image: grafana/loki:3.7.9
     command: -config.file=/etc/loki/local-config.yaml
 
   alloy:
@@ -137,7 +137,7 @@ services:
       mode: global
 
   grafana:
-    image: telemachlearning/grafana:13.0.2
+    image: telemachlearning/grafana:13.3.0
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin

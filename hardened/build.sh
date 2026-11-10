@@ -16,8 +16,8 @@ PLATFORMS="linux/amd64,linux/arm64"
 
 # répertoire | image publiée | image amont
 IMAGES=(
-  "grafana|telemachlearning/grafana:13.0.2|grafana/grafana:13.0.2"
-  "cadvisor|telemachlearning/cadvisor:v0.55.1|gcr.io/cadvisor/cadvisor:v0.55.1"
+  "grafana|telemachlearning/grafana:13.3.0|grafana/grafana:13.3.0"
+  "cadvisor|telemachlearning/cadvisor:v0.60.6|ghcr.io/google/cadvisor:v0.60.6"
 )
 
 # Rend « <corrigeables>/<total> » pour les CVE de paquets OS CRITICAL+HIGH, en
