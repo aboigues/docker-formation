@@ -15,7 +15,7 @@ services:
 
   # --- MÉTRIQUES ---
   prometheus:
-    image: prom/prometheus:v3.12.0
+    image: prom/prometheus:v3.16.0
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --web.enable-lifecycle
@@ -28,7 +28,7 @@ services:
       - "9091:9090"
 
   cadvisor:
-    image: telemachlearning/cadvisor:v0.55.1
+    image: telemachlearning/cadvisor:v0.60.6
     privileged: true
     devices:
       - /dev/kmsg
@@ -43,7 +43,7 @@ services:
 
   # --- LOGS ---
   loki:
-    image: grafana/loki:3.7.2
+    image: grafana/loki:3.7.9
     command: -config.file=/etc/loki/local-config.yaml  # config par défaut de l'image
     ports:
       - "3100:3100"
@@ -59,7 +59,7 @@ services:
 
   # --- VISUALISATION ---
   grafana:
-    image: telemachlearning/grafana:13.0.2
+    image: telemachlearning/grafana:13.3.0
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin

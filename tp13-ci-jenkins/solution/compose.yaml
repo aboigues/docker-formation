@@ -7,7 +7,7 @@ services:
   # Registre privé (rappel du TP9). Sans authentification ici pour rester simple :
   # publié sur localhost:5000, que Docker considère « insecure » par défaut.
   registry:
-    image: registry:2
+    image: registry:3.1.2
     ports:
       - "5000:5000"
 

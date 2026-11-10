@@ -6,5 +6,7 @@
 # sinon la barrière bloquerait sur les CVE que ce Dockerfile corrige justement.
 # C'est l'image PUBLIÉE (telemachlearning/*), elle, qui est scannée.
 # image-scan: ignore
-FROM gcr.io/cadvisor/cadvisor:v0.55.1
+# Depuis la v0.56, cAdvisor n'est plus publié sur gcr.io (arrêté à v0.55.1),
+# mais sur ghcr.io/google/cadvisor. Toujours Alpine (apk upgrade valable).
+FROM ghcr.io/google/cadvisor:v0.60.6
 RUN apk upgrade --no-cache

@@ -1,6 +1,7 @@
 # Images durcies `telemachlearning/*`
 
-Deux images seulement : `grafana/grafana:13.0.2` et `gcr.io/cadvisor/cadvisor:v0.55.1`.
+Deux images seulement : `grafana/grafana:13.3.0` et `ghcr.io/google/cadvisor:v0.60.6`
+(cAdvisor n'est plus publié sur `gcr.io` depuis la v0.56).
 Publiées en **amd64 + arm64** (les Mac Apple Silicon sont courants en salle).
 
 ## Quand durcir — et surtout quand ne PAS durcir
@@ -47,6 +48,9 @@ CVE de paquets OS, HIGH/CRITICAL, corrigeables (`--ignore-unfixed`) :
 
 Comportement vérifié identique à l'amont (Grafana HTTP 200, cAdvisor v0.55.1).
 
+*Mesures de la première version durcie (13.0.2 / v0.55.1). Le résumé de chaque run
+de `rebuild-hardened-images.yml` donne les chiffres de la version en cours.*
+
 ## Ces images périment aussi
 
 Le durcissement est figé à l'instant du build. La barrière du scan applique la
@@ -64,7 +68,7 @@ docker buildx create --name tpmultiarch --driver docker-container --use
 docker buildx build --builder tpmultiarch \
   --platform linux/amd64,linux/arm64 \
   -f hardened/grafana/Dockerfile \
-  -t telemachlearning/grafana:13.0.2 \
+  -t telemachlearning/grafana:13.3.0 \
   --push hardened/grafana
 ```
 
@@ -74,9 +78,9 @@ jamais `latest`. Le build arm64 tourne sous émulation QEMU (~5 min).
 Vérifier après publication :
 
 ```bash
-docker manifest inspect telemachlearning/grafana:13.0.2      # amd64 + arm64
+docker manifest inspect telemachlearning/grafana:13.3.0      # amd64 + arm64
 trivy image --severity HIGH,CRITICAL --ignore-unfixed --pkg-types os \
-  telemachlearning/grafana:13.0.2                            # doit être vide
+  telemachlearning/grafana:13.3.0                            # doit être vide
 ```
 
 ---
